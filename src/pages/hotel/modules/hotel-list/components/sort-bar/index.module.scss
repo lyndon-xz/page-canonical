@@ -1,0 +1,27 @@
+.sortBar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.option {
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: var(--primary-strong);
+    border-color: var(--primary);
+  }
+
+  &[data-active="true"] {
+    color: var(--primary-strong);
+    background: var(--primary-soft);
+    border-color: var(--primary);
+  }
+}

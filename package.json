@@ -1,0 +1,47 @@
+{
+  "name": "@lyndon/page-canonical",
+  "version": "1.0.0",
+  "private": true,
+  "description": "页面分层架构（store / model / actions / effects / UI）的范式级 SPA 示范：zustand / unstated-next / Redux Toolkit 三栈落地，覆盖结构化状态与非结构化活对象",
+  "keywords": [
+    "spa",
+    "react",
+    "architecture",
+    "layered-page",
+    "state-management"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Lyndon",
+    "email": "wuxianzhi052@gmail.com"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^6.1.0",
+    "@reduxjs/toolkit": "^2.8.2",
+    "antd": "^6.1.0",
+    "dayjs": "^1.11.19",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.7",
+    "react-hook-form": "^7.54.2",
+    "react-redux": "^9.2.0",
+    "unstated-next": "^1.1.0",
+    "zustand": "^5.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.1.0",
+    "@types/react": "^19.2.10",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "sass": "^1.87.0",
+    "typescript": "^5.9.2",
+    "vite": "^8.0.3"
+  },
+  "packageManager": "pnpm@10.12.4"
+}

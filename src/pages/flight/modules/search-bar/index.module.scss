@@ -1,0 +1,51 @@
+.searchBar {
+  padding: 16px;
+  margin-bottom: 26px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cabins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cabin {
+  padding: 6px 16px;
+  font-size: 13.5px;
+  color: var(--muted);
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: var(--primary-strong);
+    border-color: var(--primary);
+  }
+
+  &[data-active="true"] {
+    font-weight: 500;
+    color: var(--primary-strong);
+    background: var(--primary-soft);
+    border-color: var(--primary);
+  }
+}
+
+.resultCount {
+  margin: 16px 0 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+}

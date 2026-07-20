@@ -1,0 +1,61 @@
+import type { Listing } from "../shared/types";
+
+/** 本地 mock 民宿数据，供 services 的异步 mock 服务过滤后返回 */
+export const MOCK_LISTINGS: Listing[] = [
+  {
+    id: "l1",
+    title: "西湖边・原木复式整套",
+    city: "杭州",
+    pricePerNight: 680,
+    rating: 4.9,
+    roomType: "整套",
+  },
+  {
+    id: "l2",
+    title: "大理古城・海景小院单间",
+    city: "大理",
+    pricePerNight: 320,
+    rating: 4.7,
+    roomType: "单间",
+  },
+  {
+    id: "l3",
+    title: "厦门曾厝垵・文艺合住青旅",
+    city: "厦门",
+    pricePerNight: 128,
+    rating: 4.4,
+    roomType: "合住",
+  },
+  {
+    id: "l4",
+    title: "成都宽窄巷子・川西庭院整套",
+    city: "成都",
+    pricePerNight: 560,
+    rating: 4.8,
+    roomType: "整套",
+  },
+  {
+    id: "l5",
+    title: "丽江束河・雪山view单间",
+    city: "丽江",
+    pricePerNight: 288,
+    rating: 4.6,
+    roomType: "单间",
+  },
+  {
+    id: "l6",
+    title: "青岛八大关・老洋房整套",
+    city: "青岛",
+    pricePerNight: 720,
+    rating: 4.7,
+    roomType: "整套",
+  },
+  {
+    id: "l7",
+    title: "阳朔遇龙河・稻田合住民宿",
+    city: "桂林",
+    pricePerNight: 158,
+    rating: 4.3,
+    roomType: "合住",
+  },
+];

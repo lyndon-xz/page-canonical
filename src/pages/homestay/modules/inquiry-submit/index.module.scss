@@ -1,0 +1,26 @@
+.submitBar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.feedback {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 13.5px;
+}
+
+.feedback[data-status="success"] {
+  color: var(--primary-strong);
+
+  &::before {
+    color: var(--primary);
+    content: "●";
+  }
+}
+
+.feedback[data-status="error"] {
+  color: #c0492f;
+}

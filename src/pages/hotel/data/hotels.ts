@@ -1,0 +1,68 @@
+import type { Hotel } from "../shared/types";
+
+/** 本地 mock 酒店数据，供 services 的异步 mock 服务过滤后返回 */
+export const MOCK_HOTELS: Hotel[] = [
+  {
+    id: "h1",
+    name: "外滩和平饭店",
+    city: "上海",
+    pricePerNight: 1880,
+    rating: 4.8,
+    star: 5,
+    distanceKm: 0.6,
+  },
+  {
+    id: "h2",
+    name: "西湖景澜酒店",
+    city: "杭州",
+    pricePerNight: 760,
+    rating: 4.5,
+    star: 4,
+    distanceKm: 1.2,
+  },
+  {
+    id: "h3",
+    name: "成都锦江宾馆",
+    city: "成都",
+    pricePerNight: 980,
+    rating: 4.6,
+    star: 5,
+    distanceKm: 2.4,
+  },
+  {
+    id: "h4",
+    name: "广州珠江快捷酒店",
+    city: "广州",
+    pricePerNight: 320,
+    rating: 4.1,
+    star: 3,
+    distanceKm: 3.8,
+  },
+  {
+    id: "h5",
+    name: "北京王府井大饭店",
+    city: "北京",
+    pricePerNight: 1420,
+    rating: 4.7,
+    star: 5,
+    distanceKm: 0.9,
+  },
+  {
+    id: "h6",
+    name: "厦门海景假日酒店",
+    city: "厦门",
+    pricePerNight: 640,
+    rating: 4.4,
+    star: 4,
+    distanceKm: 5.1,
+  },
+  {
+    id: "h7",
+    name: "西安钟楼客栈",
+    city: "西安",
+    pricePerNight: 280,
+    rating: 4.0,
+    star: 3,
+    distanceKm: 1.7,
+  },
+];
