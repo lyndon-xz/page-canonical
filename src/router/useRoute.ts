@@ -12,17 +12,17 @@ function readPathPage(): PageKey {
 export function useRoute() {
   const [active, setActive] = useState<PageKey>(readPathPage);
 
+  const navigate = (next: PageKey) => {
+    window.history.pushState(null, "", `/${next}`);
+    setActive(next);
+  };
+
   useEffect(() => {
     const syncFromPath = () => setActive(readPathPage());
     window.addEventListener("popstate", syncFromPath);
 
     return () => window.removeEventListener("popstate", syncFromPath);
   }, []);
-
-  const navigate = (next: PageKey) => {
-    window.history.pushState(null, "", `/${next}`);
-    setActive(next);
-  };
 
   return {
     active,
