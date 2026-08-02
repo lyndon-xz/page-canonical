@@ -1,11 +1,14 @@
 import { useEffect } from "react";
 
-import { pageActions } from "./actions";
+import { usePageActions } from "./actions";
 import { parseFilters } from "./shared/params";
 
 export function usePageEffects() {
+  const { initPage } = usePageActions();
+
   useEffect(() => {
     const filters = parseFilters(window.location.search);
-    pageActions.loadFlights(filters);
-  }, []);
+
+    void initPage(filters);
+  }, [initPage]);
 }

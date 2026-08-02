@@ -1,14 +1,20 @@
+import { usePageActions } from "../../actions";
 import type { SortBy } from "../../shared/types";
-import { setSelectedFlightId, store } from "../../store";
 
-import { setSortBy } from "./slice";
+import { FlightResultsModel } from "./model";
 
-export const flightResultsActions = {
-  changeSortBy(sortBy: SortBy) {
-    store.dispatch(setSortBy(sortBy));
-  },
+export function useFlightResultsActions() {
+  const { setSortBy } = FlightResultsModel.useContainer();
+  const { selectFlight: selectFlightOnPage } = usePageActions();
 
-  selectFlight(id: string) {
-    store.dispatch(setSelectedFlightId(id));
-  },
-};
+  const changeSortBy = (sortBy: SortBy) => {
+    setSortBy(sortBy);
+  };
+
+  // 选中要连带拉取退改规则，属页面级编排，故转交页面 action
+  const selectFlight = (id: string) => {
+    void selectFlightOnPage(id);
+  };
+
+  return { changeSortBy, selectFlight };
+}

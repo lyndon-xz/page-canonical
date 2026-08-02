@@ -1,13 +1,16 @@
 import { FormProvider, useForm } from "react-hook-form";
+import { Provider } from "react-redux";
 
 import { useRegisterLive } from "@/lib/live";
 
 import { usePageEffects } from "./effects";
+import ConfirmDialog from "./modules/confirm-dialog";
 import InquiryFields from "./modules/inquiry-fields";
 import InquirySubmit from "./modules/inquiry-submit";
+import ListingDetail from "./modules/listing-detail";
 import ListingList from "./modules/listing-list";
 import type { InquiryForm } from "./shared/types";
-import { PageStore } from "./store";
+import { store } from "./store";
 
 import styles from "./index.module.scss";
 
@@ -20,7 +23,7 @@ const DEFAULT_INQUIRY: InquiryForm = {
 };
 
 // 单独成组件：effects 内部订阅状态引起的重渲染只落在这个空组件上，不波及子树。
-// 必须挂在 PageStore.Provider 内层，否则 usePageActions 取不到 Container。
+// 必须挂在 <Provider> 内层，否则订阅取不到 store。
 function PageEffectsRunner() {
   usePageEffects();
   return null;
@@ -36,7 +39,7 @@ export default function HomestayPage() {
   useRegisterLive("inquiryForm", methods);
 
   return (
-    <PageStore.Provider>
+    <Provider store={store}>
       <PageEffectsRunner />
       <div className={styles.page}>
         <header className={styles.hero}>
@@ -45,6 +48,7 @@ export default function HomestayPage() {
         </header>
 
         <ListingList />
+        <ListingDetail />
 
         {/* 让下面两个模块经 useFormContext 共享同一表单实例，避免两模块互相 import */}
         <FormProvider {...methods}>
@@ -59,7 +63,10 @@ export default function HomestayPage() {
             <InquirySubmit />
           </section>
         </FormProvider>
+
+        {/* 弹窗挂页面层：列表卡片与详情抽屉都能触发它，谁都不该拥有它 */}
+        <ConfirmDialog />
       </div>
-    </PageStore.Provider>
+    </Provider>
   );
 }

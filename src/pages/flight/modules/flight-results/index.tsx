@@ -5,13 +5,14 @@ import { useRegisterLive } from "@/lib/live";
 
 import FlightCard from "./components/flight-card";
 import SortBar from "./components/sort-bar";
-import { useFlightResultsModel } from "./model";
+import { FlightResultsModel } from "./model";
 import type { FlightResultsHandle } from "../../shared/types";
 
 import styles from "./index.module.scss";
 
-export default function FlightResults() {
-  const { sortedList, isLoading, selectedFlightId } = useFlightResultsModel();
+function FlightResultsInner() {
+  const { sortedFlights, isLoading, selectedFlightId } =
+    FlightResultsModel.useContainer();
 
   const containerRef = useRef<HTMLElement>(null);
   const handleRef = useRef<FlightResultsHandle>(null);
@@ -43,13 +44,13 @@ export default function FlightResults() {
         <div className={styles.stateBox}>
           <Spin />
         </div>
-      ) : sortedList.length === 0 ? (
+      ) : sortedFlights.length === 0 ? (
         <div className={styles.stateBox}>
           <Empty description="暂无匹配的航班" />
         </div>
       ) : (
         <div className={styles.list}>
-          {sortedList.map((flight) => (
+          {sortedFlights.map((flight) => (
             <FlightCard
               key={flight.id}
               flight={flight}
@@ -59,5 +60,13 @@ export default function FlightResults() {
         </div>
       )}
     </section>
+  );
+}
+
+export default function FlightResults() {
+  return (
+    <FlightResultsModel.Provider>
+      <FlightResultsInner />
+    </FlightResultsModel.Provider>
   );
 }

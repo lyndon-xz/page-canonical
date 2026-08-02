@@ -1,8 +1,7 @@
-import { createSelector } from "@reduxjs/toolkit";
 import { useForm } from "react-hook-form";
 
 import type { BookingForm } from "../../shared/types";
-import { selectPageState, useAppSelector } from "../../store";
+import { PageStore } from "../../store";
 
 const DEFAULT_BOOKING: BookingForm = {
   passengerName: "",
@@ -10,25 +9,27 @@ const DEFAULT_BOOKING: BookingForm = {
   contactPhone: "",
 };
 
-const selectBookingFormModel = createSelector(selectPageState, (page) => {
-  const selectedFlight =
-    page.flightList.find((flight) => flight.id === page.selectedFlightId) ??
-    null;
-
-  return {
-    selectedFlight,
-    isSubmitting: page.isSubmittingBooking,
-    submitError: page.bookingError,
-    submitted: page.bookingSubmitted,
-  };
-});
-
 export function useBookingFormModel() {
   const form = useForm<BookingForm>({
     defaultValues: DEFAULT_BOOKING,
     mode: "onTouched",
   });
-  const derived = useAppSelector(selectBookingFormModel);
 
-  return { form, ...derived };
+  const {
+    isBookingAllowed,
+    selectedFlight,
+    isSubmittingBooking,
+    bookingError,
+    bookingSubmitted,
+  } = PageStore.useContainer();
+
+  return {
+    form,
+    // 与 fare-rules 共用页面层的闸门结论，两处不各判一次
+    isVisible: isBookingAllowed,
+    selectedFlight,
+    isSubmitting: isSubmittingBooking,
+    submitError: bookingError,
+    submitted: bookingSubmitted,
+  };
 }

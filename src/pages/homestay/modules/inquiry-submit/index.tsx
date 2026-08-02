@@ -1,6 +1,6 @@
 import { Button } from "antd";
 
-import { useInquirySubmitActions } from "./actions";
+import { inquirySubmitActions } from "./actions";
 import { useInquirySubmitModel } from "./model";
 
 import styles from "./index.module.scss";
@@ -8,14 +8,13 @@ import styles from "./index.module.scss";
 export default function InquirySubmit() {
   const { handleSubmit, isSubmittingInquiry, inquiryError, inquirySubmitted } =
     useInquirySubmitModel();
-  const { submit } = useInquirySubmitActions();
 
   return (
     <div className={styles.submitBar}>
       <Button
         type="primary"
         loading={isSubmittingInquiry}
-        onClick={handleSubmit((values) => submit(values))}
+        onClick={handleSubmit((values) => inquirySubmitActions.submit(values))}
       >
         提交询价
       </Button>
@@ -26,7 +25,7 @@ export default function InquirySubmit() {
       )}
       {inquiryError && (
         <span className={styles.feedback} data-status="error">
-          {inquiryError.message}
+          {inquiryError}
         </span>
       )}
     </div>

@@ -24,13 +24,13 @@ export const routes = [
   {
     path: "homestay",
     name: "民宿",
-    lib: "unstated-next",
+    lib: "redux toolkit",
     Component: HomestayPage,
   },
   {
     path: "flight",
     name: "机票",
-    lib: "redux toolkit",
+    lib: "unstated-next",
     Component: FlightPage,
   },
 ] as const satisfies readonly Route[];

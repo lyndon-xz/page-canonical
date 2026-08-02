@@ -81,16 +81,15 @@
 }
 
 .rating {
-  display: inline-flex;
-  gap: 5px;
-  align-items: center;
+  font-weight: 600;
   color: var(--amber);
 }
 
+/* 价格是主信息、留在左侧，操作靠右；两者之间留出空白，避免误点 */
 .foot {
   display: flex;
-  align-items: baseline;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
   padding-top: 13px;
   border-top: 1px dashed var(--line);
 }
@@ -109,4 +108,34 @@
   font-weight: 400;
   font-style: normal;
   color: var(--muted);
+}
+
+/* 撑到 32px 见方：图标本身只有 16px，直接当按钮点击区太小 */
+.favorite {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease;
+
+  &:hover {
+    color: var(--primary);
+    background: var(--primary-soft);
+  }
+
+  &[data-active="true"] {
+    color: var(--primary-strong);
+  }
 }

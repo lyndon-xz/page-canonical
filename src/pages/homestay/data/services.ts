@@ -1,12 +1,17 @@
-import { MOCK_LISTINGS } from "./data/listings";
+import { MOCK_LISTING_DETAILS } from "./listing-details";
+import { MOCK_LISTINGS } from "./listings";
 import type {
   InquiryFieldError,
   InquiryForm,
   Listing,
+  ListingDetail,
   ListingFilters,
-} from "./shared/types";
+} from "../shared/types";
 
 const MOCK_DELAY_MS = 300;
+
+/** 该房源的收藏接口固定失败，用于演示乐观更新后的回滚 */
+const FAVORITE_REJECTED_LISTING_IDS = ["l3"];
 
 /** 命中的手机号提交询价会被拒，用于演示服务端字段级错误回填 */
 const BLOCKED_PHONES = ["13800000000"];
@@ -47,4 +52,24 @@ export async function submitInquiry(values: InquiryForm): Promise<void> {
       { field: "phone", message: "该手机号暂不可用，请更换后重试" },
     ]);
   }
+}
+
+export async function fetchListingDetail(
+  listingId: string,
+): Promise<ListingDetail | null> {
+  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+
+  return MOCK_LISTING_DETAILS[listingId] ?? null;
+}
+
+export async function toggleFavorite(listingId: string): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+
+  if (FAVORITE_REJECTED_LISTING_IDS.includes(listingId)) {
+    throw new Error("收藏服务暂不可用");
+  }
+}
+
+export async function cancelInquiry(): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
 }

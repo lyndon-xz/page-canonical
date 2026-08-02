@@ -1,0 +1,102 @@
+.item {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.itemQualified {
+  composes: item;
+  background: var(--ok-soft);
+  border-color: #dbe5d2;
+}
+
+.itemUnqualified {
+  composes: item;
+  background: var(--amber-soft);
+  border-color: #f0dfc4;
+}
+
+.head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.standard {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.infoIcon {
+  flex: none;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.status {
+  flex: none;
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statusOk {
+  composes: status;
+  color: var(--ok);
+}
+
+.statusWarn {
+  composes: status;
+  color: var(--primary-strong);
+}
+
+.value {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.tip {
+  margin-top: 8px;
+}
+
+.tipToggle {
+  padding: 0;
+  height: auto;
+  font-size: 12px;
+}
+
+.tipBody {
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--card);
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+}
+
+.tipTitle {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.tipDesc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.tipAction {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary-strong);
+}

@@ -1,14 +1,15 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 
-import { searchBarActions } from "./actions";
+import { useSearchBarActions } from "./actions";
 import { CABIN_OPTIONS } from "./constants";
-import { useSearchBarModel } from "./model";
+import { SearchBarModel } from "./model";
 
 import styles from "./index.module.scss";
 
-export default function SearchBar() {
-  const { cabinDraft, resultCount, isLoading } = useSearchBarModel();
+function SearchBarInner() {
+  const { cabinDraft, resultCount, isLoading } = SearchBarModel.useContainer();
+  const { changeCabin, submit } = useSearchBarActions();
 
   return (
     <section className={styles.searchBar}>
@@ -20,7 +21,7 @@ export default function SearchBar() {
               type="button"
               className={styles.cabin}
               data-active={cabinDraft === option.value}
-              onClick={() => searchBarActions.changeCabin(option.value)}
+              onClick={() => changeCabin(option.value)}
             >
               {option.label}
             </button>
@@ -30,7 +31,7 @@ export default function SearchBar() {
           type="primary"
           icon={<SearchOutlined />}
           loading={isLoading}
-          onClick={searchBarActions.submit}
+          onClick={submit}
         >
           搜索
         </Button>
@@ -38,5 +39,13 @@ export default function SearchBar() {
 
       <p className={styles.resultCount}>找到 {resultCount} 个航班</p>
     </section>
+  );
+}
+
+export default function SearchBar() {
+  return (
+    <SearchBarModel.Provider>
+      <SearchBarInner />
+    </SearchBarModel.Provider>
   );
 }

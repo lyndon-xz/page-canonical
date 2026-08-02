@@ -1,4 +1,4 @@
-import { flightResultsActions } from "../../actions";
+import { useFlightResultsActions } from "../../actions";
 import type { Flight } from "../../../../shared/types";
 
 import styles from "./index.module.scss";
@@ -10,12 +10,13 @@ interface FlightCardProps {
 
 export default function FlightCard(props: FlightCardProps) {
   const { flight, selected } = props;
+  const { selectFlight } = useFlightResultsActions();
 
   return (
     <article
       className={styles.card}
       data-selected={selected}
-      onClick={() => flightResultsActions.selectFlight(flight.id)}
+      onClick={() => selectFlight(flight.id)}
     >
       <div className={styles.head}>
         <h3 className={styles.airline}>{flight.airline}</h3>

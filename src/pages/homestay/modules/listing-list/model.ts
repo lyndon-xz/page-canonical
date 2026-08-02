@@ -1,21 +1,34 @@
-import { useState } from "react";
-import { createContainer } from "unstated-next";
+import { createSelector } from "@reduxjs/toolkit";
 
-import { PageStore } from "../../store";
+import {
+  selectListings,
+  selectListingsCount,
+  selectPageState,
+  useAppSelector,
+  type RootState,
+} from "../../store";
 
-function useListingListModelHook() {
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+const selectListingListModel = createSelector(
+  selectPageState,
+  selectListings,
+  selectListingsCount,
+  (state: RootState) => state.listingList,
+  (page, listings, listingsCount, local) => {
+    const { isLoadingListings, selectedListingId, favoriteIds, favoriteError } =
+      page;
 
-  const { listingList, isLoadingList, selectedListingId } =
-    PageStore.useContainer();
+    return {
+      listings,
+      listingsCount,
+      isLoadingListings,
+      selectedListingId,
+      favoriteIds,
+      favoriteError,
+      hoveredId: local.hoveredId,
+    };
+  },
+);
 
-  return {
-    listingList,
-    isLoadingList,
-    selectedListingId,
-    hoveredId,
-    setHoveredId,
-  };
+export function useListingListModel() {
+  return useAppSelector(selectListingListModel);
 }
-
-export const ListingListModel = createContainer(useListingListModelHook);

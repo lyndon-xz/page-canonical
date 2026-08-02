@@ -3,18 +3,30 @@ import { Controller } from "react-hook-form";
 
 import { useRegisterLive } from "@/lib/live";
 
-import { bookingFormActions } from "./actions";
+import { useBookingFormActions } from "./actions";
 import { useBookingFormModel } from "./model";
 
 import styles from "./index.module.scss";
 
 export default function BookingForm() {
-  const { form, selectedFlight, isSubmitting, submitError, submitted } =
-    useBookingFormModel();
+  const {
+    form,
+    isVisible,
+    selectedFlight,
+    isSubmitting,
+    submitError,
+    submitted,
+  } = useBookingFormModel();
+  const { submit } = useBookingFormActions();
   useRegisterLive("bookingForm", form);
 
   const { control, handleSubmit, formState } = form;
   const { errors } = formState;
+
+  // 闸门不通过时不给预订入口，与 fare-rules 同一条结论
+  if (!isVisible) {
+    return null;
+  }
 
   return (
     <section className={styles.bookingForm}>
@@ -38,7 +50,7 @@ export default function BookingForm() {
 
       <form
         className={styles.fields}
-        onSubmit={handleSubmit((values) => bookingFormActions.submit(values))}
+        onSubmit={handleSubmit((values) => submit(values))}
       >
         <div className={styles.field}>
           <label className={styles.label} htmlFor="passengerName">

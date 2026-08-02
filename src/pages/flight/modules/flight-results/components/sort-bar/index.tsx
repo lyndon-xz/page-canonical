@@ -1,11 +1,12 @@
-import { flightResultsActions } from "../../actions";
+import { useFlightResultsActions } from "../../actions";
 import { SORT_OPTIONS } from "../../constants";
-import { useFlightResultsModel } from "../../model";
+import { FlightResultsModel } from "../../model";
 
 import styles from "./index.module.scss";
 
 export default function SortBar() {
-  const { sortBy } = useFlightResultsModel();
+  const { sortBy } = FlightResultsModel.useContainer();
+  const { changeSortBy } = useFlightResultsActions();
 
   return (
     <div className={styles.sortBar} role="group" aria-label="排序方式">
@@ -15,7 +16,7 @@ export default function SortBar() {
           type="button"
           className={styles.option}
           data-active={sortBy === option.value}
-          onClick={() => flightResultsActions.changeSortBy(option.value)}
+          onClick={() => changeSortBy(option.value)}
         >
           {option.label}
         </button>

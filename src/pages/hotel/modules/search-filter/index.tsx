@@ -3,12 +3,14 @@ import { Button, Input } from "antd";
 
 import { searchFilterActions } from "./actions";
 import { STAR_OPTIONS } from "./constants";
+import { useSearchFilterEffects } from "./effects";
 import { useSearchFilterModel } from "./model";
 
 import styles from "./index.module.scss";
 
 export default function SearchFilter() {
   const { keyword, star, resultCount, isLoading } = useSearchFilterModel();
+  useSearchFilterEffects();
 
   return (
     <section className={styles.searchFilter}>

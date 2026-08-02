@@ -25,8 +25,8 @@ export function useSearchFilterModel() {
 
   const { resultCount, isLoading } = usePageStore(
     useShallow((s) => ({
-      resultCount: s.hotelList.length,
-      isLoading: s.isLoadingHotelList,
+      resultCount: s.hotels.length,
+      isLoading: s.isLoadingHotels,
     })),
   );
 

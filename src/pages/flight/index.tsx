@@ -1,15 +1,14 @@
-import { Provider } from "react-redux";
-
 import { usePageEffects } from "./effects";
 import BookingForm from "./modules/booking-form";
+import FareRules from "./modules/fare-rules";
 import FlightResults from "./modules/flight-results";
 import SearchBar from "./modules/search-bar";
-import { store } from "./store";
+import { PageStore } from "./store";
 
 import styles from "./index.module.scss";
 
 // 单独成组件：effects 内部订阅状态引起的重渲染只落在这个空组件上，不波及子树。
-// 必须挂在 <Provider> 内层，否则订阅取不到 store。
+// 必须挂在 PageStore.Provider 内层，否则 usePageActions 取不到 Container。
 function EffectsRunner() {
   usePageEffects();
   return null;
@@ -17,7 +16,7 @@ function EffectsRunner() {
 
 export default function FlightPage() {
   return (
-    <Provider store={store}>
+    <PageStore.Provider>
       <div className={styles.page}>
         <EffectsRunner />
         <header className={styles.hero}>
@@ -26,8 +25,9 @@ export default function FlightPage() {
         </header>
         <SearchBar />
         <FlightResults />
+        <FareRules />
         <BookingForm />
       </div>
-    </Provider>
+    </PageStore.Provider>
   );
 }

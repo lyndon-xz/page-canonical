@@ -1,83 +1,86 @@
-import {
-  configureStore,
-  createSlice,
-  type PayloadAction,
-} from "@reduxjs/toolkit";
-import { useSelector } from "react-redux";
+import { useMemo, useState } from "react";
+import { createContainer } from "unstated-next";
 
-import { flightResultsReducer } from "./modules/flight-results/slice";
-import { searchBarReducer } from "./modules/search-bar/slice";
-import type { Flight } from "./shared/types";
+import { isBookingAllowed } from "./shared/gate";
+import type {
+  BookingEligibility,
+  FareBlockReason,
+  FareRule,
+  Flight,
+} from "./shared/types";
 
-interface FlightPageState {
-  flightList: Flight[];
-  isLoadingList: boolean;
-  listError: Error | null;
-  selectedFlightId: string | null;
-  isSubmittingBooking: boolean;
-  bookingError: Error | null;
-  bookingSubmitted: boolean;
+function usePageStoreHook() {
+  const [flights, setFlights] = useState<Flight[]>([]);
+  const [isLoadingFlights, setIsLoadingFlights] = useState(false);
+  const [flightsError, setFlightsError] = useState<Error | null>(null);
+  const [selectedFlightId, setSelectedFlightId] = useState<string | null>(null);
+
+  /** 为空表示资格尚未取回；闸门此时按不通过处理 */
+  const [eligibility, setEligibility] = useState<BookingEligibility | null>(
+    null,
+  );
+  const [isLoadingEligibility, setIsLoadingEligibility] = useState(false);
+
+  const [fareRules, setFareRules] = useState<FareRule[]>([]);
+  const [isLoadingFareRules, setIsLoadingFareRules] = useState(false);
+  const [fareRulesError, setFareRulesError] = useState<Error | null>(null);
+  const [fareBlockReasons, setFareBlockReasons] = useState<FareBlockReason[]>(
+    [],
+  );
+
+  const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
+  const [bookingError, setBookingError] = useState<Error | null>(null);
+  const [bookingSubmitted, setBookingSubmitted] = useState(false);
+
+  /**
+   * 闸门结论收在页面层：预订与退改规则两个模块都据此决定是否渲染，
+   * 各自再判一次就会和 action 里的判定漂移（见 shared/gate.ts）。
+   */
+  const bookingAllowed = useMemo(
+    () => isBookingAllowed(eligibility),
+    [eligibility],
+  );
+
+  /** 选中航班：booking-form 与 fare-rules 都要，故提到页面层，避免两处各 find 一遍 */
+  const selectedFlight = useMemo(
+    () => flights.find((flight) => flight.id === selectedFlightId) ?? null,
+    [flights, selectedFlightId],
+  );
+
+  return {
+    flights,
+    setFlights,
+    isLoadingFlights,
+    setIsLoadingFlights,
+    flightsError,
+    setFlightsError,
+    selectedFlightId,
+    setSelectedFlightId,
+
+    eligibility,
+    setEligibility,
+    isLoadingEligibility,
+    setIsLoadingEligibility,
+
+    fareRules,
+    setFareRules,
+    isLoadingFareRules,
+    setIsLoadingFareRules,
+    fareRulesError,
+    setFareRulesError,
+    fareBlockReasons,
+    setFareBlockReasons,
+
+    isSubmittingBooking,
+    setIsSubmittingBooking,
+    bookingError,
+    setBookingError,
+    bookingSubmitted,
+    setBookingSubmitted,
+
+    isBookingAllowed: bookingAllowed,
+    selectedFlight,
+  };
 }
 
-/** 前向引用下方的 store，以满足「type 先于 const」的排序约束 */
-export type RootState = ReturnType<typeof store.getState>;
-
-const initialState: FlightPageState = {
-  flightList: [],
-  isLoadingList: false,
-  listError: null,
-  selectedFlightId: null,
-  isSubmittingBooking: false,
-  bookingError: null,
-  bookingSubmitted: false,
-};
-
-const flightPageSlice = createSlice({
-  name: "flightPage",
-  initialState,
-  reducers: {
-    setFlightList(state, action: PayloadAction<Flight[]>) {
-      state.flightList = action.payload;
-    },
-    setIsLoadingList(state, action: PayloadAction<boolean>) {
-      state.isLoadingList = action.payload;
-    },
-    setListError(state, action: PayloadAction<Error | null>) {
-      state.listError = action.payload;
-    },
-    setSelectedFlightId(state, action: PayloadAction<string | null>) {
-      state.selectedFlightId = action.payload;
-    },
-    setIsSubmittingBooking(state, action: PayloadAction<boolean>) {
-      state.isSubmittingBooking = action.payload;
-    },
-    setBookingError(state, action: PayloadAction<Error | null>) {
-      state.bookingError = action.payload;
-    },
-    setBookingSubmitted(state, action: PayloadAction<boolean>) {
-      state.bookingSubmitted = action.payload;
-    },
-  },
-});
-
-export const {
-  setFlightList,
-  setIsLoadingList,
-  setListError,
-  setSelectedFlightId,
-  setIsSubmittingBooking,
-  setBookingError,
-  setBookingSubmitted,
-} = flightPageSlice.actions;
-
-export const store = configureStore({
-  reducer: {
-    page: flightPageSlice.reducer,
-    searchBar: searchBarReducer,
-    flightResults: flightResultsReducer,
-  },
-});
-
-export const useAppSelector = useSelector.withTypes<RootState>();
-
-export const selectPageState = (state: RootState) => state.page;
+export const PageStore = createContainer(usePageStoreHook);

@@ -1,8 +1,12 @@
-import { EnvironmentOutlined, StarFilled } from "@ant-design/icons";
+import {
+  EnvironmentOutlined,
+  HeartFilled,
+  HeartOutlined,
+} from "@ant-design/icons";
 
 import type { Listing } from "../../../../shared/types";
-import { useListingListActions } from "../../actions";
-import { ListingListModel } from "../../model";
+import { listingListActions } from "../../actions";
+import { useListingListModel } from "../../model";
 
 import styles from "./index.module.scss";
 
@@ -13,8 +17,9 @@ interface ListingCardProps {
 
 export default function ListingCard(props: ListingCardProps) {
   const { listing, selected } = props;
-  const { hoveredId } = ListingListModel.useContainer();
-  const { selectListing, hoverListing } = useListingListActions();
+  const { hoveredId, favoriteIds } = useListingListModel();
+  const { selectListing, hoverListing, toggleFavorite } = listingListActions;
+  const isFavorite = favoriteIds.includes(listing.id);
 
   return (
     <article
@@ -34,9 +39,7 @@ export default function ListingCard(props: ListingCardProps) {
         <span className={styles.city}>
           <EnvironmentOutlined /> {listing.city}
         </span>
-        <span className={styles.rating}>
-          <StarFilled /> {listing.rating}
-        </span>
+        <span className={styles.rating}>{listing.rating} 分</span>
       </div>
 
       <div className={styles.foot}>
@@ -44,6 +47,19 @@ export default function ListingCard(props: ListingCardProps) {
           ¥{listing.pricePerNight}
           <em className={styles.unit}> / 晚</em>
         </span>
+        {/* 阻止冒泡：收藏不应连带触发卡片的选中 */}
+        <button
+          type="button"
+          className={styles.favorite}
+          data-active={isFavorite}
+          aria-label={isFavorite ? "取消收藏" : "收藏房源"}
+          onClick={(event) => {
+            event.stopPropagation();
+            toggleFavorite(listing.id);
+          }}
+        >
+          {isFavorite ? <HeartFilled /> : <HeartOutlined />}
+        </button>
       </div>
     </article>
   );
