@@ -1,7 +1,7 @@
 # 依赖
 node_modules/
 
-# 本项目用 pnpm，只保留 pnpm-lock.yaml，避免多包管理器混用
+# 避免多包管理器混用
 package-lock.json
 yarn.lock
 bun.lockb
@@ -39,10 +39,9 @@ playwright-report/
 # 日志
 *.log
 
-# 编辑器：.vscode 只共享 settings 与 extensions
+# 编辑器
 .vscode/*
 !.vscode/settings.json
-!.vscode/extensions.json
 .idea/
 
 # 操作系统
