@@ -1,19 +1,19 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-// 本文件被页面 store.ts import 用于注册 reducer。
-// 因此这里禁止 import store 的运行时内容，需要类型时一律 type-only import。
-import type { SortBy } from '../../shared/types';
+// 本文件被页面 store.ts import 用于注册 reducer，禁止反向 import store 的运行时内容，
+// 需要类型时一律 type-only import，否则形成循环依赖。
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-/** 模块本地状态：当前排序维度 */
+import type { SortBy } from "../../shared/types";
+
 interface FlightResultsLocalState {
   sortBy: SortBy;
 }
 
 const initialState: FlightResultsLocalState = {
-  sortBy: 'price',
+  sortBy: "price",
 };
 
 export const flightResultsSlice = createSlice({
-  name: 'flightResults',
+  name: "flightResults",
   initialState,
   reducers: {
     setSortBy(state, action: PayloadAction<SortBy>) {

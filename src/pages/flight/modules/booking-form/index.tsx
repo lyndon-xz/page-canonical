@@ -8,10 +8,6 @@ import { useBookingFormModel } from "./model";
 
 import styles from "./index.module.scss";
 
-/**
- * 单一视图：预订表单。表单实例（活对象）经 useRegisterLive 登记进 liveStore，供 action 命令式回写。
- * handleSubmit 管校验，通过后把纯值透传给 action；UI 只做字段绑定与提交态 / 结果反馈。
- */
 export default function BookingForm() {
   const { form, selectedFlight, isSubmitting, submitError, submitted } =
     useBookingFormModel();

@@ -1,0 +1,35 @@
+/* 同一批色值在 theme.ts 另有一份：antd 走 cssinjs，取不到这里的 CSS 变量，改色需两处同步。 */
+:root {
+  --ink: #3b3129;
+  --paper: #f7f2ea;
+  --card: #fffdf9;
+  --primary: #c17a4f;
+  --primary-strong: #a9603a;
+  --primary-soft: #f3e6d9;
+  --amber: #d99a4a;
+  --line: #ece2d4;
+  --line-soft: #f1e9dd;
+  --muted: #8a7c6d;
+
+  --display: "Fraunces", "Noto Serif SC", Georgia, serif;
+  --body: "Inter", "Noto Sans SC", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", "Noto Sans Mono", ui-monospace, monospace;
+
+  --radius: 16px;
+  --shadow-card: 0 8px 24px -18px rgb(59 49 41 / 28%);
+  --shadow-lift: 0 16px 30px -20px rgb(59 49 41 / 30%);
+}
+
+body {
+  margin: 0;
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+}
+
+.ant-btn {
+  font-weight: 600;
+}

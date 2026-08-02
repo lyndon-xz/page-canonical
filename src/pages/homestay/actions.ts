@@ -7,11 +7,6 @@ import {
 import type { InquiryForm, ListingFilters } from "./shared/types";
 import { PageStore } from "./store";
 
-/**
- * 全局 actions：unstated-next 下是 hook（需消费 Container）。
- * 按需稳定引用（R6.9）：被 effects 依赖的 loadListings 用 useCallback；
- * 只在事件里调用的 submitInquiry 保持普通函数。deps 里的 setter 跨渲染稳定。
- */
 export function usePageActions() {
   const {
     setListingList,
@@ -23,7 +18,7 @@ export function usePageActions() {
     setInquirySubmitted,
   } = PageStore.useContainer();
 
-  // loadListings 被 usePageEffects 的 useEffect 依赖 → 需稳定引用，用 useCallback
+  // 被 usePageEffects 的 useEffect 依赖，需要稳定引用
   const loadListings = useCallback(
     async (filters: ListingFilters) => {
       setAppliedFilters(filters);
@@ -41,9 +36,7 @@ export function usePageActions() {
     [setAppliedFilters, setIsLoadingList, setListError, setListingList],
   );
 
-  // submitInquiry 只在提交事件里被 module action 调用、不作依赖 → 普通函数即可。
-  // 置提交态、调 service；成功置 inquirySubmitted；失败写 error 并 rethrow，
-  // 让 inquiry-submit 的 module action 捕获后经 getLive 回填字段错误（编排在 action，不进 UI）。
+  // 记下 error 后仍要 rethrow：调用方 action 需要拿到原错误把字段级错误回填到表单
   const submitInquiry = async (values: InquiryForm) => {
     setIsSubmittingInquiry(true);
     setInquiryError(null);

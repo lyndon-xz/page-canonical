@@ -1,6 +1,5 @@
 import type { Hotel } from "../shared/types";
 
-/** 本地 mock 酒店数据，供 services 的异步 mock 服务过滤后返回 */
 export const MOCK_HOTELS: Hotel[] = [
   {
     id: "h1",

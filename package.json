@@ -17,8 +17,8 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "vite build",
+    "dev": "vite",
     "preview": "vite preview",
     "type-check": "tsc --noEmit"
   },
@@ -42,6 +42,5 @@
     "sass": "^1.87.0",
     "typescript": "^5.9.2",
     "vite": "^8.0.3"
-  },
-  "packageManager": "pnpm@10.12.4"
+  }
 }

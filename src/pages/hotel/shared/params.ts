@@ -1,6 +1,5 @@
 import type { SearchParams } from "./types";
 
-/** 从 URL query string 解析初始搜索条件，非法值回落到默认 */
 export function parseSearchParams(search: string): SearchParams {
   const query = new URLSearchParams(search);
   const keyword = query.get("keyword") ?? "";
@@ -10,7 +9,6 @@ export function parseSearchParams(search: string): SearchParams {
   return { keyword, star };
 }
 
-/** 将搜索条件序列化为 URL query 参数（仅保留有意义的字段） */
 export function serializeParams(
   searchParams: SearchParams,
 ): Record<string, string> {

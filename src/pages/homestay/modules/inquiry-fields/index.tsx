@@ -8,7 +8,6 @@ import styles from "./index.module.scss";
 
 const { TextArea } = Input;
 
-/** 单一视图：直接在 index.tsx 内编写。antd 受控控件统一经 RHF Controller 接入，错误提示来自 errors */
 export default function InquiryFields() {
   const { control, errors } = useInquiryFieldsModel();
 

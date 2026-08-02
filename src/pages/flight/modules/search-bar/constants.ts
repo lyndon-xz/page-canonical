@@ -1,4 +1,3 @@
-/** 舱位筛选选项，空串表示不限 */
 export const CABIN_OPTIONS: { label: string; value: string }[] = [
   { label: "不限", value: "" },
   { label: "经济舱", value: "经济舱" },

@@ -5,7 +5,6 @@ import { ListingListModel } from "./model";
 
 import styles from "./index.module.scss";
 
-/** 组装层：消费本模块 model 渲染房源列表 */
 function ListingListInner() {
   const { listingList, isLoadingList, selectedListingId } =
     ListingListModel.useContainer();
@@ -40,7 +39,6 @@ function ListingListInner() {
   );
 }
 
-/** unstated-next 需在模块入口包裹 Provider（PageStore.Provider 之内、Model.Provider 之层） */
 export default function ListingList() {
   return (
     <ListingListModel.Provider>

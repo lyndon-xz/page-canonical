@@ -5,7 +5,6 @@ import { useInquirySubmitModel } from "./model";
 
 import styles from "./index.module.scss";
 
-/** 单一视图：提交栏。handleSubmit 管校验，通过后把纯值透传给 action；只做提交态 / 结果反馈 */
 export default function InquirySubmit() {
   const { handleSubmit, isSubmittingInquiry, inquiryError, inquirySubmitted } =
     useInquirySubmitModel();

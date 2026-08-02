@@ -3,7 +3,6 @@ import { getLive } from "../../live";
 
 import { useSearchFilterLocal } from "./model";
 
-/** 模块 actions：写本模块草稿 local state，提交时经 global action 落 store */
 export const searchFilterActions = {
   updateKeyword(keyword: string) {
     useSearchFilterLocal.getState().setKeyword(keyword);
@@ -16,7 +15,7 @@ export const searchFilterActions = {
   submit() {
     const { keyword, star } = useSearchFilterLocal.getState();
     pageActions.applySearchParams({ keyword, star });
-    // 跨模块命令式协作：经 liveStore 取 hotel-list 的容器 ref 滚动定位，两模块互不 import（§3.3）
+    // 经 liveStore 取 hotel-list 的容器，避免两模块互相 import
     getLive("hotelListRef")?.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",

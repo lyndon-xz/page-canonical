@@ -10,16 +10,12 @@ import type { FlightResultsHandle } from "../../shared/types";
 
 import styles from "./index.module.scss";
 
-/** 多组件模块：index.tsx 只做组装，并向 liveStore 暴露命令式句柄 */
 export default function FlightResults() {
   const { sortedList, isLoading, selectedFlightId } = useFlightResultsModel();
 
-  // 本模块容器 ref（命令式滚动目标）
   const containerRef = useRef<HTMLElement>(null);
-  // 承载命令式句柄的 ref
   const handleRef = useRef<FlightResultsHandle>(null);
 
-  // 用 useImperativeHandle 建立命令式句柄：把「滚动到本模块容器顶部」封装为 scrollToTop
   useImperativeHandle(
     handleRef,
     () => ({
@@ -33,7 +29,7 @@ export default function FlightResults() {
     [],
   );
 
-  // 句柄 ref 作为活对象登记进 liveStore，供 search-bar 提交后跨模块命令式调用（两模块互不 import）
+  // 经 liveStore 交给 search-bar 调用，避免两模块互相 import
   useRegisterLive("flightResults", handleRef);
 
   return (

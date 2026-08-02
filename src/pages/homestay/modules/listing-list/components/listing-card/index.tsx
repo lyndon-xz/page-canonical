@@ -11,7 +11,6 @@ interface ListingCardProps {
   selected: boolean;
 }
 
-/** 叶子组件：只消费本模块 model（hoveredId）与本模块 actions，不含业务逻辑 */
 export default function ListingCard(props: ListingCardProps) {
   const { listing, selected } = props;
   const { hoveredId } = ListingListModel.useContainer();

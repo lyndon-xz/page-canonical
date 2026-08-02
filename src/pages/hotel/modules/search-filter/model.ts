@@ -3,7 +3,7 @@ import { useShallow } from "zustand/react/shallow";
 
 import { usePageStore } from "../../store";
 
-/** 模块本地草稿状态：用户编辑中、尚未提交的搜索条件 */
+/** 用户编辑中、尚未提交的搜索条件（已提交的在页面 store 的 appliedParams） */
 interface SearchFilterLocalState {
   keyword: string;
   star: number;
@@ -18,7 +18,6 @@ export const useSearchFilterLocal = create<SearchFilterLocalState>((set) => ({
   setStar: (star) => set({ star }),
 }));
 
-/** 统一入口 hook：本地草稿 + 从页面 store 派生结果数与加载态 */
 export function useSearchFilterModel() {
   const { keyword, star } = useSearchFilterLocal(
     useShallow((s) => ({ keyword: s.keyword, star: s.star })),

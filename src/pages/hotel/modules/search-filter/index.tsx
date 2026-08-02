@@ -7,7 +7,6 @@ import { useSearchFilterModel } from "./model";
 
 import styles from "./index.module.scss";
 
-/** 单一视图：直接在 index.tsx 内编写（§0.3），无需另建 components 空壳 */
 export default function SearchFilter() {
   const { keyword, star, resultCount, isLoading } = useSearchFilterModel();
 

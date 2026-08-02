@@ -1,4 +1,3 @@
-/** 星级筛选选项，0 表示不限 */
 export const STAR_OPTIONS: { label: string; value: number }[] = [
   { label: "不限", value: 0 },
   { label: "三星", value: 3 },

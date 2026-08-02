@@ -14,10 +14,6 @@ import {
   store,
 } from "./store";
 
-/**
- * 页面级 actions：纯对象，通过 store.dispatch() 在组件外调用。
- * 负责页面级 / 跨模块的业务编排，不碰任何模块的 model / actions。
- */
 export const pageActions = {
   async loadFlights(filters: FlightFilters) {
     store.dispatch(setIsLoadingList(true));
@@ -44,8 +40,7 @@ export const pageActions = {
     );
   },
 
-  // 预订提交编排：置提交态、调 service；成功置 submitted；失败写 error 并 rethrow，
-  // 让 booking-form 的 module action 捕获后经 getLive 回填字段错误（编排在 action，不进 UI）。
+  // 记下 error 后仍要 rethrow：调用方 action 需要拿到原错误把字段级错误回填到表单
   async submitBooking(values: BookingForm) {
     store.dispatch(setIsSubmittingBooking(true));
     store.dispatch(setBookingError(null));

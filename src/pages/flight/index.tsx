@@ -8,9 +8,8 @@ import { store } from "./store";
 
 import styles from "./index.module.scss";
 
-// 渲染隔离：effects 放在返回 null 的独立组件里，
-// 即使内部订阅了会变化的状态，重渲染也只发生在此空组件上，不波及子树。
-// 置于 <Provider> 内层：effects 依赖 store，其内部订阅需在 Provider 子树内。
+// 单独成组件：effects 内部订阅状态引起的重渲染只落在这个空组件上，不波及子树。
+// 必须挂在 <Provider> 内层，否则订阅取不到 store。
 function EffectsRunner() {
   usePageEffects();
   return null;

@@ -1,6 +1,5 @@
 import type { Flight } from "../shared/types";
 
-/** 本地 mock 航班数据，供 services 的异步 mock 服务过滤后返回 */
 export const MOCK_FLIGHTS: Flight[] = [
   {
     id: "f1",

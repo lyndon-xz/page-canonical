@@ -9,11 +9,10 @@ import { useHotelListModel } from "./model";
 
 import styles from "./index.module.scss";
 
-/** 多组件模块：index.tsx 只做组装 */
 export default function HotelList() {
   const { sortedList, isLoading, selectedHotelId } = useHotelListModel();
 
-  // 列表容器 ref 作为活对象登记进 liveStore，供 search-filter 提交后跨模块滚动定位（不被其它模块直接 import）
+  // 经 liveStore 交给 search-filter 滚动定位，避免两模块互相 import
   const listRef = useRef<HTMLElement>(null);
   useRegisterLive("hotelListRef", listRef);
 
