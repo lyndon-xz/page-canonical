@@ -10,13 +10,20 @@ export interface Hotel {
   distanceKm: number;
 }
 
+export type SortBy = "price" | "rating" | "distance";
+
 export interface SearchParams {
   keyword: string;
   /** 星级筛选，0 表示不限 */
   star: number;
+  /**
+   * 排序方式。
+   *
+   * 它是取数参数而非纯展示态：列表分页加载，排序必须由服务端在全量数据上做。
+   * 放前端排已加载的部分，会让新到的一页插进已展示的卡片之间、整列重排。
+   */
+  sortBy: SortBy;
 }
-
-export type SortBy = "price" | "rating" | "distance";
 
 /**
  * 分页响应。hasMore 由服务端明确给出，不靠「items.length < pageSize」推断——
@@ -25,6 +32,8 @@ export type SortBy = "price" | "rating" | "distance";
 export interface HotelPage {
   items: Hotel[];
   hasMore: boolean;
+  /** 匹配筛选条件的总条数，与本页取回多少条无关 */
+  total: number;
 }
 
 /** 批量收藏里单项的失败原因；只存 id，展示用的酒店名在 model 里按 id 取 */

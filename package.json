@@ -16,9 +16,6 @@
     "email": "wuxianzhi052@gmail.com"
   },
   "type": "module",
-  "engines": {
-    "node": ">=20.12"
-  },
   "scripts": {
     "build": "vite build",
     "dev": "vite",

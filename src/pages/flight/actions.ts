@@ -44,6 +44,20 @@ export function usePageActions() {
     async (filters: FlightFilters) => {
       setIsLoadingFlights(true);
       setFlightsError(null);
+
+      /*
+       * 请求发出前先把上一轮结果作废，否则 loading 期间「找到 N 个航班」报的是上一次的数字，
+       * 选中航班与其退改规则也会指向已经不在结果里的班次。
+       *
+       * 本页换栈到 unstated-next 后，重进页面时 Provider 重建、useState 天然回到初值，
+       * 这段只为「换筛选条件」这条路径而写——zustand 与 RTK 的 store 是模块单例，两条路径都需要它。
+       */
+      setFlights([]);
+      setSelectedFlightId(null);
+      setFareRules([]);
+      setFareBlockReasons([]);
+      setFareRulesError(null);
+
       try {
         const flights = await fetchFlights(filters);
         setFlights(flights);
@@ -53,7 +67,15 @@ export function usePageActions() {
         setIsLoadingFlights(false);
       }
     },
-    [setFlights, setFlightsError, setIsLoadingFlights],
+    [
+      setFareBlockReasons,
+      setFareRules,
+      setFareRulesError,
+      setFlights,
+      setFlightsError,
+      setIsLoadingFlights,
+      setSelectedFlightId,
+    ],
   );
 
   /**

@@ -5,17 +5,28 @@ import type {
   Hotel,
   HotelPage,
   SearchParams,
+  SortBy,
 } from "../shared/types";
 
 const MOCK_DELAY_MS = 300;
 
-/** 每页条数，故意取小值以便演示滚动加载 */
-export const HOTEL_PAGE_SIZE = 3;
+/**
+ * 每页条数。取值要让首屏填满一屏以上——
+ * 否则列表末尾的哨兵一开始就在视口内，会自动连锁翻页直到取完。
+ */
+export const HOTEL_PAGE_SIZE = 12;
+
+/** 排序在服务端做：分页返回的每一页都取自全量排序后的结果 */
+const comparators: Record<SortBy, (a: Hotel, b: Hotel) => number> = {
+  price: (a, b) => a.pricePerNight - b.pricePerNight,
+  rating: (a, b) => b.rating - a.rating,
+  distance: (a, b) => a.distanceKm - b.distanceKm,
+};
 
 /** 该酒店的收藏接口固定失败，用于演示乐观更新后的回滚 */
 const FAVORITE_REJECTED_HOTEL_IDS = ["h2"];
 
-const filterHotels = (searchParams: SearchParams): Hotel[] => {
+const resolveMatchedHotels = (searchParams: SearchParams): Hotel[] => {
   const keyword = searchParams.keyword.trim().toLowerCase();
 
   return MOCK_HOTELS.filter((hotel) => {
@@ -26,7 +37,7 @@ const filterHotels = (searchParams: SearchParams): Hotel[] => {
     const matchesStar =
       searchParams.star === 0 || hotel.star === searchParams.star;
     return matchesKeyword && matchesStar;
-  });
+  }).sort(comparators[searchParams.sortBy]);
 };
 
 export async function fetchHotelPage(
@@ -35,11 +46,15 @@ export async function fetchHotelPage(
 ): Promise<HotelPage> {
   await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
 
-  const matched = filterHotels(searchParams);
+  const matched = resolveMatchedHotels(searchParams);
   const start = (page - 1) * HOTEL_PAGE_SIZE;
   const items = matched.slice(start, start + HOTEL_PAGE_SIZE);
 
-  return { items, hasMore: start + items.length < matched.length };
+  return {
+    items,
+    hasMore: start + items.length < matched.length,
+    total: matched.length,
+  };
 }
 
 export async function toggleHotelFavorite(hotelId: string): Promise<void> {

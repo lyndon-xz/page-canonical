@@ -3,7 +3,11 @@ import { persist } from "zustand/middleware";
 
 import type { BatchFavoriteFailure, Hotel, SearchParams } from "./shared/types";
 
-const DEFAULT_PARAMS: SearchParams = { keyword: "", star: 0 };
+const DEFAULT_PARAMS: SearchParams = {
+  keyword: "",
+  star: 0,
+  sortBy: "price",
+};
 
 const PERSIST_KEY = "hotel-page";
 
@@ -19,6 +23,12 @@ interface PageStore {
   hotelsError: Error | null;
   selectedHotelId: string | null;
   appliedParams: SearchParams;
+
+  /**
+   * 匹配筛选条件的总条数，由服务端给出。
+   * 与 hotels.length（已加载条数）是两回事：后者随分页累加，不能用来显示「找到 N 家」。
+   */
+  hotelsTotal: number;
 
   /** 已加载到第几页；下一页取 loadedPage + 1 */
   loadedPage: number;
@@ -43,6 +53,7 @@ interface PageStore {
   setHotelsError: (error: Error | null) => void;
   setSelectedHotelId: (id: string | null) => void;
   setAppliedParams: (searchParams: SearchParams) => void;
+  setHotelsTotal: (total: number) => void;
   setLoadedPage: (page: number) => void;
   setHasMore: (hasMore: boolean) => void;
   setIsLoadingMore: (loading: boolean) => void;
@@ -63,6 +74,7 @@ export const usePageStore = create<PageStore>()(
       selectedHotelId: null,
       appliedParams: DEFAULT_PARAMS,
 
+      hotelsTotal: 0,
       loadedPage: 0,
       hasMore: false,
       isLoadingMore: false,
@@ -82,6 +94,7 @@ export const usePageStore = create<PageStore>()(
       setHotelsError: (error) => set({ hotelsError: error }),
       setSelectedHotelId: (id) => set({ selectedHotelId: id }),
       setAppliedParams: (searchParams) => set({ appliedParams: searchParams }),
+      setHotelsTotal: (total) => set({ hotelsTotal: total }),
       setLoadedPage: (page) => set({ loadedPage: page }),
       setHasMore: (hasMore) => set({ hasMore }),
       setIsLoadingMore: (loading) => set({ isLoadingMore: loading }),
@@ -107,6 +120,21 @@ export const usePageStore = create<PageStore>()(
         appliedParams: state.appliedParams,
         favoriteIds: state.favoriteIds,
       }),
+      /*
+       * 恢复时把落盘值与当前默认值合并，而不是直接展开覆盖。
+       *
+       * 落盘结构会随版本演进：给 appliedParams 新增一个字段后，老用户存下来的那份就缺它，
+       * 直接展开会让该字段变成 undefined，一路传到取数与排序里炸掉。
+       */
+      merge: (persisted, current) => {
+        const saved = persisted as Partial<PersistedPageState> | undefined;
+
+        return {
+          ...current,
+          ...saved,
+          appliedParams: { ...DEFAULT_PARAMS, ...saved?.appliedParams },
+        };
+      },
     },
   ),
 );

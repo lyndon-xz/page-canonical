@@ -25,7 +25,8 @@ export function useSearchFilterModel() {
 
   const { resultCount, isLoading } = usePageStore(
     useShallow((s) => ({
-      resultCount: s.hotels.length,
+      // 取服务端给的匹配总数，不用 hotels.length——后者随分页累加，会一路从 3 涨到 7
+      resultCount: s.hotelsTotal,
       isLoading: s.isLoadingHotels,
     })),
   );

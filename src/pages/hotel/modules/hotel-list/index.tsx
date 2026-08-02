@@ -13,7 +13,7 @@ import styles from "./index.module.scss";
 
 export default function HotelList() {
   const {
-    sortedHotels,
+    hotels,
     isLoading,
     error,
     selectedHotelId,
@@ -37,7 +37,7 @@ export default function HotelList() {
   const showSentinel =
     !isLoading &&
     !error &&
-    sortedHotels.length > 0 &&
+    hotels.length > 0 &&
     hasMore &&
     !isLoadingMore &&
     !loadMoreError;
@@ -50,7 +50,7 @@ export default function HotelList() {
       <header className={styles.header}>
         <div className={styles.headLeft}>
           <h2 className={styles.title}>酒店列表</h2>
-          {sortedHotels.length > 0 && (
+          {hotels.length > 0 && (
             <Checkbox
               checked={isAllLoadedSelected}
               // 勾了一部分时给半选态，否则表头会谎称「一个都没选」
@@ -122,14 +122,14 @@ export default function HotelList() {
             重试
           </Button>
         </div>
-      ) : sortedHotels.length === 0 ? (
+      ) : hotels.length === 0 ? (
         <div className={styles.stateBox}>
           <Empty description="暂无匹配的酒店" />
         </div>
       ) : (
         <>
           <div className={styles.grid}>
-            {sortedHotels.map((hotel) => (
+            {hotels.map((hotel) => (
               <HotelCard
                 key={hotel.id}
                 hotel={hotel}

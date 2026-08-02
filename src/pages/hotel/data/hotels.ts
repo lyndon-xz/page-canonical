@@ -1,5 +1,11 @@
 import type { Hotel } from "../shared/types";
 
+/*
+ * 条数取「一页多一点」（HOTEL_PAGE_SIZE 12 + 6）：够演示翻一次页，也够让首屏填满一屏。
+ *
+ * 首屏若填不满一屏，列表末尾的哨兵一开始就落在视口里，会自动连锁翻页直到取完，
+ * 反而看不出滚动加载的真实效果。
+ */
 export const MOCK_HOTELS: Hotel[] = [
   {
     id: "h1",
@@ -63,5 +69,104 @@ export const MOCK_HOTELS: Hotel[] = [
     rating: 4.0,
     star: 3,
     distanceKm: 1.7,
+  },
+  {
+    id: "h8",
+    name: "南京夫子庙饭店",
+    city: "南京",
+    pricePerNight: 690,
+    rating: 4.3,
+    star: 4,
+    distanceKm: 1.1,
+  },
+  {
+    id: "h9",
+    name: "苏州平江府酒店",
+    city: "苏州",
+    pricePerNight: 1180,
+    rating: 4.7,
+    star: 5,
+    distanceKm: 0.8,
+  },
+  {
+    id: "h10",
+    name: "重庆解放碑大酒店",
+    city: "重庆",
+    pricePerNight: 520,
+    rating: 4.2,
+    star: 4,
+    distanceKm: 0.4,
+  },
+  {
+    id: "h11",
+    name: "青岛栈桥宾馆",
+    city: "青岛",
+    pricePerNight: 430,
+    rating: 4.1,
+    star: 3,
+    distanceKm: 2.0,
+  },
+  {
+    id: "h12",
+    name: "长沙五一广场酒店",
+    city: "长沙",
+    pricePerNight: 560,
+    rating: 4.4,
+    star: 4,
+    distanceKm: 1.5,
+  },
+  {
+    id: "h13",
+    name: "武汉江滩花园酒店",
+    city: "武汉",
+    pricePerNight: 720,
+    rating: 4.5,
+    star: 4,
+    distanceKm: 2.7,
+  },
+  {
+    id: "h14",
+    name: "天津五大道公馆",
+    city: "天津",
+    pricePerNight: 1320,
+    rating: 4.6,
+    star: 5,
+    distanceKm: 1.9,
+  },
+  {
+    id: "h15",
+    name: "昆明翠湖宾馆",
+    city: "昆明",
+    pricePerNight: 480,
+    rating: 4.2,
+    star: 4,
+    distanceKm: 3.1,
+  },
+  {
+    id: "h16",
+    name: "哈尔滨中央大街饭店",
+    city: "哈尔滨",
+    pricePerNight: 390,
+    rating: 4.0,
+    star: 3,
+    distanceKm: 0.7,
+  },
+  {
+    id: "h17",
+    name: "三亚亚龙湾度假村",
+    city: "三亚",
+    pricePerNight: 2280,
+    rating: 4.9,
+    star: 5,
+    distanceKm: 8.4,
+  },
+  {
+    id: "h18",
+    name: "丽江古城精品酒店",
+    city: "丽江",
+    pricePerNight: 610,
+    rating: 4.5,
+    star: 4,
+    distanceKm: 1.3,
   },
 ];

@@ -1,5 +1,4 @@
 import { pageActions } from "../../actions";
-import { getLive } from "../../live";
 
 import { useSearchFilterLocal } from "./model";
 
@@ -12,13 +11,10 @@ export const searchFilterActions = {
     useSearchFilterLocal.getState().setStar(star);
   },
 
+  // 滚回列表顶部由 applySearchParams 统一负责，排序改动也要这行为
   submit() {
     const { keyword, star } = useSearchFilterLocal.getState();
+
     pageActions.applySearchParams({ keyword, star });
-    // 经 liveStore 取 hotel-list 的容器，避免两模块互相 import
-    getLive("hotelListRef")?.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
   },
 };

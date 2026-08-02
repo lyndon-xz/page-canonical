@@ -2,11 +2,10 @@ import { pageActions } from "../../actions";
 import type { SortBy } from "../../shared/types";
 import { usePageStore } from "../../store";
 
-import { useHotelListLocal } from "./model";
-
 export const hotelListActions = {
+  // 排序由服务端执行，换排序等于换一次取数条件，故回到第一页重新拉
   changeSortBy(sortBy: SortBy) {
-    useHotelListLocal.getState().setSortBy(sortBy);
+    pageActions.applySearchParams({ sortBy });
   },
 
   selectHotel(id: string) {

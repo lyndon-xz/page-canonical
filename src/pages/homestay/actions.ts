@@ -26,6 +26,7 @@ import {
   setListingDetail,
   setListings,
   setListingsError,
+  setSelectedListingId,
 } from "./slice";
 import { reportTrace } from "./shared/trace";
 import { selectTraceCommonTag, store } from "./store";
@@ -62,6 +63,22 @@ export const pageActions = {
     store.dispatch(setAppliedFilters(filters));
     store.dispatch(setIsLoadingListings(true));
     store.dispatch(setListingsError(null));
+
+    /*
+     * 请求发出前先把上一轮结果作废。
+     *
+     * store 是页面级单例、不随页面卸载重置，重进本页或换筛选条件时旧值都还在：
+     * 少了这段，loading 期间「共 N 套」会报上一次的数字，选中态与详情也会指向
+     * 已经不在结果里的房源。收藏（favoriteIds）不清——那是跨结果集的用户数据。
+     */
+    store.dispatch(setListings([]));
+    store.dispatch(setSelectedListingId(null));
+    store.dispatch(setDetailListingId(null));
+    store.dispatch(setListingDetail(null));
+    store.dispatch(setDetailError(null));
+    store.dispatch(setConfirmScene(null));
+    store.dispatch(setFavoriteError(null));
+
     try {
       const listings = await fetchListings(filters);
       store.dispatch(setListings(listings));

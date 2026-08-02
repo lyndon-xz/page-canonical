@@ -3,6 +3,7 @@ import {
   fetchHotelPage,
   toggleHotelFavorite,
 } from "./data/services";
+import { getLive } from "./live";
 import { parseSearchParams, serializeParams } from "./shared/params";
 import type { SearchParams } from "./shared/types";
 import { usePageStore } from "./store";
@@ -53,25 +54,44 @@ export const pageActions = {
       setIsLoadingHotels,
       setHotelsError,
       setHotels,
+      setHotelsTotal,
       setLoadedPage,
       setHasMore,
       setLoadMoreError,
+      setSelectedHotelId,
+      setSelectedHotelIds,
+      setBatchFavoriteFailures,
     } = usePageStore.getState();
 
     setAppliedParams(searchParams);
     setIsLoadingHotels(true);
     setHotelsError(null);
     setLoadMoreError(null);
+
+    /*
+     * 请求发出前先把上一轮结果作废。
+     *
+     * store 是页面级单例、不随页面卸载重置，重进本页或换筛选条件时旧值都还在：
+     * 少了这段，loading 期间「找到 N 家」会报上一次的数字，选中态与批量失败提示
+     * 也会指向已经不在结果里的酒店。收藏（favoriteIds）不清——那是跨结果集的用户数据。
+     */
+    setHotels([]);
+    setHotelsTotal(0);
+    setLoadedPage(0);
+    setHasMore(false);
+    setSelectedHotelId(null);
+    setSelectedHotelIds([]);
+    setBatchFavoriteFailures([]);
+
     try {
-      const { items, hasMore } = await fetchHotelPage(searchParams, 1);
+      const { items, hasMore, total } = await fetchHotelPage(searchParams, 1);
       setHotels(items);
+      setHotelsTotal(total);
       setLoadedPage(1);
       setHasMore(hasMore);
     } catch (err) {
+      // 结果态已在请求前清空，这里只记错误
       setHotelsError(err instanceof Error ? err : new Error(String(err)));
-      setHotels([]);
-      setLoadedPage(0);
-      setHasMore(false);
     } finally {
       setIsLoadingHotels(false);
     }
@@ -91,6 +111,7 @@ export const pageActions = {
       setIsLoadingMore,
       setLoadMoreError,
       appendHotels,
+      setHotelsTotal,
       setLoadedPage,
       setHasMore,
     } = usePageStore.getState();
@@ -103,11 +124,15 @@ export const pageActions = {
     setIsLoadingMore(true);
     setLoadMoreError(null);
     try {
-      const { items, hasMore: nextHasMore } = await fetchHotelPage(
-        appliedParams,
-        nextPage,
-      );
+      const {
+        items,
+        hasMore: nextHasMore,
+        total,
+      } = await fetchHotelPage(appliedParams, nextPage);
+
       appendHotels(items);
+      // 总数每页都跟服务端对齐：期间别人增删了酒店，这里要反映真实值
+      setHotelsTotal(total);
       setLoadedPage(nextPage);
       setHasMore(nextHasMore);
     } catch (err) {
@@ -118,8 +143,31 @@ export const pageActions = {
     }
   },
 
-  applySearchParams(searchParams: SearchParams) {
+  /**
+   * 局部更新取数条件并重新取第一页。
+   *
+   * 接收 patch 而非整份条件：筛选来自 search-filter、排序来自 hotel-list，
+   * 各改各的那部分，新增取数参数时也不必逐个改调用点。
+   */
+  applySearchParams(patch: Partial<SearchParams>) {
+    const searchParams = { ...usePageStore.getState().appliedParams, ...patch };
+
     void pageActions.loadHotels(searchParams);
+
+    /*
+     * 列表重置回第一页，滚动位置也必须回到列表顶部。
+     *
+     * 少了这步，用户在页底换筛选或排序时，列表缩回一页而视口还停在下方，
+     * 末尾哨兵立刻又进视口，于是自动连锁翻页直到取完。
+     * 收在这里而不是各调用点：筛选与排序都会走到这，分开写必漏一个。
+     */
+    // 用 auto 而非 smooth：平滑滚动要几百毫秒，取数比它先回来，
+    // 哨兵会在视口还没归位时重新挂载并立刻触发下一页
+    getLive("hotelListRef")?.current?.scrollIntoView({
+      behavior: "auto",
+      block: "start",
+    });
+
     const query = new URLSearchParams(serializeParams(searchParams)).toString();
     history.replaceState(
       null,

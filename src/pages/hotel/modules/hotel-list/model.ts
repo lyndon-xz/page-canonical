@@ -1,34 +1,19 @@
 import { useMemo } from "react";
-import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
-import type { Hotel, SortBy } from "../../shared/types";
 import { usePageStore } from "../../store";
 
-const comparators: Record<SortBy, (a: Hotel, b: Hotel) => number> = {
-  price: (a, b) => a.pricePerNight - b.pricePerNight,
-  rating: (a, b) => b.rating - a.rating,
-  distance: (a, b) => a.distanceKm - b.distanceKm,
-};
-
-interface HotelListLocalState {
-  sortBy: SortBy;
-  setSortBy: (sortBy: SortBy) => void;
-}
-
-export const useHotelListLocal = create<HotelListLocalState>((set) => ({
-  sortBy: "price",
-  setSortBy: (sortBy) => set({ sortBy }),
-}));
-
+/*
+ * 本模块没有私有状态：排序是取数参数、归页面层（见 shared/types.ts 的 SearchParams.sortBy），
+ * 列表也不在前端排序，服务端每页都返回全量排序后的切片。
+ */
 export function useHotelListModel() {
-  const sortBy = useHotelListLocal((s) => s.sortBy);
-
   const {
     hotels,
     isLoading,
     error,
     selectedHotelId,
+    sortBy,
     hasMore,
     isLoadingMore,
     loadMoreError,
@@ -43,6 +28,7 @@ export function useHotelListModel() {
       isLoading: s.isLoadingHotels,
       error: s.hotelsError,
       selectedHotelId: s.selectedHotelId,
+      sortBy: s.appliedParams.sortBy,
       hasMore: s.hasMore,
       isLoadingMore: s.isLoadingMore,
       loadMoreError: s.loadMoreError,
@@ -52,13 +38,6 @@ export function useHotelListModel() {
       isBatchFavoriting: s.isBatchFavoriting,
       batchFavoriteFailures: s.batchFavoriteFailures,
     })),
-  );
-
-  // 只对已加载的部分排序：分页下的排序本应由服务端做，
-  // 这里仅演示前端排序，故明确它作用于已加载数据
-  const sortedHotels = useMemo(
-    () => [...hotels].sort(comparators[sortBy]),
-    [hotels, sortBy],
   );
 
   // 失败提示要点名酒店，故在此把 id 换成名字；store 只存 id，不存会过期的名字快照
@@ -73,7 +52,7 @@ export function useHotelListModel() {
   );
 
   return {
-    sortedHotels,
+    hotels,
     isLoading,
     error,
     selectedHotelId,
