@@ -1,5 +1,7 @@
 import { Button, Spin } from "antd";
 
+import { FetchStatus } from "@/lib/fetch-status";
+
 import { useFareRulesActions } from "./actions";
 import { CATEGORY_CONFIG, CATEGORY_TAB_ORDER } from "./category";
 import RuleItem from "./components/rule-item";
@@ -8,14 +10,8 @@ import { FareRulesModel } from "./model";
 import styles from "./index.module.scss";
 
 function FareRulesInner() {
-  const {
-    isVisible,
-    selectedFlight,
-    isLoading,
-    error,
-    activeCategory,
-    groups,
-  } = FareRulesModel.useContainer();
+  const { isVisible, selectedFlight, fareRulesStatus, activeCategory, groups } =
+    FareRulesModel.useContainer();
   const { changeCategory, retry } = useFareRulesActions();
 
   if (!isVisible) {
@@ -43,11 +39,11 @@ function FareRulesInner() {
         ))}
       </div>
 
-      {isLoading ? (
+      {fareRulesStatus === FetchStatus.Loading ? (
         <div className={styles.stateBox}>
           <Spin />
         </div>
-      ) : error ? (
+      ) : fareRulesStatus === FetchStatus.Error ? (
         <div className={styles.stateBox}>
           <p className={styles.errorText}>退改规则加载失败</p>
           <Button size="small" onClick={retry}>

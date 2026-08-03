@@ -25,7 +25,15 @@
 
 .stateBox {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
   align-items: center;
   justify-content: center;
   padding: 56px 0;
+}
+
+.errorText {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
 }

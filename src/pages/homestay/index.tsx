@@ -34,7 +34,7 @@ export default function HomestayPage() {
     mode: "onTouched",
   });
 
-  // 经 liveStore 交给 inquiry-submit 的 action 回写（reset / setError）
+  // 经页面 live 表交给 inquiry-submit 的 action 回写（reset / setError）
   useRegisterLive("inquiryForm", methods);
 
   return (

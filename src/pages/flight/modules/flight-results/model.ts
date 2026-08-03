@@ -12,8 +12,7 @@ const comparators: Record<SortBy, (a: Flight, b: Flight) => number> = {
 function useFlightResultsModelHook() {
   const [sortBy, setSortBy] = useState<SortBy>("price");
 
-  const { flights, isLoadingFlights, selectedFlightId } =
-    PageStore.useContainer();
+  const { flights, flightsStatus, selectedFlightId } = PageStore.useContainer();
 
   const sortedFlights = useMemo(
     () => [...flights].sort(comparators[sortBy]),
@@ -22,7 +21,7 @@ function useFlightResultsModelHook() {
 
   return {
     sortedFlights,
-    isLoading: isLoadingFlights,
+    flightsStatus,
     selectedFlightId,
     sortBy,
     setSortBy,

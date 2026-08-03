@@ -13,8 +13,11 @@ export function useSearchBarActions() {
 
   const submit = () => {
     applyFilters({ cabin: cabinDraft });
-    // 经 liveStore 取 flight-results 的句柄，避免两模块互相 import
-    getLive("flightResults")?.current?.scrollToTop();
+    // 经页面 live 表取 flight-results 的容器，避免两模块互相 import
+    getLive("flightResultsRef")?.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   return { changeCabin, submit };

@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 
+import { FetchStatus } from "@/lib/fetch-status";
+
 import { usePageStore } from "../../store";
 
 /** 用户编辑中、尚未提交的搜索条件（已提交的在页面 store 的 appliedParams） */
@@ -27,7 +29,7 @@ export function useSearchFilterModel() {
     useShallow((s) => ({
       // 取服务端给的匹配总数，不用 hotels.length——后者随分页累加，会一路从 3 涨到 7
       resultCount: s.hotelsTotal,
-      isLoading: s.isLoadingHotels,
+      isLoading: s.hotelsStatus === FetchStatus.Loading,
     })),
   );
 

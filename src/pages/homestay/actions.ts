@@ -1,3 +1,7 @@
+import { message } from "antd";
+
+import { FetchStatus } from "@/lib/fetch-status";
+
 import {
   cancelInquiry as cancelInquiryService,
   fetchListingDetail,
@@ -14,19 +18,15 @@ import {
   clearDetailContext,
   setAppliedFilters,
   setConfirmScene,
-  setDetailError,
   setDetailListingId,
-  setFavoriteError,
+  setDetailStatus,
   setFavoriteIds,
-  setInquiryError,
   setInquirySubmitted,
   setIsDetailDrawerOpen,
-  setIsLoadingDetail,
-  setIsLoadingListings,
   setIsSubmittingInquiry,
   setListingDetail,
   setListings,
-  setListingsError,
+  setListingsStatus,
   setSelectedListingId,
 } from "./slice";
 import { reportTrace } from "./shared/trace";
@@ -41,11 +41,6 @@ import { selectTraceCommonTag, store } from "./store";
  * 它只管「谁是最新请求」，「结果还有人要吗」由 loadListingDetail 另行校验。
  */
 let latestDetailRequestId = 0;
-
-/** store 只存可序列化值，故错误统一收成消息字符串 */
-function toMessage(err: unknown) {
-  return err instanceof Error ? err.message : String(err);
-}
 
 export const pageActions = {
   /**
@@ -63,8 +58,7 @@ export const pageActions = {
 
   async loadListings(filters: ListingFilters) {
     store.dispatch(setAppliedFilters(filters));
-    store.dispatch(setIsLoadingListings(true));
-    store.dispatch(setListingsError(null));
+    store.dispatch(setListingsStatus(FetchStatus.Loading));
 
     /*
      * 请求发出前先把上一轮结果作废。
@@ -77,16 +71,19 @@ export const pageActions = {
     store.dispatch(setSelectedListingId(null));
     store.dispatch(clearDetailContext());
     store.dispatch(setConfirmScene(null));
-    store.dispatch(setFavoriteError(null));
 
     try {
       const listings = await fetchListings(filters);
       store.dispatch(setListings(listings));
-    } catch (err) {
-      store.dispatch(setListingsError(toMessage(err)));
-    } finally {
-      store.dispatch(setIsLoadingListings(false));
+      store.dispatch(setListingsStatus(FetchStatus.Ready));
+    } catch {
+      store.dispatch(setListingsStatus(FetchStatus.Error));
     }
+  },
+
+  /** 供错误态的重试入口调用：沿用已生效的筛选条件，不必让用户重走一遍 URL */
+  retryListings() {
+    void pageActions.loadListings(store.getState().page.appliedFilters);
   },
 
   async loadListingDetail(listingId: string) {
@@ -101,24 +98,20 @@ export const pageActions = {
       requestId === latestDetailRequestId &&
       store.getState().page.detailListingId === listingId;
 
-    store.dispatch(setIsLoadingDetail(true));
-    store.dispatch(setDetailError(null));
+    store.dispatch(setDetailStatus(FetchStatus.Loading));
     try {
       const detail = await fetchListingDetail(listingId);
       if (!isCurrent()) {
         return;
       }
       store.dispatch(setListingDetail(detail));
-    } catch (err) {
+      store.dispatch(setDetailStatus(FetchStatus.Ready));
+    } catch {
+      // 过期请求连状态都不该动，否则会把仍在飞的那次请求的 loading 提前收掉
       if (!isCurrent()) {
         return;
       }
-      store.dispatch(setDetailError(toMessage(err)));
-    } finally {
-      // loading 只由仍然作数的请求关闭，否则会提前收掉进行中请求的 loading
-      if (isCurrent()) {
-        store.dispatch(setIsLoadingDetail(false));
-      }
+      store.dispatch(setDetailStatus(FetchStatus.Error));
     }
   },
 
@@ -160,7 +153,7 @@ export const pageActions = {
   /**
    * 收藏写入的唯一出口，失败向上抛。
    * 两条调用路径对失败的处置不同，故错误处理留给调用方：
-   * 确认弹窗要把错误留在弹窗内，直接收藏要把错误落到列表顶部（见 addFavorite）。
+   * 确认弹窗要把错误留在弹窗内，直接收藏走 toast（见 addFavorite）。
    */
   async commitFavorite(listingId: string) {
     const { favoriteIds } = store.getState().page;
@@ -176,31 +169,25 @@ export const pageActions = {
     );
   },
 
-  /** 新增收藏无需二次确认，但失败必须有反馈——否则就成了没人接的 rejection */
+  /**
+   * 新增收藏无需二次确认，失败也不改变界面结构，故用 toast 反馈。
+   * 不吞掉——没人接的 rejection 等于失败静默。
+   */
   async addFavorite(listingId: string) {
-    store.dispatch(setFavoriteError(null));
     try {
       await pageActions.commitFavorite(listingId);
     } catch (err) {
-      store.dispatch(setFavoriteError(toMessage(err)));
+      message.error(err instanceof Error ? err.message : String(err));
     }
   },
 
-  dismissFavoriteError() {
-    store.dispatch(setFavoriteError(null));
-  },
-
-  // 记下 error 后仍要 rethrow：调用方 action 需要拿到原错误把字段级错误回填到表单
+  // 不接错误，只保证 loading 收尾：字段级错误要回填到表单，得由调用方拿到原错误分流
   async submitInquiry(values: InquiryForm) {
     store.dispatch(setIsSubmittingInquiry(true));
-    store.dispatch(setInquiryError(null));
     store.dispatch(setInquirySubmitted(false));
     try {
       await submitInquiryService(values);
       store.dispatch(setInquirySubmitted(true));
-    } catch (err) {
-      store.dispatch(setInquiryError(toMessage(err)));
-      throw err;
     } finally {
       store.dispatch(setIsSubmittingInquiry(false));
     }
@@ -209,6 +196,5 @@ export const pageActions = {
   async cancelInquiry() {
     await cancelInquiryService();
     store.dispatch(setInquirySubmitted(false));
-    store.dispatch(setInquiryError(null));
   },
 };

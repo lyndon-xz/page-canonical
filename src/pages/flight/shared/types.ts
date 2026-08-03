@@ -21,20 +21,14 @@ export interface FlightFilters {
 
 export type SortBy = "price" | "departTime";
 
-/** 放在 shared/ 而非模块内，以便 live 层与 flight-results 共用同一类型 */
-export interface FlightResultsHandle {
-  scrollToTop: () => void;
-}
-
-export interface BookingForm {
-  passengerName: string;
-  idNumber: string;
-  contactPhone: string;
-}
-
-export interface BookingFieldError {
-  field: keyof BookingForm;
-  message: string;
+/** 预订资格：闸门的三个输入，由三个独立接口并行取回 */
+export interface BookingEligibility {
+  /** 当前账号是否有预订权限 */
+  canBook: boolean;
+  /** 所选航线是否在可售范围 */
+  routeOpen: boolean;
+  /** 余位是否充足 */
+  seatsAvailable: boolean;
 }
 
 /** 退改规则的类型标识，服务端下发；前端据此索引到本地规则定义 */
@@ -65,12 +59,13 @@ export enum FareBlockReason {
   SoldOut = "soldOut",
 }
 
-/** 预订资格：闸门的三个输入，由三个独立接口并行取回 */
-export interface BookingEligibility {
-  /** 当前账号是否有预订权限 */
-  canBook: boolean;
-  /** 所选航线是否在可售范围 */
-  routeOpen: boolean;
-  /** 余位是否充足 */
-  seatsAvailable: boolean;
+export interface BookingForm {
+  passengerName: string;
+  idNumber: string;
+  contactPhone: string;
+}
+
+export interface BookingFieldError {
+  field: keyof BookingForm;
+  message: string;
 }

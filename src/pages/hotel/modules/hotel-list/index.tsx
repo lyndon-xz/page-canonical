@@ -1,6 +1,8 @@
 import { Alert, Button, Checkbox, Empty, Spin } from "antd";
 import { useRef } from "react";
 
+import { FetchStatus } from "@/lib/fetch-status";
+
 import { useRegisterLive } from "../../live";
 
 import { hotelListActions } from "./actions";
@@ -14,33 +16,28 @@ import styles from "./index.module.scss";
 export default function HotelList() {
   const {
     hotels,
-    isLoading,
-    error,
+    hotelsStatus,
     selectedHotelId,
     hasMore,
-    isLoadingMore,
-    loadMoreError,
+    loadMoreStatus,
     favoriteIds,
-    favoriteError,
     selectedHotelIds,
     isBatchFavoriting,
     batchFailureNames,
     isAllLoadedSelected,
   } = useHotelListModel();
 
-  // 经 liveStore 交给 search-filter 滚动定位，避免两模块互相 import
+  // 经页面 live 表交给 search-filter 滚动定位，避免两模块互相 import
   const listRef = useRef<HTMLElement>(null);
   useRegisterLive("hotelListRef", listRef);
 
   // 三个分支共用一处判定：哨兵渲染条件与观察器挂载条件必须同一个表达式，
   // 各写一遍就会出现「哨兵在 DOM 里但没人观察」的哑火
   const showSentinel =
-    !isLoading &&
-    !error &&
+    hotelsStatus === FetchStatus.Ready &&
+    loadMoreStatus === FetchStatus.Ready &&
     hotels.length > 0 &&
-    hasMore &&
-    !isLoadingMore &&
-    !loadMoreError;
+    hasMore;
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   useHotelListEffects(sentinelRef, showSentinel);
@@ -68,24 +65,14 @@ export default function HotelList() {
         <SortBar />
       </header>
 
-      {favoriteError && (
-        <Alert
-          type="warning"
-          showIcon
-          closable
-          className={styles.favoriteAlert}
-          message={favoriteError.message}
-          onClose={hotelListActions.dismissFavoriteError}
-        />
-      )}
-
-      {/* 点名失败项，而不是只说「部分失败」——用户需要知道该重试哪几家 */}
+      {/* 点名失败项，而不是只说「部分失败」——用户需要知道该重试哪几家。
+          单项收藏失败走 toast，批量的结果是一份清单，得留在页面上供逐项核对 */}
       {batchFailureNames.length > 0 && (
         <Alert
           type="warning"
           showIcon
           closable
-          className={styles.favoriteAlert}
+          className={styles.batchAlert}
           message={`${batchFailureNames.length} 家收藏失败，已保留勾选可重试`}
           description={batchFailureNames.join("；")}
           onClose={hotelListActions.dismissBatchFavoriteFailures}
@@ -111,11 +98,11 @@ export default function HotelList() {
         </div>
       )}
 
-      {isLoading ? (
+      {hotelsStatus === FetchStatus.Loading ? (
         <div className={styles.stateBox}>
           <Spin />
         </div>
-      ) : error ? (
+      ) : hotelsStatus === FetchStatus.Error ? (
         <div className={styles.stateBox}>
           <p className={styles.errorText}>酒店列表加载失败</p>
           <Button size="small" onClick={hotelListActions.retry}>
@@ -140,14 +127,14 @@ export default function HotelList() {
             ))}
           </div>
 
-          {loadMoreError ? (
+          {loadMoreStatus === FetchStatus.Error ? (
             <div className={styles.loadMoreBox}>
               <span className={styles.errorText}>下一页加载失败</span>
               <Button size="small" onClick={hotelListActions.loadMore}>
                 重试
               </Button>
             </div>
-          ) : isLoadingMore ? (
+          ) : loadMoreStatus === FetchStatus.Loading ? (
             <div className={styles.loadMoreBox}>
               <Spin size="small" />
             </div>

@@ -33,7 +33,8 @@ export const listingListActions = {
     void pageActions.addFavorite(id);
   },
 
-  dismissFavoriteError() {
-    pageActions.dismissFavoriteError();
+  // 重试属页面级取数，转交页面 action
+  retry() {
+    pageActions.retryListings();
   },
 };

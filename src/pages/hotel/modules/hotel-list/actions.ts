@@ -25,10 +25,6 @@ export const hotelListActions = {
     void pageActions.toggleFavorite(id);
   },
 
-  dismissFavoriteError() {
-    pageActions.dismissFavoriteError();
-  },
-
   toggleSelect(id: string) {
     pageActions.toggleSelect(id);
   },

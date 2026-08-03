@@ -5,9 +5,9 @@ import type { InquiryForm } from "../../shared/types";
 import { selectPageState, useAppSelector } from "../../store";
 
 const selectInquirySubmitState = createSelector(selectPageState, (page) => {
-  const { isSubmittingInquiry, inquiryError, inquirySubmitted } = page;
+  const { isSubmittingInquiry, inquirySubmitted } = page;
 
-  return { isSubmittingInquiry, inquiryError, inquirySubmitted };
+  return { isSubmittingInquiry, inquirySubmitted };
 });
 
 export function useInquirySubmitModel() {

@@ -1,3 +1,7 @@
+import { message } from "antd";
+
+import { FetchStatus } from "@/lib/fetch-status";
+
 import {
   batchFavoriteHotels,
   fetchHotelPage,
@@ -51,22 +55,20 @@ export const pageActions = {
   async loadHotels(searchParams: SearchParams) {
     const {
       setAppliedParams,
-      setIsLoadingHotels,
-      setHotelsError,
+      setHotelsStatus,
       setHotels,
       setHotelsTotal,
       setLoadedPage,
       setHasMore,
-      setLoadMoreError,
+      setLoadMoreStatus,
       setSelectedHotelId,
       setSelectedHotelIds,
       setBatchFavoriteFailures,
     } = usePageStore.getState();
 
     setAppliedParams(searchParams);
-    setIsLoadingHotels(true);
-    setHotelsError(null);
-    setLoadMoreError(null);
+    setHotelsStatus(FetchStatus.Loading);
+    setLoadMoreStatus(FetchStatus.Ready);
 
     /*
      * 请求发出前先把上一轮结果作废。
@@ -89,11 +91,10 @@ export const pageActions = {
       setHotelsTotal(total);
       setLoadedPage(1);
       setHasMore(hasMore);
-    } catch (err) {
-      // 结果态已在请求前清空，这里只记错误
-      setHotelsError(err instanceof Error ? err : new Error(String(err)));
-    } finally {
-      setIsLoadingHotels(false);
+      setHotelsStatus(FetchStatus.Ready);
+    } catch {
+      // 结果态已在请求前清空，这里只翻状态
+      setHotelsStatus(FetchStatus.Error);
     }
   },
 
@@ -104,25 +105,27 @@ export const pageActions = {
   async loadMoreHotels() {
     const {
       hasMore,
-      isLoadingMore,
-      isLoadingHotels,
+      loadMoreStatus,
+      hotelsStatus,
       loadedPage,
       appliedParams,
-      setIsLoadingMore,
-      setLoadMoreError,
+      setLoadMoreStatus,
       appendHotels,
       setHotelsTotal,
       setLoadedPage,
       setHasMore,
     } = usePageStore.getState();
 
-    if (!hasMore || isLoadingMore || isLoadingHotels) {
+    if (
+      !hasMore ||
+      loadMoreStatus === FetchStatus.Loading ||
+      hotelsStatus === FetchStatus.Loading
+    ) {
       return;
     }
 
     const nextPage = loadedPage + 1;
-    setIsLoadingMore(true);
-    setLoadMoreError(null);
+    setLoadMoreStatus(FetchStatus.Loading);
     try {
       const {
         items,
@@ -135,11 +138,10 @@ export const pageActions = {
       setHotelsTotal(total);
       setLoadedPage(nextPage);
       setHasMore(nextHasMore);
-    } catch (err) {
+      setLoadMoreStatus(FetchStatus.Ready);
+    } catch {
       // 保留 hasMore：失败不代表没有下一页，用户可以原地重试
-      setLoadMoreError(err instanceof Error ? err : new Error(String(err)));
-    } finally {
-      setIsLoadingMore(false);
+      setLoadMoreStatus(FetchStatus.Error);
     }
   },
 
@@ -186,8 +188,7 @@ export const pageActions = {
    * 回滚用请求前的快照而非「再取反一次」——并发点击下取反会把状态推到错的一边。
    */
   async toggleFavorite(hotelId: string) {
-    const { favoriteIds, setFavoriteIds, setFavoriteError } =
-      usePageStore.getState();
+    const { favoriteIds, setFavoriteIds } = usePageStore.getState();
 
     const snapshot = favoriteIds;
     const nextIds = favoriteIds.includes(hotelId)
@@ -195,17 +196,13 @@ export const pageActions = {
       : [...favoriteIds, hotelId];
 
     setFavoriteIds(nextIds);
-    setFavoriteError(null);
     try {
       await toggleHotelFavorite(hotelId);
     } catch (err) {
       setFavoriteIds(snapshot);
-      setFavoriteError(err instanceof Error ? err : new Error(String(err)));
+      // 回滚已经把星标弹回去了，但那只是「没生效」，用户还需要知道为什么
+      message.error(err instanceof Error ? err.message : String(err));
     }
-  },
-
-  dismissFavoriteError() {
-    usePageStore.getState().setFavoriteError(null);
   },
 
   toggleSelect(hotelId: string) {

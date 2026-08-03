@@ -19,7 +19,6 @@ export function useBookingFormModel() {
     isBookingAllowed,
     selectedFlight,
     isSubmittingBooking,
-    bookingError,
     bookingSubmitted,
   } = PageStore.useContainer();
 
@@ -29,7 +28,6 @@ export function useBookingFormModel() {
     isVisible: isBookingAllowed,
     selectedFlight,
     isSubmitting: isSubmittingBooking,
-    submitError: bookingError,
     submitted: bookingSubmitted,
   };
 }

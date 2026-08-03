@@ -1,3 +1,5 @@
+import { message } from "antd";
+
 import { usePageActions } from "../../actions";
 import { BookingSubmitError } from "../../data/services";
 import { getLive } from "../../live";
@@ -12,13 +14,17 @@ export function useBookingFormActions() {
       await submitBooking(values);
       getLive("bookingForm")?.reset();
     } catch (error) {
-      const form = getLive("bookingForm");
-
+      // 字段级错误落到对应输入框，不再弹 toast——同一件事说两遍
       if (error instanceof BookingSubmitError) {
+        const form = getLive("bookingForm");
+
         error.fieldErrors.forEach((fieldError) => {
           form?.setError(fieldError.field, { message: fieldError.message });
         });
+        return;
       }
+
+      message.error(error instanceof Error ? error.message : String(error));
     }
   };
 

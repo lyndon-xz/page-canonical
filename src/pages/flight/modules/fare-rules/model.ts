@@ -52,8 +52,7 @@ function useFareRulesModelHook() {
   const {
     fareRules,
     fareBlockReasons,
-    isLoadingFareRules,
-    fareRulesError,
+    fareRulesStatus,
     isBookingAllowed,
     selectedFlight,
   } = PageStore.useContainer();
@@ -125,8 +124,7 @@ function useFareRulesModelHook() {
     // 闸门不通过、或还没选航班时整个模块不渲染
     isVisible: isBookingAllowed && !!selectedFlight,
     selectedFlight,
-    isLoading: isLoadingFareRules,
-    error: fareRulesError,
+    fareRulesStatus,
     activeCategory,
     setActiveCategory,
     expandedRuleTypes,

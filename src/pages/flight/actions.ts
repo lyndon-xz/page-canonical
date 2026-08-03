@@ -1,5 +1,7 @@
 import { useCallback, useRef } from "react";
 
+import { FetchStatus } from "@/lib/fetch-status";
+
 import {
   fetchBookingEligibility,
   fetchFareBlockReasons,
@@ -15,18 +17,16 @@ import { PageStore } from "./store";
 export function usePageActions() {
   const {
     setFlights,
-    setIsLoadingFlights,
-    setFlightsError,
+    setFlightsStatus,
+    appliedFilters,
+    setAppliedFilters,
     selectedFlightId,
     setSelectedFlightId,
     setEligibility,
-    setIsLoadingEligibility,
     setFareRules,
-    setIsLoadingFareRules,
-    setFareRulesError,
+    setFareRulesStatus,
     setFareBlockReasons,
     setIsSubmittingBooking,
-    setBookingError,
     setBookingSubmitted,
   } = PageStore.useContainer();
 
@@ -42,8 +42,8 @@ export function usePageActions() {
   // 被 initPage 依赖、并间接被 usePageEffects 的 useEffect 依赖，需要稳定引用
   const loadFlights = useCallback(
     async (filters: FlightFilters) => {
-      setIsLoadingFlights(true);
-      setFlightsError(null);
+      setAppliedFilters(filters);
+      setFlightsStatus(FetchStatus.Loading);
 
       /*
        * 请求发出前先把上一轮结果作废，否则 loading 期间「找到 N 个航班」报的是上一次的数字，
@@ -56,24 +56,23 @@ export function usePageActions() {
       setSelectedFlightId(null);
       setFareRules([]);
       setFareBlockReasons([]);
-      setFareRulesError(null);
+      setFareRulesStatus(FetchStatus.Ready);
 
       try {
         const flights = await fetchFlights(filters);
         setFlights(flights);
-      } catch (err) {
-        setFlightsError(err instanceof Error ? err : new Error(String(err)));
-      } finally {
-        setIsLoadingFlights(false);
+        setFlightsStatus(FetchStatus.Ready);
+      } catch {
+        setFlightsStatus(FetchStatus.Error);
       }
     },
     [
+      setAppliedFilters,
       setFareBlockReasons,
       setFareRules,
-      setFareRulesError,
+      setFareRulesStatus,
       setFlights,
-      setFlightsError,
-      setIsLoadingFlights,
+      setFlightsStatus,
       setSelectedFlightId,
     ],
   );
@@ -84,7 +83,6 @@ export function usePageActions() {
    */
   const initPage = useCallback(
     async (filters: FlightFilters) => {
-      setIsLoadingEligibility(true);
       try {
         const eligibility = await fetchBookingEligibility();
         setEligibility(eligibility);
@@ -95,12 +93,11 @@ export function usePageActions() {
 
         await loadFlights(filters);
       } catch {
+        // 重进页面或重试时要清掉上一次的资格，否则闸门会沿用已失效的结论
         setEligibility(null);
-      } finally {
-        setIsLoadingEligibility(false);
       }
     },
-    [loadFlights, setEligibility, setIsLoadingEligibility],
+    [loadFlights, setEligibility],
   );
 
   const applyFilters = (filters: FlightFilters) => {
@@ -114,35 +111,37 @@ export function usePageActions() {
     );
   };
 
+  /** 供错误态的重试入口调用：沿用已生效的筛选条件，不必让用户重走一遍 URL */
+  const retryFlights = () => {
+    void loadFlights(appliedFilters);
+  };
+
   /** 规则与阻断原因来自两个接口、互不依赖，并行取回后一起落库 */
   const loadFareRules = async (flightId: string) => {
     const requestId = (latestFareRulesRequestIdRef.current += 1);
+    // 过期请求连状态都不该动，否则会把仍在飞的那次请求的 loading 提前收掉
+    const isCurrent = () => requestId === latestFareRulesRequestIdRef.current;
 
-    setIsLoadingFareRules(true);
-    setFareRulesError(null);
+    setFareRulesStatus(FetchStatus.Loading);
     try {
       const [rules, blockReasons] = await Promise.all([
         fetchFareRules(flightId),
         fetchFareBlockReasons(flightId),
       ]);
 
-      if (requestId !== latestFareRulesRequestIdRef.current) {
+      if (!isCurrent()) {
         return;
       }
 
       setFareRules(rules);
       setFareBlockReasons(blockReasons);
-    } catch (err) {
-      if (requestId !== latestFareRulesRequestIdRef.current) {
+      setFareRulesStatus(FetchStatus.Ready);
+    } catch {
+      if (!isCurrent()) {
         return;
       }
 
-      setFareRulesError(err instanceof Error ? err : new Error(String(err)));
-    } finally {
-      // loading 只由最新请求关闭，否则过期请求会提前收掉进行中请求的 loading
-      if (requestId === latestFareRulesRequestIdRef.current) {
-        setIsLoadingFareRules(false);
-      }
+      setFareRulesStatus(FetchStatus.Error);
     }
   };
 
@@ -161,17 +160,13 @@ export function usePageActions() {
     void loadFareRules(selectedFlightId);
   };
 
-  // 记下 error 后仍要 rethrow：调用方 action 需要拿到原错误把字段级错误回填到表单
+  // 不接错误，只保证 loading 收尾：字段级错误要回填到表单，得由调用方拿到原错误分流
   const submitBooking = async (values: BookingForm) => {
     setIsSubmittingBooking(true);
-    setBookingError(null);
     setBookingSubmitted(false);
     try {
       await submitBookingService(values);
       setBookingSubmitted(true);
-    } catch (err) {
-      setBookingError(err instanceof Error ? err : new Error(String(err)));
-      throw err;
     } finally {
       setIsSubmittingBooking(false);
     }
@@ -181,6 +176,7 @@ export function usePageActions() {
     loadFlights,
     initPage,
     applyFilters,
+    retryFlights,
     loadFareRules,
     selectFlight,
     retryFareRules,

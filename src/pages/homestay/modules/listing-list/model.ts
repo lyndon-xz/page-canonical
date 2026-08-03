@@ -15,16 +15,14 @@ const selectListingListModel = createSelector(
   selectListings,
   selectListingsCount,
   (page, listings, listingsCount) => {
-    const { isLoadingListings, selectedListingId, favoriteIds, favoriteError } =
-      page;
+    const { listingsStatus, selectedListingId, favoriteIds } = page;
 
     return {
       listings,
       listingsCount,
-      isLoadingListings,
+      listingsStatus,
       selectedListingId,
       favoriteIds,
-      favoriteError,
     };
   },
 );

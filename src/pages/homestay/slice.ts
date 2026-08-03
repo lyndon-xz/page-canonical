@@ -5,6 +5,8 @@ import {
   type PayloadAction,
 } from "@reduxjs/toolkit";
 
+import { FetchStatus } from "@/lib/fetch-status";
+
 import type {
   ConfirmScene,
   Listing,
@@ -27,26 +29,27 @@ const DEFAULT_FILTERS: ListingFilters = { keyword: "", roomType: "" };
 export const listingsAdapter = createEntityAdapter<Listing>();
 
 /*
- * 错误一律存消息字符串而非 Error 实例：RTK 的 serializableCheck 会拦下不可序列化的值，
- * 且 store 快照要能进 devtools / persist。Error 的堆栈属于上报关心的东西，不是 UI 状态。
+ * 取数状态一律用 FetchStatus，操作类失败一律走 toast，故本 slice 不存任何错误消息：
+ * 存下来的字符串没有渲染它的地方，只会变成要人清理的死值。
  */
 interface HomestayPageState {
   listings: EntityState<Listing, string>;
-  isLoadingListings: boolean;
-  listingsError: string | null;
+  listingsStatus: FetchStatus;
   selectedListingId: string | null;
   appliedFilters: ListingFilters;
 
   /*
-   * 详情抽屉的开关放页面层：触发方是 listing-list（卡片上的入口），
-   * 消费方是 listing-detail。跨模块的开关落在任一模块的 slice 里，另一方就得反向 import。
+   * 详情整组放页面层：触发方是 listing-list（卡片上的入口），消费方是 listing-detail。
+   * 跨模块的开关落在任一模块的 slice 里，另一方就得反向 import。
    * 抽屉内部的提交 loading 反过来归各自模块 slice——那是「谁执行」的状态。
    */
-  isDetailDrawerOpen: boolean;
-  detailListingId: string | null;
   listingDetail: ListingDetail | null;
-  isLoadingDetail: boolean;
-  detailError: string | null;
+  detailStatus: FetchStatus;
+  detailListingId: string | null;
+  isDetailDrawerOpen: boolean;
+
+  /** 收藏态：列表卡片与详情抽屉都要读，故放页面层 */
+  favoriteIds: string[];
 
   /*
    * 确认弹窗的场景放页面层，理由同上：列表卡片与详情抽屉都能触发同一个弹窗。
@@ -54,36 +57,26 @@ interface HomestayPageState {
    */
   confirmScene: ConfirmScene | null;
 
-  /** 收藏态：列表卡片与详情抽屉都要读，故放页面层 */
-  favoriteIds: string[];
-  /** 直接收藏（无二次确认那条路径）的失败提示；取消收藏的失败留在确认弹窗内 */
-  favoriteError: string | null;
-
   isSubmittingInquiry: boolean;
-  inquiryError: string | null;
   inquirySubmitted: boolean;
 }
 
 const initialState: HomestayPageState = {
   listings: listingsAdapter.getInitialState(),
-  isLoadingListings: false,
-  listingsError: null,
+  listingsStatus: FetchStatus.Ready,
   selectedListingId: null,
   appliedFilters: DEFAULT_FILTERS,
 
-  isDetailDrawerOpen: false,
-  detailListingId: null,
   listingDetail: null,
-  isLoadingDetail: false,
-  detailError: null,
+  detailStatus: FetchStatus.Ready,
+  detailListingId: null,
+  isDetailDrawerOpen: false,
+
+  favoriteIds: [],
 
   confirmScene: null,
 
-  favoriteIds: [],
-  favoriteError: null,
-
   isSubmittingInquiry: false,
-  inquiryError: null,
   inquirySubmitted: false,
 };
 
@@ -94,11 +87,8 @@ const homestayPageSlice = createSlice({
     setListings(state, action: PayloadAction<Listing[]>) {
       listingsAdapter.setAll(state.listings, action.payload);
     },
-    setIsLoadingListings(state, action: PayloadAction<boolean>) {
-      state.isLoadingListings = action.payload;
-    },
-    setListingsError(state, action: PayloadAction<string | null>) {
-      state.listingsError = action.payload;
+    setListingsStatus(state, action: PayloadAction<FetchStatus>) {
+      state.listingsStatus = action.payload;
     },
     setSelectedListingId(state, action: PayloadAction<string | null>) {
       state.selectedListingId = action.payload;
@@ -106,20 +96,17 @@ const homestayPageSlice = createSlice({
     setAppliedFilters(state, action: PayloadAction<ListingFilters>) {
       state.appliedFilters = action.payload;
     },
-    setIsDetailDrawerOpen(state, action: PayloadAction<boolean>) {
-      state.isDetailDrawerOpen = action.payload;
+    setListingDetail(state, action: PayloadAction<ListingDetail | null>) {
+      state.listingDetail = action.payload;
+    },
+    setDetailStatus(state, action: PayloadAction<FetchStatus>) {
+      state.detailStatus = action.payload;
     },
     setDetailListingId(state, action: PayloadAction<string | null>) {
       state.detailListingId = action.payload;
     },
-    setListingDetail(state, action: PayloadAction<ListingDetail | null>) {
-      state.listingDetail = action.payload;
-    },
-    setIsLoadingDetail(state, action: PayloadAction<boolean>) {
-      state.isLoadingDetail = action.payload;
-    },
-    setDetailError(state, action: PayloadAction<string | null>) {
-      state.detailError = action.payload;
+    setIsDetailDrawerOpen(state, action: PayloadAction<boolean>) {
+      state.isDetailDrawerOpen = action.payload;
     },
 
     /**
@@ -130,27 +117,20 @@ const homestayPageSlice = createSlice({
      * 开关却仍是 true；又因 store 是页面级单例不随卸载重置，下次点开任意房源抽屉就会自动弹出。
      */
     clearDetailContext(state) {
-      state.detailListingId = null;
       state.listingDetail = null;
+      state.detailStatus = FetchStatus.Ready;
+      state.detailListingId = null;
       state.isDetailDrawerOpen = false;
-      state.isLoadingDetail = false;
-      state.detailError = null;
     },
 
-    setConfirmScene(state, action: PayloadAction<ConfirmScene | null>) {
-      state.confirmScene = action.payload;
-    },
     setFavoriteIds(state, action: PayloadAction<string[]>) {
       state.favoriteIds = action.payload;
     },
-    setFavoriteError(state, action: PayloadAction<string | null>) {
-      state.favoriteError = action.payload;
+    setConfirmScene(state, action: PayloadAction<ConfirmScene | null>) {
+      state.confirmScene = action.payload;
     },
     setIsSubmittingInquiry(state, action: PayloadAction<boolean>) {
       state.isSubmittingInquiry = action.payload;
-    },
-    setInquiryError(state, action: PayloadAction<string | null>) {
-      state.inquiryError = action.payload;
     },
     setInquirySubmitted(state, action: PayloadAction<boolean>) {
       state.inquirySubmitted = action.payload;
@@ -160,21 +140,17 @@ const homestayPageSlice = createSlice({
 
 export const {
   setListings,
-  setIsLoadingListings,
-  setListingsError,
+  setListingsStatus,
   setSelectedListingId,
   setAppliedFilters,
-  setIsDetailDrawerOpen,
-  setDetailListingId,
   setListingDetail,
-  setIsLoadingDetail,
-  setDetailError,
+  setDetailStatus,
+  setDetailListingId,
+  setIsDetailDrawerOpen,
   clearDetailContext,
-  setConfirmScene,
   setFavoriteIds,
-  setFavoriteError,
+  setConfirmScene,
   setIsSubmittingInquiry,
-  setInquiryError,
   setInquirySubmitted,
 } = homestayPageSlice.actions;
 

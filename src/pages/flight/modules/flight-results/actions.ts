@@ -5,7 +5,7 @@ import { FlightResultsModel } from "./model";
 
 export function useFlightResultsActions() {
   const { setSortBy } = FlightResultsModel.useContainer();
-  const { selectFlight: selectFlightOnPage } = usePageActions();
+  const { selectFlight: selectFlightOnPage, retryFlights } = usePageActions();
 
   const changeSortBy = (sortBy: SortBy) => {
     setSortBy(sortBy);
@@ -16,5 +16,10 @@ export function useFlightResultsActions() {
     void selectFlightOnPage(id);
   };
 
-  return { changeSortBy, selectFlight };
+  // 重试属页面级取数，转交页面 action
+  const retry = () => {
+    retryFlights();
+  };
+
+  return { changeSortBy, selectFlight, retry };
 }

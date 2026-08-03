@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+import { FetchStatus } from "@/lib/fetch-status";
+
 import type { BatchFavoriteFailure, Hotel, SearchParams } from "./shared/types";
 
 const DEFAULT_PARAMS: SearchParams = {
@@ -19,27 +21,22 @@ interface PersistedPageState {
 
 interface PageStore {
   hotels: Hotel[];
-  isLoadingHotels: boolean;
-  hotelsError: Error | null;
-  selectedHotelId: string | null;
-  appliedParams: SearchParams;
-
   /**
    * 匹配筛选条件的总条数，由服务端给出。
    * 与 hotels.length（已加载条数）是两回事：后者随分页累加，不能用来显示「找到 N 家」。
    */
   hotelsTotal: number;
+  hotelsStatus: FetchStatus;
+  selectedHotelId: string | null;
+  appliedParams: SearchParams;
 
   /** 已加载到第几页；下一页取 loadedPage + 1 */
   loadedPage: number;
   hasMore: boolean;
-  /** 与 isLoadingHotels 分开：首屏要盖住整个列表，加载更多只在列表末尾转圈 */
-  isLoadingMore: boolean;
-  loadMoreError: Error | null;
+  /** 与 hotelsStatus 分开：首屏要盖住整个列表，加载更多只在列表末尾转圈 */
+  loadMoreStatus: FetchStatus;
 
   favoriteIds: string[];
-  /** 乐观更新失败后的提示；成功路径下始终为 null */
-  favoriteError: Error | null;
 
   /** 多选集合，批量操作的作用域；与单选的 selectedHotelId 各管一件事 */
   selectedHotelIds: string[];
@@ -49,17 +46,14 @@ interface PageStore {
 
   setHotels: (hotels: Hotel[]) => void;
   appendHotels: (hotels: Hotel[]) => void;
-  setIsLoadingHotels: (loading: boolean) => void;
-  setHotelsError: (error: Error | null) => void;
+  setHotelsTotal: (total: number) => void;
+  setHotelsStatus: (status: FetchStatus) => void;
   setSelectedHotelId: (id: string | null) => void;
   setAppliedParams: (searchParams: SearchParams) => void;
-  setHotelsTotal: (total: number) => void;
   setLoadedPage: (page: number) => void;
   setHasMore: (hasMore: boolean) => void;
-  setIsLoadingMore: (loading: boolean) => void;
-  setLoadMoreError: (error: Error | null) => void;
+  setLoadMoreStatus: (status: FetchStatus) => void;
   setFavoriteIds: (ids: string[]) => void;
-  setFavoriteError: (error: Error | null) => void;
   setSelectedHotelIds: (ids: string[]) => void;
   setIsBatchFavoriting: (batchFavoriting: boolean) => void;
   setBatchFavoriteFailures: (failures: BatchFavoriteFailure[]) => void;
@@ -69,19 +63,16 @@ export const usePageStore = create<PageStore>()(
   persist<PageStore, [], [], PersistedPageState>(
     (set) => ({
       hotels: [],
-      isLoadingHotels: false,
-      hotelsError: null,
+      hotelsTotal: 0,
+      hotelsStatus: FetchStatus.Ready,
       selectedHotelId: null,
       appliedParams: DEFAULT_PARAMS,
 
-      hotelsTotal: 0,
       loadedPage: 0,
       hasMore: false,
-      isLoadingMore: false,
-      loadMoreError: null,
+      loadMoreStatus: FetchStatus.Ready,
 
       favoriteIds: [],
-      favoriteError: null,
 
       selectedHotelIds: [],
       isBatchFavoriting: false,
@@ -90,17 +81,14 @@ export const usePageStore = create<PageStore>()(
       setHotels: (hotels) => set({ hotels }),
       appendHotels: (hotels) =>
         set((state) => ({ hotels: [...state.hotels, ...hotels] })),
-      setIsLoadingHotels: (loading) => set({ isLoadingHotels: loading }),
-      setHotelsError: (error) => set({ hotelsError: error }),
+      setHotelsTotal: (total) => set({ hotelsTotal: total }),
+      setHotelsStatus: (status) => set({ hotelsStatus: status }),
       setSelectedHotelId: (id) => set({ selectedHotelId: id }),
       setAppliedParams: (searchParams) => set({ appliedParams: searchParams }),
-      setHotelsTotal: (total) => set({ hotelsTotal: total }),
       setLoadedPage: (page) => set({ loadedPage: page }),
       setHasMore: (hasMore) => set({ hasMore }),
-      setIsLoadingMore: (loading) => set({ isLoadingMore: loading }),
-      setLoadMoreError: (error) => set({ loadMoreError: error }),
+      setLoadMoreStatus: (status) => set({ loadMoreStatus: status }),
       setFavoriteIds: (ids) => set({ favoriteIds: ids }),
-      setFavoriteError: (error) => set({ favoriteError: error }),
       setSelectedHotelIds: (ids) => set({ selectedHotelIds: ids }),
       setIsBatchFavoriting: (batchFavoriting) =>
         set({ isBatchFavoriting: batchFavoriting }),
@@ -113,8 +101,9 @@ export const usePageStore = create<PageStore>()(
        * 白名单：只落盘用户的长期偏好，其余一概不存。
        *
        * 默认整棵 state 落盘会连瞬时态与服务端快照一起存：
-       * isLoading* 存下来后重进页面会永久转圈，hotels 存下来是一份会过期的旧数据，
-       * selectedHotelIds 与 error 是一次性的操作意图与结果，都不该跨会话活着。
+       * 取数状态存下来后重进页面会停在上一次的 loading 或错误占位上，
+       * hotels 存下来是一份会过期的旧数据，selectedHotelIds 与批量失败清单
+       * 是一次性的操作意图与结果，都不该跨会话活着。
        */
       partialize: (state) => ({
         appliedParams: state.appliedParams,

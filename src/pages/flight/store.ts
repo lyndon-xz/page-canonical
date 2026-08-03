@@ -1,35 +1,49 @@
 import { useMemo, useState } from "react";
 import { createContainer } from "unstated-next";
 
+import { FetchStatus } from "@/lib/fetch-status";
+
 import { isBookingAllowed } from "./shared/gate";
 import type {
   BookingEligibility,
   FareBlockReason,
   FareRule,
   Flight,
+  FlightFilters,
 } from "./shared/types";
+
+const DEFAULT_FILTERS: FlightFilters = { cabin: "" };
 
 function usePageStoreHook() {
   const [flights, setFlights] = useState<Flight[]>([]);
-  const [isLoadingFlights, setIsLoadingFlights] = useState(false);
-  const [flightsError, setFlightsError] = useState<Error | null>(null);
+  const [flightsStatus, setFlightsStatus] = useState<FetchStatus>(
+    FetchStatus.Ready,
+  );
   const [selectedFlightId, setSelectedFlightId] = useState<string | null>(null);
 
-  /** 为空表示资格尚未取回；闸门此时按不通过处理 */
+  /** 已生效的筛选条件，即当前这份结果集是按什么条件取回的；编辑中的草稿在 search-bar */
+  const [appliedFilters, setAppliedFilters] =
+    useState<FlightFilters>(DEFAULT_FILTERS);
+
+  /**
+   * 为空表示资格尚未取回或取回失败；闸门此时一律按不通过处理。
+   *
+   * 没有配套的 loading 与 error：闸门期间受它管的两个模块本就不渲染，
+   * 「校验中」与「不通过」在界面上是同一种表现，多存的状态没有读者。
+   */
   const [eligibility, setEligibility] = useState<BookingEligibility | null>(
     null,
   );
-  const [isLoadingEligibility, setIsLoadingEligibility] = useState(false);
 
   const [fareRules, setFareRules] = useState<FareRule[]>([]);
-  const [isLoadingFareRules, setIsLoadingFareRules] = useState(false);
-  const [fareRulesError, setFareRulesError] = useState<Error | null>(null);
   const [fareBlockReasons, setFareBlockReasons] = useState<FareBlockReason[]>(
     [],
   );
+  const [fareRulesStatus, setFareRulesStatus] = useState<FetchStatus>(
+    FetchStatus.Ready,
+  );
 
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
-  const [bookingError, setBookingError] = useState<Error | null>(null);
   const [bookingSubmitted, setBookingSubmitted] = useState(false);
 
   /**
@@ -50,31 +64,25 @@ function usePageStoreHook() {
   return {
     flights,
     setFlights,
-    isLoadingFlights,
-    setIsLoadingFlights,
-    flightsError,
-    setFlightsError,
+    flightsStatus,
+    setFlightsStatus,
+    appliedFilters,
+    setAppliedFilters,
     selectedFlightId,
     setSelectedFlightId,
 
     eligibility,
     setEligibility,
-    isLoadingEligibility,
-    setIsLoadingEligibility,
 
     fareRules,
     setFareRules,
-    isLoadingFareRules,
-    setIsLoadingFareRules,
-    fareRulesError,
-    setFareRulesError,
     fareBlockReasons,
     setFareBlockReasons,
+    fareRulesStatus,
+    setFareRulesStatus,
 
     isSubmittingBooking,
     setIsSubmittingBooking,
-    bookingError,
-    setBookingError,
     bookingSubmitted,
     setBookingSubmitted,
 

@@ -15,20 +15,6 @@ export interface ListingFilters {
   roomType: string;
 }
 
-export interface InquiryForm {
-  guestName: string;
-  phone: string;
-  /** 入住日期，格式 YYYY-MM-DD */
-  checkInDate: string;
-  nights: number;
-  message: string;
-}
-
-export interface InquiryFieldError {
-  field: keyof InquiryForm;
-  message: string;
-}
-
 /** 房源详情，比列表项多出描述、设施与退订政策，单独接口按需拉取 */
 export interface ListingDetail {
   listingId: string;
@@ -49,4 +35,18 @@ export interface ListingDetail {
 export enum ConfirmScene {
   RemoveFavorite = "removeFavorite",
   CancelInquiry = "cancelInquiry",
+}
+
+export interface InquiryForm {
+  guestName: string;
+  phone: string;
+  /** 入住日期，格式 YYYY-MM-DD */
+  checkInDate: string;
+  nights: number;
+  message: string;
+}
+
+export interface InquiryFieldError {
+  field: keyof InquiryForm;
+  message: string;
 }

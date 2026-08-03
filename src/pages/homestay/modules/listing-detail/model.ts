@@ -27,9 +27,8 @@ const selectListingDetailModel = createSelector(
   (page, listing) => {
     const {
       listingDetail,
+      detailStatus,
       detailListingId,
-      isLoadingDetail,
-      detailError,
       isDetailDrawerOpen,
       favoriteIds,
     } = page;
@@ -39,8 +38,7 @@ const selectListingDetailModel = createSelector(
       isVisible: !!detailListingId,
       listing,
       detail: listingDetail,
-      isLoading: isLoadingDetail,
-      error: detailError,
+      detailStatus,
       isDrawerOpen: isDetailDrawerOpen,
       isFavorite: !!detailListingId && favoriteIds.includes(detailListingId),
     };

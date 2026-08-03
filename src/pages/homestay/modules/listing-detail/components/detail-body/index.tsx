@@ -1,5 +1,7 @@
 import { Button, Empty, Spin, Tag } from "antd";
 
+import { FetchStatus } from "@/lib/fetch-status";
+
 import { listingDetailActions } from "../../actions";
 import { useListingDetailModel } from "../../model";
 
@@ -17,8 +19,7 @@ interface DetailBodyProps {
 
 export default function DetailBody(props: DetailBodyProps) {
   const { inDrawer = false } = props;
-  const { listing, detail, isLoading, error, isFavorite } =
-    useListingDetailModel();
+  const { listing, detail, detailStatus, isFavorite } = useListingDetailModel();
   const {
     openDetailDrawer,
     retryDetail,
@@ -26,7 +27,7 @@ export default function DetailBody(props: DetailBodyProps) {
     requestCancelInquiry,
   } = listingDetailActions;
 
-  if (isLoading) {
+  if (detailStatus === FetchStatus.Loading) {
     return (
       <div className={styles.stateBox}>
         <Spin />
@@ -34,7 +35,7 @@ export default function DetailBody(props: DetailBodyProps) {
     );
   }
 
-  if (error) {
+  if (detailStatus === FetchStatus.Error) {
     return (
       <div className={styles.stateBox}>
         <p className={styles.errorText}>详情加载失败</p>
