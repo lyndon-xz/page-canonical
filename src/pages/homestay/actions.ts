@@ -11,6 +11,7 @@ import {
   type ListingFilters,
 } from "./shared/types";
 import {
+  clearDetailContext,
   setAppliedFilters,
   setConfirmScene,
   setDetailError,
@@ -33,10 +34,11 @@ import { selectTraceCommonTag, store } from "./store";
 
 /**
  * 详情请求的序号守卫：连续点开不同房源时，先发的请求可能后到，
- * 直接写入会让详情与当前选中的房源不符。每次请求领取自增序号，只有最新序号的响应允许落库。
+ * 直接写入会让详情与当前选中的房源不符。每次请求领取自增序号，过期序号的响应一律丢弃。
  *
  * 不放进 store 是因为它只服务请求编排、UI 从不消费；
  * 用自增序号而非「参数去重」，是为了让重复点开同一房源仍能重新拉取（去重会漏掉重试场景）。
+ * 它只管「谁是最新请求」，「结果还有人要吗」由 loadListingDetail 另行校验。
  */
 let latestDetailRequestId = 0;
 
@@ -73,9 +75,7 @@ export const pageActions = {
      */
     store.dispatch(setListings([]));
     store.dispatch(setSelectedListingId(null));
-    store.dispatch(setDetailListingId(null));
-    store.dispatch(setListingDetail(null));
-    store.dispatch(setDetailError(null));
+    store.dispatch(clearDetailContext());
     store.dispatch(setConfirmScene(null));
     store.dispatch(setFavoriteError(null));
 
@@ -92,22 +92,31 @@ export const pageActions = {
   async loadListingDetail(listingId: string) {
     const requestId = (latestDetailRequestId += 1);
 
+    /*
+     * 本次响应是否还该落库，两个条件缺一不可：
+     * 序号最新排掉被后续请求顶掉的，目标未变排掉详情已被清空或已换房源的。
+     * 少了后者，请求在飞时清空详情（如提交询价成功）仍会把这份详情写回空掉的 store。
+     */
+    const isCurrent = () =>
+      requestId === latestDetailRequestId &&
+      store.getState().page.detailListingId === listingId;
+
     store.dispatch(setIsLoadingDetail(true));
     store.dispatch(setDetailError(null));
     try {
       const detail = await fetchListingDetail(listingId);
-      if (requestId !== latestDetailRequestId) {
+      if (!isCurrent()) {
         return;
       }
       store.dispatch(setListingDetail(detail));
     } catch (err) {
-      if (requestId !== latestDetailRequestId) {
+      if (!isCurrent()) {
         return;
       }
       store.dispatch(setDetailError(toMessage(err)));
     } finally {
-      // loading 只由最新请求关闭，否则过期请求会提前收掉进行中请求的 loading
-      if (requestId === latestDetailRequestId) {
+      // loading 只由仍然作数的请求关闭，否则会提前收掉进行中请求的 loading
+      if (isCurrent()) {
         store.dispatch(setIsLoadingDetail(false));
       }
     }
@@ -181,12 +190,6 @@ export const pageActions = {
     store.dispatch(setFavoriteError(null));
   },
 
-  async cancelInquiry() {
-    await cancelInquiryService();
-    store.dispatch(setInquirySubmitted(false));
-    store.dispatch(setInquiryError(null));
-  },
-
   // 记下 error 后仍要 rethrow：调用方 action 需要拿到原错误把字段级错误回填到表单
   async submitInquiry(values: InquiryForm) {
     store.dispatch(setIsSubmittingInquiry(true));
@@ -201,5 +204,11 @@ export const pageActions = {
     } finally {
       store.dispatch(setIsSubmittingInquiry(false));
     }
+  },
+
+  async cancelInquiry() {
+    await cancelInquiryService();
+    store.dispatch(setInquirySubmitted(false));
+    store.dispatch(setInquiryError(null));
   },
 };

@@ -121,6 +121,22 @@ const homestayPageSlice = createSlice({
     setDetailError(state, action: PayloadAction<string | null>) {
       state.detailError = action.payload;
     },
+
+    /**
+     * 详情上下文整组归零：退出当前房源、或列表结果作废时都走这里。
+     *
+     * 收成一个 reducer 而不在各调用点手写字段清单，是因为 isDetailDrawerOpen 容易被落下：
+     * 抽屉渲染在 detailListingId 的可见性判断之内，只清 id 时抽屉会随模块卸载而看似关闭，
+     * 开关却仍是 true；又因 store 是页面级单例不随卸载重置，下次点开任意房源抽屉就会自动弹出。
+     */
+    clearDetailContext(state) {
+      state.detailListingId = null;
+      state.listingDetail = null;
+      state.isDetailDrawerOpen = false;
+      state.isLoadingDetail = false;
+      state.detailError = null;
+    },
+
     setConfirmScene(state, action: PayloadAction<ConfirmScene | null>) {
       state.confirmScene = action.payload;
     },
@@ -153,6 +169,7 @@ export const {
   setListingDetail,
   setIsLoadingDetail,
   setDetailError,
+  clearDetailContext,
   setConfirmScene,
   setFavoriteIds,
   setFavoriteError,
