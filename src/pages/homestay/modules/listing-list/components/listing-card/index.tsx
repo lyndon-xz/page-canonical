@@ -17,18 +17,15 @@ interface ListingCardProps {
 
 export default function ListingCard(props: ListingCardProps) {
   const { listing, selected } = props;
-  const { hoveredId, favoriteIds } = useListingListModel();
-  const { selectListing, hoverListing, toggleFavorite } = listingListActions;
+  const { favoriteIds } = useListingListModel();
+  const { selectListing, toggleFavorite } = listingListActions;
   const isFavorite = favoriteIds.includes(listing.id);
 
   return (
     <article
       className={styles.card}
       data-selected={selected}
-      data-hovered={hoveredId === listing.id}
       onClick={() => selectListing(listing.id)}
-      onMouseEnter={() => hoverListing(listing.id)}
-      onMouseLeave={() => hoverListing(null)}
     >
       <div className={styles.head}>
         <h3 className={styles.title}>{listing.title}</h3>

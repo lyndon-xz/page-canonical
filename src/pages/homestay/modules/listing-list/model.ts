@@ -5,15 +5,16 @@ import {
   selectListingsCount,
   selectPageState,
   useAppSelector,
-  type RootState,
 } from "../../store";
 
+/*
+ * 本模块没有私有状态：卡片的 hover 反馈由 CSS :hover 承担，不进状态层。
+ */
 const selectListingListModel = createSelector(
   selectPageState,
   selectListings,
   selectListingsCount,
-  (state: RootState) => state.listingList,
-  (page, listings, listingsCount, local) => {
+  (page, listings, listingsCount) => {
     const { isLoadingListings, selectedListingId, favoriteIds, favoriteError } =
       page;
 
@@ -24,7 +25,6 @@ const selectListingListModel = createSelector(
       selectedListingId,
       favoriteIds,
       favoriteError,
-      hoveredId: local.hoveredId,
     };
   },
 );

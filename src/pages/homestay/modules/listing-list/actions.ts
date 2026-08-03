@@ -3,18 +3,12 @@ import { ConfirmScene } from "../../shared/types";
 import { setDetailListingId, setSelectedListingId } from "../../slice";
 import { store } from "../../store";
 
-import { setHoveredId } from "./slice";
-
 export const listingListActions = {
   // 选中即切换详情：详情区跟着卡片走，避免用户还要再点一次「看详情」
   selectListing(id: string) {
     pageActions.trackClick("listing_select", { listingId: id });
     store.dispatch(setSelectedListingId(id));
     void pageActions.viewDetail(id);
-  },
-
-  hoverListing(id: string | null) {
-    store.dispatch(setHoveredId(id));
   },
 
   /**

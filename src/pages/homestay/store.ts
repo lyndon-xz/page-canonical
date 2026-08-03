@@ -7,7 +7,6 @@ import { useSelector } from "react-redux";
 
 import { registerPageListeners, type AppStartListening } from "./listeners";
 import { confirmDialogReducer } from "./modules/confirm-dialog/slice";
-import { listingListReducer } from "./modules/listing-list/slice";
 import type { TraceCommonTag } from "./shared/trace";
 import { homestayPageReducer, listingsAdapter } from "./slice";
 
@@ -16,7 +15,6 @@ const listenerMiddleware = createListenerMiddleware();
 export const store = configureStore({
   reducer: {
     page: homestayPageReducer,
-    listingList: listingListReducer,
     confirmDialog: confirmDialogReducer,
   },
   // 前置：让监听器在其它中间件处理该 action 之前就登记上

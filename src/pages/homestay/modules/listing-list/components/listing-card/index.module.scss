@@ -10,7 +10,7 @@
     box-shadow 0.18s ease,
     border-color 0.18s ease;
 
-  &[data-hovered="true"] {
+  &:hover {
     border-color: #e2d5c4;
     box-shadow: var(--shadow-lift);
     transform: translateY(-3px);
