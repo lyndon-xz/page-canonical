@@ -2,9 +2,9 @@ import { SearchOutlined } from "@ant-design/icons";
 import { Button, Input } from "antd";
 
 import { searchFilterActions } from "./actions";
-import { STAR_OPTIONS } from "./constants";
 import { useSearchFilterEffects } from "./effects";
 import { useSearchFilterModel } from "./model";
+import { STAR_OPTIONS } from "./star";
 
 import styles from "./index.module.scss";
 

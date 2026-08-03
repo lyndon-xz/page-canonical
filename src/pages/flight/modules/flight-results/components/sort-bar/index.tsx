@@ -1,6 +1,6 @@
 import { useFlightResultsActions } from "../../actions";
-import { SORT_OPTIONS } from "../../constants";
 import { FlightResultsModel } from "../../model";
+import { SORT_OPTIONS } from "../../sort";
 
 import styles from "./index.module.scss";
 

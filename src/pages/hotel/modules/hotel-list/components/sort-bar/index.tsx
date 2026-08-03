@@ -1,6 +1,6 @@
-import { SORT_OPTIONS } from "../../constants";
 import { hotelListActions } from "../../actions";
 import { useHotelListModel } from "../../model";
+import { SORT_OPTIONS } from "../../sort";
 
 import styles from "./index.module.scss";
 

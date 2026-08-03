@@ -2,7 +2,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 
 import { useSearchBarActions } from "./actions";
-import { CABIN_OPTIONS } from "./constants";
+import { CABIN_OPTIONS } from "./cabin";
 import { SearchBarModel } from "./model";
 
 import styles from "./index.module.scss";
