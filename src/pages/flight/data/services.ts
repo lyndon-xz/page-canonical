@@ -25,29 +25,19 @@ export class BookingSubmitError extends Error {
   }
 }
 
+/** 闸门的三项资格由同一接口返回；真实场景下常是三个独立接口，由 action 并行取回后合并 */
+export async function fetchBookingEligibility(): Promise<BookingEligibility> {
+  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+
+  return { canBook: true, routeOpen: true, seatsAvailable: true };
+}
+
 export async function fetchFlights(filters: FlightFilters): Promise<Flight[]> {
   await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
 
   return MOCK_FLIGHTS.filter(
     (flight) => filters.cabin === "" || flight.cabin === filters.cabin,
   );
-}
-
-export async function submitBooking(values: BookingForm): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
-
-  if (BLOCKED_ID_NUMBERS.includes(values.idNumber.trim())) {
-    throw new BookingSubmitError([
-      { field: "idNumber", message: "该证件号暂不可用，请核对后重试" },
-    ]);
-  }
-}
-
-/** 闸门的三项资格由同一接口返回；真实场景下常是三个独立接口，由 action 并行取回后合并 */
-export async function fetchBookingEligibility(): Promise<BookingEligibility> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
-
-  return { canBook: true, routeOpen: true, seatsAvailable: true };
 }
 
 export async function fetchFareRules(flightId: string): Promise<FareRule[]> {
@@ -62,4 +52,14 @@ export async function fetchFareBlockReasons(
   await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
 
   return MOCK_FARE_BLOCK_REASONS[flightId] ?? [];
+}
+
+export async function submitBooking(values: BookingForm): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+
+  if (BLOCKED_ID_NUMBERS.includes(values.idNumber.trim())) {
+    throw new BookingSubmitError([
+      { field: "idNumber", message: "该证件号暂不可用，请核对后重试" },
+    ]);
+  }
 }

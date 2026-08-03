@@ -8,12 +8,6 @@ export enum FareRuleCategory {
   Travel = "travel",
 }
 
-interface CategoryConfig {
-  tabLabel: string;
-  /** 分组标题；聚合 Tab 不成组，故为可选 */
-  groupTitle?: string;
-}
-
 /** 分组渲染顺序，不含聚合 Tab */
 export const CATEGORY_GROUP_ORDER = [
   FareRuleCategory.Refund,
@@ -24,6 +18,12 @@ export const CATEGORY_TAB_ORDER = [
   FareRuleCategory.All,
   ...CATEGORY_GROUP_ORDER,
 ] as const;
+
+interface CategoryConfig {
+  tabLabel: string;
+  /** 分组标题；聚合 Tab 不成组，故为可选 */
+  groupTitle?: string;
+}
 
 export const CATEGORY_CONFIG: Record<FareRuleCategory, CategoryConfig> = {
   [FareRuleCategory.All]: {

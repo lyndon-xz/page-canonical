@@ -178,11 +178,11 @@ export function usePageActions() {
   };
 
   return {
-    initPage,
     loadFlights,
+    initPage,
     applyFilters,
-    selectFlight,
     loadFareRules,
+    selectFlight,
     retryFareRules,
     submitBooking,
   };

@@ -44,16 +44,6 @@ export async function fetchListings(
   });
 }
 
-export async function submitInquiry(values: InquiryForm): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
-
-  if (BLOCKED_PHONES.includes(values.phone.trim())) {
-    throw new InquirySubmitError([
-      { field: "phone", message: "该手机号暂不可用，请更换后重试" },
-    ]);
-  }
-}
-
 export async function fetchListingDetail(
   listingId: string,
 ): Promise<ListingDetail | null> {
@@ -67,6 +57,16 @@ export async function toggleFavorite(listingId: string): Promise<void> {
 
   if (FAVORITE_REJECTED_LISTING_IDS.includes(listingId)) {
     throw new Error("收藏服务暂不可用");
+  }
+}
+
+export async function submitInquiry(values: InquiryForm): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+
+  if (BLOCKED_PHONES.includes(values.phone.trim())) {
+    throw new InquirySubmitError([
+      { field: "phone", message: "该手机号暂不可用，请更换后重试" },
+    ]);
   }
 }
 
