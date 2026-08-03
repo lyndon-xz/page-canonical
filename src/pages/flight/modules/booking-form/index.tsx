@@ -1,7 +1,7 @@
 import { Button, Input } from "antd";
 import { Controller } from "react-hook-form";
 
-import { useRegisterLive } from "@/lib/live";
+import { useRegisterLive } from "../../live";
 
 import { useBookingFormActions } from "./actions";
 import { useBookingFormModel } from "./model";

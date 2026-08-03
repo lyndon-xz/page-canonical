@@ -1,7 +1,7 @@
 import { Empty, Spin } from "antd";
 import { useImperativeHandle, useRef } from "react";
 
-import { useRegisterLive } from "@/lib/live";
+import { useRegisterLive } from "../../live";
 
 import FlightCard from "./components/flight-card";
 import SortBar from "./components/sort-bar";

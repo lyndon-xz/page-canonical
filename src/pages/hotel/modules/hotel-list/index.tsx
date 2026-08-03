@@ -1,7 +1,7 @@
 import { Alert, Button, Checkbox, Empty, Spin } from "antd";
 import { useRef } from "react";
 
-import { useRegisterLive } from "@/lib/live";
+import { useRegisterLive } from "../../live";
 
 import { hotelListActions } from "./actions";
 import HotelCard from "./components/hotel-card";

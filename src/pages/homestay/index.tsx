@@ -1,9 +1,8 @@
 import { FormProvider, useForm } from "react-hook-form";
 import { Provider } from "react-redux";
 
-import { useRegisterLive } from "@/lib/live";
-
 import { usePageEffects } from "./effects";
+import { useRegisterLive } from "./live";
 import ConfirmDialog from "./modules/confirm-dialog";
 import InquiryFields from "./modules/inquiry-fields";
 import InquirySubmit from "./modules/inquiry-submit";
