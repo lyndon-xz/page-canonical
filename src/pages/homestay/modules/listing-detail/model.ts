@@ -1,25 +1,19 @@
 import { createSelector } from "@reduxjs/toolkit";
 
 import {
-  selectListingById,
+  selectListings,
   selectPageState,
   useAppSelector,
   type RootState,
 } from "../../store";
 
-/*
- * 详情接口只返回描述类字段，标题价格仍取列表项，避免两处各存一份房源基本信息。
- * 规范化存储下这是一次字典查，不必遍历列表。
- */
-const selectDetailListing = (state: RootState) => {
-  const { detailListingId } = state.page;
-
-  if (!detailListingId) {
-    return null;
-  }
-
-  return selectListingById(state, detailListingId) ?? null;
-};
+/** 详情接口只返回描述类字段，标题价格仍取列表项，避免两处各存一份房源基本信息 */
+const selectDetailListing = createSelector(
+  selectListings,
+  (state: RootState) => state.page.detailListingId,
+  (listings, detailListingId) =>
+    listings.find((listing) => listing.id === detailListingId) ?? null,
+);
 
 const selectListingDetailModel = createSelector(
   selectPageState,
@@ -34,7 +28,6 @@ const selectListingDetailModel = createSelector(
     } = page;
 
     return {
-      // 没选房源时整个模块不渲染：一个只写着「点选卡片切换」的空壳标题没有信息量
       isVisible: !!detailListingId,
       listing,
       detail: listingDetail,

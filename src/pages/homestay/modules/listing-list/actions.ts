@@ -11,11 +11,7 @@ export const listingListActions = {
     void pageActions.viewDetail(id);
   },
 
-  /**
-   * 卡片上的收藏与详情抽屉里的收藏走同一条链路：
-   * 新增即点即改，取消收藏交给二次确认。确认弹窗按 detailListingId 定位房源，
-   * 故这里先把它对齐到当前卡片。
-   */
+  /** 确认弹窗按 detailListingId 定位房源，故取消收藏前先把它对齐到当前卡片 */
   toggleFavorite(id: string) {
     const { favoriteIds } = store.getState().page;
 
@@ -33,7 +29,6 @@ export const listingListActions = {
     void pageActions.addFavorite(id);
   },
 
-  // 重试属页面级取数，转交页面 action
   retry() {
     pageActions.retryListings();
   },

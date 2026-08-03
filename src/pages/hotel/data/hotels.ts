@@ -1,11 +1,6 @@
 import type { Hotel } from "../shared/types";
 
-/*
- * 条数取「一页多一点」（HOTEL_PAGE_SIZE 12 + 6）：够演示翻一次页，也够让首屏填满一屏。
- *
- * 首屏若填不满一屏，列表末尾的哨兵一开始就落在视口里，会自动连锁翻页直到取完，
- * 反而看不出滚动加载的真实效果。
- */
+/** 条数略多于一页，用于演示翻页 */
 export const MOCK_HOTELS: Hotel[] = [
   {
     id: "h1",

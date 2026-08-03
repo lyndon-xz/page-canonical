@@ -21,16 +21,11 @@ function usePageStoreHook() {
   );
   const [selectedFlightId, setSelectedFlightId] = useState<string | null>(null);
 
-  /** 已生效的筛选条件，即当前这份结果集是按什么条件取回的；编辑中的草稿在 search-bar */
+  /** 当前这份结果集是按什么条件取回的 */
   const [appliedFilters, setAppliedFilters] =
     useState<FlightFilters>(DEFAULT_FILTERS);
 
-  /**
-   * 为空表示资格尚未取回或取回失败；闸门此时一律按不通过处理。
-   *
-   * 没有配套的 loading 与 error：闸门期间受它管的两个模块本就不渲染，
-   * 「校验中」与「不通过」在界面上是同一种表现，多存的状态没有读者。
-   */
+  /** 为空表示资格未取回或取回失败，闸门一律按不通过处理 */
   const [eligibility, setEligibility] = useState<BookingEligibility | null>(
     null,
   );
@@ -46,16 +41,12 @@ function usePageStoreHook() {
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
   const [bookingSubmitted, setBookingSubmitted] = useState(false);
 
-  /**
-   * 闸门结论收在页面层：预订与退改规则两个模块都据此决定是否渲染，
-   * 各自再判一次就会和 action 里的判定漂移（见 shared/gate.ts）。
-   */
   const bookingAllowed = useMemo(
     () => isBookingAllowed(eligibility),
     [eligibility],
   );
 
-  /** 选中航班：booking-form 与 fare-rules 都要，故提到页面层，避免两处各 find 一遍 */
+  /** 提到页面层，避免多个模块各 find 一遍 */
   const selectedFlight = useMemo(
     () => flights.find((flight) => flight.id === selectedFlightId) ?? null,
     [flights, selectedFlightId],
@@ -86,6 +77,7 @@ function usePageStoreHook() {
     bookingSubmitted,
     setBookingSubmitted,
 
+    /** 已求值的布尔，不是 gate.ts 的同名函数 */
     isBookingAllowed: bookingAllowed,
     selectedFlight,
   };

@@ -8,12 +8,7 @@ import { useListingDetailModel } from "../../model";
 import styles from "./index.module.scss";
 
 interface DetailBodyProps {
-  /**
-   * 是否渲染在抽屉内。
-   *
-   * 同一份详情在列表下方与抽屉里各渲染一次：内联区只读，抽屉里才给操作。
-   * 用位置参数分流而不是复制两份组件——字段一变两份都要改，迟早漂移。
-   */
+  /** 写操作只在抽屉里给，内联区只提供展开入口 */
   inDrawer?: boolean;
 }
 
@@ -46,7 +41,7 @@ export default function DetailBody(props: DetailBodyProps) {
     );
   }
 
-  // 模块只在选中房源后渲染，走到这里意味着选中的房源已不在当前列表里（如列表重新拉过）
+  // 详情接口可能返回 null，此时列表项虽在也无内容可展示
   if (!listing || !detail) {
     return (
       <div className={styles.stateBox}>

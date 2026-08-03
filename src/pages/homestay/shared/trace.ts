@@ -1,4 +1,3 @@
-/** 每条埋点都带的通用参数，由 store 派生，见 store.ts 的 selectTraceCommonTag */
 export interface TraceCommonTag {
   page: string;
   /** 当前生效的筛选条件，空串表示不限 */

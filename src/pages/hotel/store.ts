@@ -13,7 +13,7 @@ const DEFAULT_PARAMS: SearchParams = {
 
 const PERSIST_KEY = "hotel-page";
 
-/** 落盘的字段集合，由 partialize 挑出。改这里等于改存储格式 */
+/** 改动即改动存储格式，需兼容老数据 */
 interface PersistedPageState {
   appliedParams: SearchParams;
   favoriteIds: string[];
@@ -21,16 +21,11 @@ interface PersistedPageState {
 
 interface PageStore {
   hotels: Hotel[];
-  /**
-   * 匹配筛选条件的总条数，由服务端给出。
-   * 与 hotels.length（已加载条数）是两回事：后者随分页累加，不能用来显示「找到 N 家」。
-   */
   hotelsTotal: number;
   hotelsStatus: FetchStatus;
   selectedHotelId: string | null;
   appliedParams: SearchParams;
 
-  /** 已加载到第几页；下一页取 loadedPage + 1 */
   loadedPage: number;
   hasMore: boolean;
   /** 与 hotelsStatus 分开：首屏要盖住整个列表，加载更多只在列表末尾转圈 */
@@ -41,7 +36,6 @@ interface PageStore {
   /** 多选集合，批量操作的作用域；与单选的 selectedHotelId 各管一件事 */
   selectedHotelIds: string[];
   isBatchFavoriting: boolean;
-  /** 批量收藏中失败的项。空数组表示上一次批量全部成功 */
   batchFavoriteFailures: BatchFavoriteFailure[];
 
   setHotels: (hotels: Hotel[]) => void;
@@ -97,24 +91,12 @@ export const usePageStore = create<PageStore>()(
     }),
     {
       name: PERSIST_KEY,
-      /*
-       * 白名单：只落盘用户的长期偏好，其余一概不存。
-       *
-       * 默认整棵 state 落盘会连瞬时态与服务端快照一起存：
-       * 取数状态存下来后重进页面会停在上一次的 loading 或错误占位上，
-       * hotels 存下来是一份会过期的旧数据，selectedHotelIds 与批量失败清单
-       * 是一次性的操作意图与结果，都不该跨会话活着。
-       */
+      /** 白名单：只落盘长期偏好，瞬时态与服务端快照不跨会话 */
       partialize: (state) => ({
         appliedParams: state.appliedParams,
         favoriteIds: state.favoriteIds,
       }),
-      /*
-       * 恢复时把落盘值与当前默认值合并，而不是直接展开覆盖。
-       *
-       * 落盘结构会随版本演进：给 appliedParams 新增一个字段后，老用户存下来的那份就缺它，
-       * 直接展开会让该字段变成 undefined，一路传到取数与排序里炸掉。
-       */
+      /** 与默认值合并，避免老数据缺少后加的字段 */
       merge: (persisted, current) => {
         const saved = persisted as Partial<PersistedPageState> | undefined;
 

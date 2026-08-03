@@ -13,7 +13,6 @@ export function useSearchBarActions() {
 
   const submit = () => {
     applyFilters({ cabin: cabinDraft });
-    // 经页面 live 表取 flight-results 的容器，避免两模块互相 import
     getLive("flightResultsRef")?.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",

@@ -55,7 +55,6 @@ export default function HotelCard(props: HotelCardProps) {
           ¥{hotel.pricePerNight}
           <em className={styles.unit}> / 晚</em>
         </span>
-        {/* 阻止冒泡：收藏不应连带触发卡片的选中 */}
         <button
           type="button"
           className={styles.favorite}

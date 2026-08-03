@@ -17,7 +17,6 @@ function FlightResultsInner() {
     FlightResultsModel.useContainer();
   const { retry } = useFlightResultsActions();
 
-  // 经页面 live 表交给 search-bar 滚动定位，避免两模块互相 import
   const containerRef = useRef<HTMLElement>(null);
   useRegisterLive("flightResultsRef", containerRef);
 

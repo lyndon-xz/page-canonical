@@ -7,8 +7,9 @@ import { PageStore } from "./store";
 
 import styles from "./index.module.scss";
 
-// 单独成组件：effects 内部订阅状态引起的重渲染只落在这个空组件上，不波及子树。
-// 必须挂在 PageStore.Provider 内层，否则 usePageActions 取不到 Container。
+// 页面 effects 单独成组件：本页的 effects 经 usePageActions 订阅了 Container，
+// 直接在页面组件里调用会让每次状态变更都重渲染所有模块。
+// 也必须挂在 PageStore.Provider 内层，否则 usePageActions 取不到 Container。
 function EffectsRunner() {
   usePageEffects();
   return null;

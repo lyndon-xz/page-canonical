@@ -23,7 +23,6 @@ export default function ListingDetail() {
         <DetailBody />
       </section>
 
-      {/* 同一份数据、同一个 DetailBody，换个容器再渲染一次；抽屉内才出操作区 */}
       <Drawer
         open={isDrawerOpen}
         onClose={listingDetailActions.closeDetailDrawer}

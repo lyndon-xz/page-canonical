@@ -17,7 +17,6 @@ export default function BookingForm() {
   const { control, handleSubmit, formState } = form;
   const { errors } = formState;
 
-  // 闸门不通过时不给预订入口，与 fare-rules 同一条结论
   if (!isVisible) {
     return null;
   }
@@ -124,8 +123,7 @@ export default function BookingForm() {
           >
             提交预订
           </Button>
-          {/* 成功态留在页面上：它是「已下单」这件事本身。
-              失败反过来走 toast——提交失败不改变界面，用户只需即时知道没成 */}
+          {/* 成功态留在页面上：它是「已下单」这件事本身 */}
           {submitted && (
             <span className={styles.feedback} data-status="success">
               预订成功，行程确认短信将发送至你的手机

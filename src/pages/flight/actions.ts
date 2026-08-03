@@ -30,30 +30,20 @@ export function usePageActions() {
     setBookingSubmitted,
   } = PageStore.useContainer();
 
-  /**
-   * 退改规则请求的序号守卫：快速切换选中航班时，先发的请求可能后到，
-   * 直接写入会让规则与当前选中的航班不符。每次请求领取自增序号，只有最新序号的响应允许落库。
-   *
-   * 放 ref 而非 state——它只服务请求编排、UI 从不读它，进 state 会白白多一次渲染；
-   * 用自增序号而非「参数去重」，是为了让重复选中同一航班仍能重新拉取（去重会漏掉重试场景）。
-   */
+  /** 快速切换航班时先发的请求可能后到，只有最新序号的响应允许落库 */
   const latestFareRulesRequestIdRef = useRef(0);
 
-  // 被 initPage 依赖、并间接被 usePageEffects 的 useEffect 依赖，需要稳定引用
+  // 被 effect 的依赖数组间接依赖，需稳定引用
   const loadFlights = useCallback(
     async (filters: FlightFilters) => {
       setAppliedFilters(filters);
       setFlightsStatus(FetchStatus.Loading);
 
-      /*
-       * 请求发出前先把上一轮结果作废，否则 loading 期间「找到 N 个航班」报的是上一次的数字，
-       * 选中航班与其退改规则也会指向已经不在结果里的班次。
-       *
-       * 本页换栈到 unstated-next 后，重进页面时 Provider 重建、useState 天然回到初值，
-       * 这段只为「换筛选条件」这条路径而写——zustand 与 RTK 的 store 是模块单例，两条路径都需要它。
-       */
+      // 先作废上一轮结果，否则 loading 期间的航班数与选中航班仍指向上一次的班次
       setFlights([]);
       setSelectedFlightId(null);
+      // 推进序号让未返回的规则请求过期，否则它会把规则写回这里刚清空的 store
+      latestFareRulesRequestIdRef.current += 1;
       setFareRules([]);
       setFareBlockReasons([]);
       setFareRulesStatus(FetchStatus.Ready);
@@ -77,10 +67,7 @@ export function usePageActions() {
     ],
   );
 
-  /**
-   * 首屏编排：先判预订资格，闸门不通过就不再拉航班与退改规则。
-   * 资格接口失败按「不通过」处理，宁可少展示，也不给出可能无效的预订入口。
-   */
+  /** 资格接口失败按「不通过」处理，宁可少展示，也不给出可能无效的预订入口 */
   const initPage = useCallback(
     async (filters: FlightFilters) => {
       try {
@@ -93,7 +80,6 @@ export function usePageActions() {
 
         await loadFlights(filters);
       } catch {
-        // 重进页面或重试时要清掉上一次的资格，否则闸门会沿用已失效的结论
         setEligibility(null);
       }
     },
@@ -111,15 +97,13 @@ export function usePageActions() {
     );
   };
 
-  /** 供错误态的重试入口调用：沿用已生效的筛选条件，不必让用户重走一遍 URL */
   const retryFlights = () => {
     void loadFlights(appliedFilters);
   };
 
-  /** 规则与阻断原因来自两个接口、互不依赖，并行取回后一起落库 */
   const loadFareRules = async (flightId: string) => {
     const requestId = (latestFareRulesRequestIdRef.current += 1);
-    // 过期请求连状态都不该动，否则会把仍在飞的那次请求的 loading 提前收掉
+    // 过期请求连状态都不该动，否则会把仍进行中的那次请求的 loading 提前收掉
     const isCurrent = () => requestId === latestFareRulesRequestIdRef.current;
 
     setFareRulesStatus(FetchStatus.Loading);
@@ -145,13 +129,11 @@ export function usePageActions() {
     }
   };
 
-  /** 选中航班连带拉取其退改规则：选中态与规则必须同步变更，故收在同一个 action */
   const selectFlight = async (flightId: string) => {
     setSelectedFlightId(flightId);
     await loadFareRules(flightId);
   };
 
-  /** 供错误态的重试入口调用，避免用户只能刷新整页 */
   const retryFareRules = () => {
     if (!selectedFlightId) {
       return;

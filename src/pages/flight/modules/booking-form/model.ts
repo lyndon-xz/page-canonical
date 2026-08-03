@@ -24,7 +24,6 @@ export function useBookingFormModel() {
 
   return {
     form,
-    // 与 fare-rules 共用页面层的闸门结论，两处不各判一次
     isVisible: isBookingAllowed,
     selectedFlight,
     isSubmitting: isSubmittingBooking,

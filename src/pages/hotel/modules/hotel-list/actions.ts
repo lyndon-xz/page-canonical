@@ -3,7 +3,6 @@ import type { SortBy } from "../../shared/types";
 import { usePageStore } from "../../store";
 
 export const hotelListActions = {
-  // 排序由服务端执行，换排序等于换一次取数条件，故回到第一页重新拉
   changeSortBy(sortBy: SortBy) {
     pageActions.applySearchParams({ sortBy });
   },
@@ -12,7 +11,6 @@ export const hotelListActions = {
     usePageStore.getState().setSelectedHotelId(id);
   },
 
-  // 下面三条都是页面级取数与写入，模块只做转交
   loadMore() {
     void pageActions.loadMoreHotels();
   },

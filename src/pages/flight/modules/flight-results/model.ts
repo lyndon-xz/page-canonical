@@ -14,6 +14,7 @@ function useFlightResultsModelHook() {
 
   const { flights, flightsStatus, selectedFlightId } = PageStore.useContainer();
 
+  // 先展开再排：sort 原地改数组，直接排会改掉 store 里那一份且不触发重渲染
   const sortedFlights = useMemo(
     () => [...flights].sort(comparators[sortBy]),
     [flights, sortBy],

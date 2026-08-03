@@ -10,7 +10,7 @@ import type {
 
 const MOCK_DELAY_MS = 300;
 
-/** 该房源的收藏接口固定失败，用于演示乐观更新后的回滚 */
+/** 该房源的收藏接口固定失败，用于演示收藏失败的反馈路径 */
 const FAVORITE_REJECTED_LISTING_IDS = ["l3"];
 
 /** 命中的手机号提交询价会被拒，用于演示服务端字段级错误回填 */

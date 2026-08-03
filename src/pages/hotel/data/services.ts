@@ -10,13 +10,9 @@ import type {
 
 const MOCK_DELAY_MS = 300;
 
-/**
- * 每页条数。取值要让首屏填满一屏以上——
- * 否则列表末尾的哨兵一开始就在视口内，会自动连锁翻页直到取完。
- */
+/** 取值要让首屏填满一屏以上，否则末尾哨兵一开始就在视口内，会连锁翻页直到取完 */
 export const HOTEL_PAGE_SIZE = 12;
 
-/** 排序在服务端做：分页返回的每一页都取自全量排序后的结果 */
 const comparators: Record<SortBy, (a: Hotel, b: Hotel) => number> = {
   price: (a, b) => a.pricePerNight - b.pricePerNight,
   rating: (a, b) => b.rating - a.rating,
@@ -65,12 +61,7 @@ export async function toggleHotelFavorite(hotelId: string): Promise<void> {
   }
 }
 
-/**
- * 批量收藏。整批一次请求，逐项返回成败。
- *
- * 真实服务端的批量接口通常也是这个形状：HTTP 200 + body 里带逐项结果。
- * 只要有一项失败就返回 4xx 会让调用方无法区分「全失败」和「部分失败」。
- */
+/** 整批一次请求，逐项返回成败 */
 export async function batchFavoriteHotels(
   hotelIds: string[],
 ): Promise<BatchFavoriteResult> {

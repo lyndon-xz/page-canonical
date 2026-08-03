@@ -5,32 +5,23 @@ import {
 } from "../../shared/types";
 import { FareRuleCategory } from "./category";
 
-/** 引导入口；无入口的规则为 null */
+/** 规则不合格时的引导入口 */
 export type RuleAction = { text: string; href: string } | null;
 
-/**
- * 一条规则一份自包含定义。
- *
- * 六条规则的展示结构完全同构、只有文案与个别分支不同，因此用一张表承载差异、
- * 由 UI 统一渲染，而不是在组件里按 ruleType 堆 if/switch——后者每加一条规则都要改渲染逻辑。
- * 需要按数据取变体的字段配 resolveXxx，它覆盖同名的静态字段。
- */
+/** 需要按数据取变体的字段配 resolveXxx，覆盖同名的静态字段 */
 export interface RuleDefinition {
   category: FareRuleCategory;
-  /** 规则标准的一句话描述 */
   standard: string;
   tooltip: string;
   /** 合格态的取值说明，`{value}` 占位当前取值 */
   qualifiedDesc: string;
-  /** 合格态说明的变体，返回值覆盖 qualifiedDesc */
   resolveQualifiedDesc?: (rule: FareRule) => string;
-  /** 本规则关注的整班次阻断原因；命中则数值达标也按不合格展示 */
+  /** 本规则关注的整班次阻断原因 */
   blockReason?: FareBlockReason;
-  /** 不合格时的改进建议；null 表示该规则不给建议 */
+  /** 不合格时的改进建议 */
   tip: {
     title: string;
     desc: string;
-    /** 建议文案的变体，覆盖 desc；阻断态与单纯不达标的措辞不同 */
     resolveDesc?: (rule: FareRule, blocked: boolean) => string;
     action?: RuleAction;
   } | null;

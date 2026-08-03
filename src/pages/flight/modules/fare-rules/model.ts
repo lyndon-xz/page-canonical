@@ -23,10 +23,10 @@ export interface RuleView {
   tooltip: string;
   /** 展示态是否合格：数值合格且未被整班次阻断 */
   qualified: boolean;
-  /** 命中整班次阻断；用于让文案说明「为什么达标也不算」 */
+  /** 命中整班次阻断 */
   blocked: boolean;
   qualifiedDesc: string;
-  /** 不合格时的改进建议；合格或该规则不给建议时为 null */
+  /** 不合格时的改进建议 */
   tip: RuleTip | null;
   expanded: boolean;
 }
@@ -46,7 +46,6 @@ const formatRuleText = (template: string, rule: FareRule) =>
 
 function useFareRulesModelHook() {
   const [activeCategory, setActiveCategory] = useState(FareRuleCategory.All);
-  /** 展开了改进建议的规则；折叠态只显示标准与取值 */
   const [expandedRuleTypes, setExpandedRuleTypes] = useState<string[]>([]);
 
   const {
@@ -121,7 +120,6 @@ function useFareRulesModelHook() {
   }, [activeCategory, expandedRuleTypes, fareBlockReasons, fareRules]);
 
   return {
-    // 闸门不通过、或还没选航班时整个模块不渲染
     isVisible: isBookingAllowed && !!selectedFlight,
     selectedFlight,
     fareRulesStatus,

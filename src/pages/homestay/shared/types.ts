@@ -4,7 +4,6 @@ export interface Listing {
   city: string;
   pricePerNight: number;
   rating: number;
-  /** 房型：整套 / 单间 / 合住 */
   roomType: string;
 }
 
@@ -15,23 +14,15 @@ export interface ListingFilters {
   roomType: string;
 }
 
-/** 房源详情，比列表项多出描述、设施与退订政策，单独接口按需拉取 */
+/** 比列表项多出的描述类字段，单独接口按需拉取 */
 export interface ListingDetail {
   listingId: string;
   description: string;
   amenities: string[];
   hostName: string;
-  /** 退订政策说明 */
   cancellationPolicy: string;
 }
 
-/**
- * 二次确认的触发场景。
- *
- * 两个场景的提交动作不同，但弹窗结构完全一致、只有文案有别，
- * 因此共用一个确认弹窗模块，由场景决定文案与提交分支——
- * 复制两份弹窗会让「确认中」的 loading、关闭时机各写一遍。
- */
 export enum ConfirmScene {
   RemoveFavorite = "removeFavorite",
   CancelInquiry = "cancelInquiry",

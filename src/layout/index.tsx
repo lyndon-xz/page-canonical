@@ -55,10 +55,7 @@ export default function Layout() {
         </div>
       </header>
       <main className={styles.main}>
-        {/* key 保证切换页面时组件重新挂载，首屏 effects 重新执行 */}
-        <div key={active}>
-          <Component />
-        </div>
+        <Component />
       </main>
     </div>
   );

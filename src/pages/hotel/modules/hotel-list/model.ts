@@ -3,10 +3,6 @@ import { useShallow } from "zustand/react/shallow";
 
 import { usePageStore } from "../../store";
 
-/*
- * 本模块没有私有状态：排序是取数参数、归页面层（见 shared/types.ts 的 SearchParams.sortBy），
- * 列表也不在前端排序，服务端每页都返回全量排序后的切片。
- */
 export function useHotelListModel() {
   const {
     hotels,
@@ -56,7 +52,6 @@ export function useHotelListModel() {
     selectedHotelIds,
     isBatchFavoriting,
     batchFailureNames,
-    /** 已加载的都勾上了才算全选；空列表不算 */
     isAllLoadedSelected:
       hotels.length > 0 && selectedHotelIds.length === hotels.length,
   };

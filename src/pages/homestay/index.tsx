@@ -21,9 +21,10 @@ const DEFAULT_INQUIRY: InquiryForm = {
   message: "",
 };
 
-// 单独成组件：effects 内部订阅状态引起的重渲染只落在这个空组件上，不波及子树。
-// 必须挂在 <Provider> 内层，否则订阅取不到 store。
-function PageEffectsRunner() {
+// 页面 effects 单独成组件：它若订阅状态，重渲染只落在这个空组件上。
+// 直接在页面组件里调用的话，页面是子树根，一次订阅变更就会重渲染所有模块。
+// 挂在 Provider 内层，effects 才能用 useAppSelector 这类依赖 context 的 hook。
+function EffectsRunner() {
   usePageEffects();
   return null;
 }
@@ -34,13 +35,12 @@ export default function HomestayPage() {
     mode: "onTouched",
   });
 
-  // 经页面 live 表交给 inquiry-submit 的 action 回写（reset / setError）
   useRegisterLive("inquiryForm", methods);
 
   return (
     <Provider store={store}>
-      <PageEffectsRunner />
       <div className={styles.page}>
+        <EffectsRunner />
         <header className={styles.hero}>
           <p className={styles.eyebrow}>民宿 · HOMESTAY</p>
           <h1 className={styles.heroTitle}>住进当地人的家</h1>
@@ -63,7 +63,7 @@ export default function HomestayPage() {
           </section>
         </FormProvider>
 
-        {/* 弹窗挂页面层：列表卡片与详情抽屉都能触发它，谁都不该拥有它 */}
+        {/* 挂页面层：列表卡片与详情抽屉都能触发它 */}
         <ConfirmDialog />
       </div>
     </Provider>

@@ -1,14 +1,10 @@
-/**
- * 分类是前端概念，服务端只下发 ruleType。
- * 放在模块内而非 shared/，因为只有本模块按分类分组展示。
- */
+/** 分类是前端概念，服务端只下发 ruleType */
 export enum FareRuleCategory {
   All = "all",
   Refund = "refund",
   Travel = "travel",
 }
 
-/** 分组渲染顺序，不含聚合 Tab */
 export const CATEGORY_GROUP_ORDER = [
   FareRuleCategory.Refund,
   FareRuleCategory.Travel,
@@ -21,7 +17,7 @@ export const CATEGORY_TAB_ORDER = [
 
 interface CategoryConfig {
   tabLabel: string;
-  /** 分组标题；聚合 Tab 不成组，故为可选 */
+  /** 聚合 Tab 不成组，故可选 */
   groupTitle?: string;
 }
 

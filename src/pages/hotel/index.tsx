@@ -4,7 +4,8 @@ import SearchFilter from "./modules/search-filter";
 
 import styles from "./index.module.scss";
 
-// 单独成组件：effects 内部订阅状态引起的重渲染只落在这个空组件上，不波及子树
+// 页面 effects 单独成组件：它若订阅状态，重渲染只落在这个空组件上。
+// 直接在页面组件里调用的话，页面是子树根，一次订阅变更就会重渲染所有模块。
 function EffectsRunner() {
   usePageEffects();
   return null;

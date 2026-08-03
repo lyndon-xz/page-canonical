@@ -20,7 +20,6 @@ export function useFareRulesActions() {
     );
   };
 
-  // 重试属页面级取数，转交页面 action
   const retry = () => {
     retryFareRules();
   };

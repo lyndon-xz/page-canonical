@@ -9,7 +9,6 @@ import styles from "./index.module.scss";
 export default function ConfirmDialog() {
   const { scene, isConfirming, confirmError } = useConfirmDialogModel();
 
-  // scene 为 null 即关闭，省掉一个必须与场景同步变更的 isOpen
   if (!scene) {
     return null;
   }

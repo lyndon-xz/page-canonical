@@ -25,7 +25,7 @@ export class BookingSubmitError extends Error {
   }
 }
 
-/** 闸门的三项资格由同一接口返回；真实场景下常是三个独立接口，由 action 并行取回后合并 */
+/** mock 用单接口返回三项资格 */
 export async function fetchBookingEligibility(): Promise<BookingEligibility> {
   await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
 

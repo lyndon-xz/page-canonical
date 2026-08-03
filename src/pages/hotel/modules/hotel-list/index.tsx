@@ -27,12 +27,10 @@ export default function HotelList() {
     isAllLoadedSelected,
   } = useHotelListModel();
 
-  // 经页面 live 表交给 search-filter 滚动定位，避免两模块互相 import
   const listRef = useRef<HTMLElement>(null);
   useRegisterLive("hotelListRef", listRef);
 
-  // 三个分支共用一处判定：哨兵渲染条件与观察器挂载条件必须同一个表达式，
-  // 各写一遍就会出现「哨兵在 DOM 里但没人观察」的哑火
+  // 哨兵的渲染条件与观察器的挂载条件必须是同一个表达式，各写一遍会出现哨兵在 DOM 里但没人观察
   const showSentinel =
     hotelsStatus === FetchStatus.Ready &&
     loadMoreStatus === FetchStatus.Ready &&
@@ -50,7 +48,6 @@ export default function HotelList() {
           {hotels.length > 0 && (
             <Checkbox
               checked={isAllLoadedSelected}
-              // 勾了一部分时给半选态，否则表头会谎称「一个都没选」
               indeterminate={
                 selectedHotelIds.length > 0 && !isAllLoadedSelected
               }
@@ -65,8 +62,7 @@ export default function HotelList() {
         <SortBar />
       </header>
 
-      {/* 点名失败项，而不是只说「部分失败」——用户需要知道该重试哪几家。
-          单项收藏失败走 toast，批量的结果是一份清单，得留在页面上供逐项核对 */}
+      {/* 点名失败项而不是只说「部分失败」：用户需要知道该重试哪几家 */}
       {batchFailureNames.length > 0 && (
         <Alert
           type="warning"
@@ -139,7 +135,6 @@ export default function HotelList() {
               <Spin size="small" />
             </div>
           ) : showSentinel ? (
-            // 哨兵：进入视口即触发下一页，不占视觉空间
             <div ref={sentinelRef} className={styles.sentinel} />
           ) : (
             <p className={styles.listEnd}>没有更多了</p>

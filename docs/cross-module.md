@@ -1,0 +1,88 @@
+# 跨模块协作
+
+模块之间不互相 import。需要协作时有四种手段，按耦合从低到高排列。
+
+## 一、页面层派生
+
+两个模块都要的派生值，算一次放在页面层，模块从各自 model 里取。
+
+flight 页的 `selectedFlight` 与闸门结论 `isBookingAllowed` 都是这样：booking-form 与 fare-rules 都要用，各算一遍就会漂移，也白白多遍历一次列表。
+
+判断标准是消费方数量。只有一个模块要的派生值留在那个模块的 model 里——homestay 的 `selectDetailListing` 只有 listing-detail 读，提到页面层反倒是页面层多担了一份没人共享的派生。等第二个模块也要时再提。
+
+## 二、模块 action 转交页面 action
+
+模块自己不做页面级的取数与写入，转交给页面 action。
+
+```ts
+// modules/hotel-list/actions.ts
+retry() {
+  pageActions.retryHotels();
+},
+```
+
+这是本仓库的通用约定，所有只做转交的模块 action 都不再各自注释一遍。转交的意义在于 UI 只认识自己模块的 action 入口，页面级编排换实现时不必改 UI。
+
+## 三、live 表：把活对象交给 action
+
+表单实例、DOM ref 这类「活对象」不能进状态层——它们不可序列化、身份可变，放进 store 会破坏状态的可比较性。但 action 有时确实需要它们：提交失败要 `setError` 回填表单，换筛选条件后要滚动到列表顶部。
+
+`lib/live.ts` 提供 `createPageLive<M>()`，按页面自己的 key→类型映射生成一对读写入口：
+
+```ts
+// pages/hotel/live.ts
+interface PageLiveMap {
+  hotelListRef: RefObject<HTMLElement | null>;
+}
+export const { useRegisterLive, getLive } = createPageLive<PageLiveMap>();
+```
+
+持有方在自己的组件里 `useRegisterLive("hotelListRef", ref)`，消费方在 action 里 `getLive("hotelListRef")`。两端受同一张表约束，key 拼错或值类型不对都在编译期报错。
+
+每个页面的 `live.ts` 就是这张跨模块契约表，谁注册、谁消费写在表上的字段注释里。
+
+注意 `createPageLive` 每次调用持有独立的 `Map`，页面之间互不影响；但这个 Map 是模块级的，仅适用于 CSR SPA。SSR 下要改成每请求实例化并经 Context 提供，否则会跨请求串用。
+
+## 四、listener：结果的旁路反应
+
+有一类联动的触发方与受影响方完全不同：homestay 的「询价提交成功 → 退出当前房源」，牵涉 listing-list 的选中态与 listing-detail 的详情内容，触发它的却是 inquiry-submit。
+
+写进提交 action 会让提交方知道另外两个模块的存在。落在 listener 里，三方都只认这条 action，互不相识。
+
+代价是因果变隐式：读提交 action 看不到选中会被清掉。所以 listener 里只放「结果的旁路反应」，提交自身必须完成的状态变更仍留在 action 内。
+
+监听 `setInquirySubmitted` 时要注意它也被用于重置，只有置为 `true` 才是「提交成功」。
+
+## 表单实例的共享
+
+同一个表单被两个模块使用（inquiry-fields 填写、inquiry-submit 提交）时，用 react-hook-form 的 `FormProvider` 在页面层提供，两个模块各自 `useFormContext` 取。这样两个模块都不必认识对方，也不必把表单实例塞进 live 表。
+
+live 表在这里的角色是另一件事：让 action（而非组件）能拿到实例做回写。
+
+## 一个模块服务多个触发方
+
+homestay 的两个二次确认场景（取消收藏、撤回询价）提交动作不同，但弹窗结构完全一致、只有文案有别。做法是共用一个 confirm-dialog 模块，由 `confirmScene` 决定文案与提交分支。
+
+复制两份弹窗的代价是「确认中」的 loading 与关闭时机各写一遍，改一处漏一处。
+
+同一个模块被复用于两种呈现位置时同理：homestay 的详情在列表下方与抽屉里各渲染一次，用一个 `inDrawer` 位置参数分流，而不是复制两份组件——字段一变两份都要改，迟早漂移。内联区只给展开入口，写操作只在抽屉里给。
+
+## 配置表驱动渲染
+
+flight 页六条退改规则展示结构完全同构，只有文案与个别分支不同。做法是一张 `RULE_DEFINITIONS` 表承载全部差异，UI 统一渲染，而不是在组件里按 `ruleType` 堆 if/switch——后者每加一条规则都要改渲染逻辑。
+
+表里需要按数据取变体的字段配一个 `resolveXxx` 函数，返回值覆盖同名的静态字段。文案里用 `{value}` 占位当前取值。
+
+分类（`FareRuleCategory`）是前端概念，服务端只下发 `ruleType`，所以分类表放在模块内而不是 `shared/`。
+
+## 埋点参数从 store 派生
+
+埋点的通用参数（当前页、生效的筛选条件、选中项）由一个 selector 从 store 派生，各调用点只给事件名与本次操作特有的参数。各处手拼的下场是漏字段与口径不一：有的带筛选条件有的不带，同一个字段在两处叫不同的名字，最后没法在报表里对齐。
+
+`trackClick` 必须在状态变更之前调用。通用参数表达「点击发生时页面处于什么上下文」，本次操作的目标由 extra 带。先改状态再上报，选中类事件就会把新选中当成旧上下文。
+
+## 循环依赖约束
+
+RTK 页的 `slice.ts` 被 `store.ts` 组装、被 `listeners.ts` 取 action creator，因此 slice 不能 import store 的运行时内容，需要类型时一律 type-only import。模块的 slice 同理。
+
+listener middleware 用 `prepend` 而不是 `concat` 装配：让监听器在其它中间件处理该 action 之前就登记上。

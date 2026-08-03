@@ -85,7 +85,10 @@ export const MOCK_FARE_RULES: Record<string, FareRule[]> = {
   f7: ECONOMY_RULES,
 };
 
-/** f3 已起飞、f4 已停售：用于演示数值达标但被整班次阻断后按不合格展示 */
+/**
+ * f3 已起飞：演示阻断态的文案变体（其改签费本就不达标）。
+ * f4 已停售：其选座数值达标，演示达标也被压成不合格。
+ */
 export const MOCK_FARE_BLOCK_REASONS: Record<string, FareBlockReason[]> = {
   f3: [FareBlockReason.Departed],
   f4: [FareBlockReason.SoldOut],

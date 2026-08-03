@@ -12,12 +12,7 @@ import { parseSearchParams, serializeParams } from "./shared/params";
 import type { SearchParams } from "./shared/types";
 import { usePageStore } from "./store";
 
-/**
- * 等持久化恢复完成。
- *
- * localStorage 的恢复虽是同步的，但门禁仍要写：storage 一旦换成异步实现（IndexedDB 等），
- * 少了它首屏就会先按默认条件拉一次、恢复后再拉一次，用户看到列表闪一下。
- */
+/** storage 若换成异步实现，缺此门禁首屏会先按默认条件多拉一次 */
 async function waitForHydration() {
   if (usePageStore.persist.hasHydrated()) {
     return;
@@ -31,11 +26,7 @@ async function waitForHydration() {
   });
 }
 
-/**
- * URL 显式带了筛选条件就以它为准，否则用持久化下来的偏好。
- *
- * 分享链接与带参刷新是用户的明示意图，持久化偏好是隐式的，不该盖掉明示。
- */
+/** URL 带参是用户的明示意图，优先于隐式的持久化偏好 */
 function resolveInitialParams(): SearchParams {
   if (window.location.search) {
     return parseSearchParams(window.location.search);
@@ -45,13 +36,11 @@ function resolveInitialParams(): SearchParams {
 }
 
 export const pageActions = {
-  /** 首屏编排：先等偏好恢复，再决定用哪套筛选条件拉第一页 */
   async initPage() {
     await waitForHydration();
     await pageActions.loadHotels(resolveInitialParams());
   },
 
-  /** 首屏与换筛选条件都走这里：列表整体替换，分页从头开始 */
   async loadHotels(searchParams: SearchParams) {
     const {
       setAppliedParams,
@@ -68,15 +57,10 @@ export const pageActions = {
 
     setAppliedParams(searchParams);
     setHotelsStatus(FetchStatus.Loading);
+    // 上一轮翻页失败的状态要清掉，否则新列表仍显示失败框、哨兵不渲染，无限滚动失效
     setLoadMoreStatus(FetchStatus.Ready);
 
-    /*
-     * 请求发出前先把上一轮结果作废。
-     *
-     * store 是页面级单例、不随页面卸载重置，重进本页或换筛选条件时旧值都还在：
-     * 少了这段，loading 期间「找到 N 家」会报上一次的数字，选中态与批量失败提示
-     * 也会指向已经不在结果里的酒店。收藏（favoriteIds）不清——那是跨结果集的用户数据。
-     */
+    // 先作废上一轮结果；favoriteIds 不清，那是跨结果集的用户数据
     setHotels([]);
     setHotelsTotal(0);
     setLoadedPage(0);
@@ -98,10 +82,7 @@ export const pageActions = {
     }
   },
 
-  /**
-   * 加载下一页。三道闸：没有下一页、已有请求在飞、首屏还没回来，都直接退出。
-   * 滚动哨兵会连续触发，缺了这三道就会并发拉同一页、把重复数据追加进列表。
-   */
+  /** 哨兵会连续触发，三个前置判断防并发拉同一页 */
   async loadMoreHotels() {
     const {
       hasMore,
@@ -145,26 +126,17 @@ export const pageActions = {
     }
   },
 
-  /**
-   * 局部更新取数条件并重新取第一页。
-   *
-   * 接收 patch 而非整份条件：筛选来自 search-filter、排序来自 hotel-list，
-   * 各改各的那部分，新增取数参数时也不必逐个改调用点。
-   */
+  /** 接收 patch：筛选与排序分属两个模块，各改各的那部分 */
   applySearchParams(patch: Partial<SearchParams>) {
     const searchParams = { ...usePageStore.getState().appliedParams, ...patch };
 
     void pageActions.loadHotels(searchParams);
 
     /*
-     * 列表重置回第一页，滚动位置也必须回到列表顶部。
-     *
-     * 少了这步，用户在页底换筛选或排序时，列表缩回一页而视口还停在下方，
-     * 末尾哨兵立刻又进视口，于是自动连锁翻页直到取完。
-     * 收在这里而不是各调用点：筛选与排序都会走到这，分开写必漏一个。
+     * 换条件后列表缩回一页，视口须回顶，否则末尾哨兵立即连锁翻页。
+     * 用 auto 而非 smooth：平滑滚动要几百毫秒，取数比它先回来，
+     * 哨兵会在视口还没归位时重新挂载并立刻触发下一页。
      */
-    // 用 auto 而非 smooth：平滑滚动要几百毫秒，取数比它先回来，
-    // 哨兵会在视口还没归位时重新挂载并立刻触发下一页
     getLive("hotelListRef")?.current?.scrollIntoView({
       behavior: "auto",
       block: "start",
@@ -182,11 +154,7 @@ export const pageActions = {
     void pageActions.loadHotels(usePageStore.getState().appliedParams);
   },
 
-  /**
-   * 收藏走乐观更新：先按预期改本地，再发请求，失败回滚到快照。
-   * 收藏是高频轻操作，等 300ms 再亮起会让人觉得点了没反应；
-   * 回滚用请求前的快照而非「再取反一次」——并发点击下取反会把状态推到错的一边。
-   */
+  /** 乐观更新；回滚用请求前的快照，取反在并发点击下会推到错的一边 */
   async toggleFavorite(hotelId: string) {
     const { favoriteIds, setFavoriteIds } = usePageStore.getState();
 
@@ -215,7 +183,7 @@ export const pageActions = {
     );
   },
 
-  /** 全选的作用域是「已加载的」而非「全部匹配的」：后者还没取回，勾了也提交不了 */
+  /** 全选的作用域是「已加载的」而非「全部匹配的」：后者还没取回 */
   selectAllLoaded() {
     const { hotels, setSelectedHotelIds } = usePageStore.getState();
 
@@ -227,11 +195,8 @@ export const pageActions = {
   },
 
   /**
-   * 批量收藏。与单项收藏刻意不同：不做乐观更新。
-   *
-   * 单项操作失败只需回滚一个值，批量的结果是「部分成功」，
-   * 先全亮起再挑几个回滚，中间态会让用户以为全成了。故等结果回来再落库：
-   * 成功项并入收藏，失败项点名给用户、并保留在选中态里供原地重试。
+   * 不做乐观更新：批量结果是部分成功，先全亮起再挑几个回滚会让用户以为全成了。
+   * 失败项保留在选中态里供原地重试。
    */
   async batchFavorite() {
     const {

@@ -11,12 +11,10 @@ export function useFlightResultsActions() {
     setSortBy(sortBy);
   };
 
-  // 选中要连带拉取退改规则，属页面级编排，故转交页面 action
   const selectFlight = (id: string) => {
     void selectFlightOnPage(id);
   };
 
-  // 重试属页面级取数，转交页面 action
   const retry = () => {
     retryFlights();
   };
