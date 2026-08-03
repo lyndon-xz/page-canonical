@@ -1,4 +1,4 @@
-import type { FlightFilters } from "./types";
+import type { FlightFilters } from "./shared/types";
 
 const VALID_CABINS = ["经济舱", "商务舱", "头等舱"];
 

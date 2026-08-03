@@ -1,4 +1,4 @@
-import type { SearchParams, SortBy } from "./types";
+import type { SearchParams, SortBy } from "./shared/types";
 
 const SORT_VALUES: SortBy[] = ["price", "rating", "distance"];
 

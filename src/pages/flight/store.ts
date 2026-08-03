@@ -3,7 +3,7 @@ import { createContainer } from "unstated-next";
 
 import { FetchStatus } from "@/lib/fetch-status";
 
-import { isBookingAllowed } from "./shared/gate";
+import { isBookingAllowed } from "./gate";
 import type {
   BookingEligibility,
   FareBlockReason,

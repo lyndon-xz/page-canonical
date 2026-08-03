@@ -25,7 +25,7 @@ export const listingDetailActions = {
     }
 
     if (favoriteIds.includes(detailListingId)) {
-      pageActions.openConfirm(ConfirmScene.RemoveFavorite);
+      pageActions.requestRemoveFavorite(detailListingId);
       return;
     }
 

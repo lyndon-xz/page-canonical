@@ -4,9 +4,15 @@ import { Button, Input } from "antd";
 import { searchFilterActions } from "./actions";
 import { useSearchFilterEffects } from "./effects";
 import { useSearchFilterModel } from "./model";
-import { STAR_OPTIONS } from "./star";
 
 import styles from "./index.module.scss";
+
+const STAR_OPTIONS: { label: string; value: number }[] = [
+  { label: "不限", value: 0 },
+  { label: "三星", value: 3 },
+  { label: "四星", value: 4 },
+  { label: "五星", value: 5 },
+];
 
 export default function SearchFilter() {
   const { keyword, star, resultCount, isLoading } = useSearchFilterModel();

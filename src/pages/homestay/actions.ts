@@ -29,11 +29,40 @@ import {
   setListingsStatus,
   setSelectedListingId,
 } from "./slice";
-import { reportTrace } from "./shared/trace";
+import { reportTrace } from "./trace";
 import { selectTraceCommonTag, store } from "./store";
 
 /** 连续点开不同房源时先发的请求可能后到，只有最新序号的响应允许落库 */
 let latestDetailRequestId = 0;
+
+/** 调用前须先把 detailListingId 对齐到该房源，否则响应会被 isCurrent 判为过期丢弃 */
+async function loadListingDetail(listingId: string) {
+  const requestId = (latestDetailRequestId += 1);
+
+  /*
+   * 两个条件缺一不可：序号最新排掉被后续请求顶掉的，目标未变排掉详情已被清空的。
+   * 少了后者，请求进行中时清空详情（如提交询价成功）仍会把它写回空掉的 store。
+   */
+  const isCurrent = () =>
+    requestId === latestDetailRequestId &&
+    store.getState().page.detailListingId === listingId;
+
+  store.dispatch(setDetailStatus(FetchStatus.Loading));
+  try {
+    const detail = await fetchListingDetail(listingId);
+    if (!isCurrent()) {
+      return;
+    }
+    store.dispatch(setListingDetail(detail));
+    store.dispatch(setDetailStatus(FetchStatus.Ready));
+  } catch {
+    // 过期请求连状态都不该动，否则会把仍进行中的那次请求的 loading 提前收掉
+    if (!isCurrent()) {
+      return;
+    }
+    store.dispatch(setDetailStatus(FetchStatus.Error));
+  }
+}
 
 export const pageActions = {
   /** 须在状态变更之前调用：通用参数表达「点击发生时页面处于什么上下文」 */
@@ -67,38 +96,11 @@ export const pageActions = {
     void pageActions.loadListings(store.getState().page.appliedFilters);
   },
 
-  async loadListingDetail(listingId: string) {
-    const requestId = (latestDetailRequestId += 1);
-
-    /*
-     * 两个条件缺一不可：序号最新排掉被后续请求顶掉的，目标未变排掉详情已被清空的。
-     * 少了后者，请求进行中时清空详情（如提交询价成功）仍会把它写回空掉的 store。
-     */
-    const isCurrent = () =>
-      requestId === latestDetailRequestId &&
-      store.getState().page.detailListingId === listingId;
-
-    store.dispatch(setDetailStatus(FetchStatus.Loading));
-    try {
-      const detail = await fetchListingDetail(listingId);
-      if (!isCurrent()) {
-        return;
-      }
-      store.dispatch(setListingDetail(detail));
-      store.dispatch(setDetailStatus(FetchStatus.Ready));
-    } catch {
-      // 过期请求连状态都不该动，否则会把仍进行中的那次请求的 loading 提前收掉
-      if (!isCurrent()) {
-        return;
-      }
-      store.dispatch(setDetailStatus(FetchStatus.Error));
-    }
-  },
-
-  /** detailListingId 决定看谁、isDetailDrawerOpen 决定在哪看，分开则抽屉可复用同一份数据 */
-  async viewDetail(listingId: string) {
+  /** 选中即切换详情：详情区跟着卡片走，避免用户还要再点一次「看详情」 */
+  selectListing(listingId: string) {
+    store.dispatch(setSelectedListingId(listingId));
     store.dispatch(setDetailListingId(listingId));
-    await pageActions.loadListingDetail(listingId);
+    void loadListingDetail(listingId);
   },
 
   openDetailDrawer() {
@@ -115,7 +117,7 @@ export const pageActions = {
     if (!detailListingId) {
       return;
     }
-    void pageActions.loadListingDetail(detailListingId);
+    void loadListingDetail(detailListingId);
   },
 
   openConfirm(scene: ConfirmScene) {
@@ -148,6 +150,12 @@ export const pageActions = {
     } catch (err) {
       message.error(err instanceof Error ? err.message : String(err));
     }
+  },
+
+  /** 确认弹窗按 detailListingId 定位房源，故开弹窗前先把它对齐到目标房源 */
+  requestRemoveFavorite(listingId: string) {
+    store.dispatch(setDetailListingId(listingId));
+    pageActions.openConfirm(ConfirmScene.RemoveFavorite);
   },
 
   // 不接错误，只保证 loading 收尾：字段级错误要回填到表单，得由调用方拿到原错误分流

@@ -8,7 +8,7 @@ import {
   toggleHotelFavorite,
 } from "./data/services";
 import { getLive } from "./live";
-import { parseSearchParams, serializeParams } from "./shared/params";
+import { parseSearchParams, serializeParams } from "./params";
 import type { SearchParams } from "./shared/types";
 import { usePageStore } from "./store";
 
@@ -35,53 +35,48 @@ function resolveInitialParams(): SearchParams {
   return usePageStore.getState().appliedParams;
 }
 
+async function loadHotels(searchParams: SearchParams) {
+  const {
+    setAppliedParams,
+    setHotelsStatus,
+    setHotels,
+    setHotelsTotal,
+    setLoadedPage,
+    setHasMore,
+    setLoadMoreStatus,
+    setSelectedHotelId,
+    setSelectedHotelIds,
+    setBatchFavoriteFailures,
+  } = usePageStore.getState();
+
+  setAppliedParams(searchParams);
+  setHotelsStatus(FetchStatus.Loading);
+  // 上一轮翻页失败的状态要清掉，否则新列表仍显示失败框、哨兵不渲染，无限滚动失效
+  setLoadMoreStatus(FetchStatus.Ready);
+
+  // 先作废上一轮结果；favoriteIds 不清，那是跨结果集的用户数据
+  setHotels([]);
+  setHotelsTotal(0);
+  setLoadedPage(0);
+  setHasMore(false);
+  setSelectedHotelId(null);
+  setSelectedHotelIds([]);
+  setBatchFavoriteFailures([]);
+
+  try {
+    const { items, hasMore, total } = await fetchHotelPage(searchParams, 1);
+    setHotels(items);
+    setHotelsTotal(total);
+    setLoadedPage(1);
+    setHasMore(hasMore);
+    setHotelsStatus(FetchStatus.Ready);
+  } catch {
+    // 结果态已在请求前清空，这里只翻状态
+    setHotelsStatus(FetchStatus.Error);
+  }
+}
+
 export const pageActions = {
-  async initPage() {
-    await waitForHydration();
-    await pageActions.loadHotels(resolveInitialParams());
-  },
-
-  async loadHotels(searchParams: SearchParams) {
-    const {
-      setAppliedParams,
-      setHotelsStatus,
-      setHotels,
-      setHotelsTotal,
-      setLoadedPage,
-      setHasMore,
-      setLoadMoreStatus,
-      setSelectedHotelId,
-      setSelectedHotelIds,
-      setBatchFavoriteFailures,
-    } = usePageStore.getState();
-
-    setAppliedParams(searchParams);
-    setHotelsStatus(FetchStatus.Loading);
-    // 上一轮翻页失败的状态要清掉，否则新列表仍显示失败框、哨兵不渲染，无限滚动失效
-    setLoadMoreStatus(FetchStatus.Ready);
-
-    // 先作废上一轮结果；favoriteIds 不清，那是跨结果集的用户数据
-    setHotels([]);
-    setHotelsTotal(0);
-    setLoadedPage(0);
-    setHasMore(false);
-    setSelectedHotelId(null);
-    setSelectedHotelIds([]);
-    setBatchFavoriteFailures([]);
-
-    try {
-      const { items, hasMore, total } = await fetchHotelPage(searchParams, 1);
-      setHotels(items);
-      setHotelsTotal(total);
-      setLoadedPage(1);
-      setHasMore(hasMore);
-      setHotelsStatus(FetchStatus.Ready);
-    } catch {
-      // 结果态已在请求前清空，这里只翻状态
-      setHotelsStatus(FetchStatus.Error);
-    }
-  },
-
   /** 哨兵会连续触发，三个前置判断防并发拉同一页 */
   async loadMoreHotels() {
     const {
@@ -126,11 +121,16 @@ export const pageActions = {
     }
   },
 
+  async initPage() {
+    await waitForHydration();
+    await loadHotels(resolveInitialParams());
+  },
+
   /** 接收 patch：筛选与排序分属两个模块，各改各的那部分 */
   applySearchParams(patch: Partial<SearchParams>) {
     const searchParams = { ...usePageStore.getState().appliedParams, ...patch };
 
-    void pageActions.loadHotels(searchParams);
+    void loadHotels(searchParams);
 
     /*
      * 换条件后列表缩回一页，视口须回顶，否则末尾哨兵立即连锁翻页。
@@ -151,26 +151,11 @@ export const pageActions = {
   },
 
   retryHotels() {
-    void pageActions.loadHotels(usePageStore.getState().appliedParams);
+    void loadHotels(usePageStore.getState().appliedParams);
   },
 
-  /** 乐观更新；回滚用请求前的快照，取反在并发点击下会推到错的一边 */
-  async toggleFavorite(hotelId: string) {
-    const { favoriteIds, setFavoriteIds } = usePageStore.getState();
-
-    const snapshot = favoriteIds;
-    const nextIds = favoriteIds.includes(hotelId)
-      ? favoriteIds.filter((id) => id !== hotelId)
-      : [...favoriteIds, hotelId];
-
-    setFavoriteIds(nextIds);
-    try {
-      await toggleHotelFavorite(hotelId);
-    } catch (err) {
-      setFavoriteIds(snapshot);
-      // 回滚已经把星标弹回去了，但那只是「没生效」，用户还需要知道为什么
-      message.error(err instanceof Error ? err.message : String(err));
-    }
+  selectHotel(hotelId: string) {
+    usePageStore.getState().setSelectedHotelId(hotelId);
   },
 
   toggleSelect(hotelId: string) {
@@ -192,6 +177,25 @@ export const pageActions = {
 
   clearSelection() {
     usePageStore.getState().setSelectedHotelIds([]);
+  },
+
+  /** 乐观更新；回滚用请求前的快照，取反在并发点击下会推到错的一边 */
+  async toggleFavorite(hotelId: string) {
+    const { favoriteIds, setFavoriteIds } = usePageStore.getState();
+
+    const snapshot = favoriteIds;
+    const nextIds = favoriteIds.includes(hotelId)
+      ? favoriteIds.filter((id) => id !== hotelId)
+      : [...favoriteIds, hotelId];
+
+    setFavoriteIds(nextIds);
+    try {
+      await toggleHotelFavorite(hotelId);
+    } catch (err) {
+      setFavoriteIds(snapshot);
+      // 回滚已经把星标弹回去了，但那只是「没生效」，用户还需要知道为什么
+      message.error(err instanceof Error ? err.message : String(err));
+    }
   },
 
   /**

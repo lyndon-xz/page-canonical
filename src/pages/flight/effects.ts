@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 import { usePageActions } from "./actions";
-import { parseFilters } from "./shared/params";
+import { parseFilters } from "./params";
 
 export function usePageEffects() {
   const { initPage } = usePageActions();

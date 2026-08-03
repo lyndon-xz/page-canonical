@@ -20,7 +20,7 @@
     "build": "vite build",
     "dev": "vite",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",

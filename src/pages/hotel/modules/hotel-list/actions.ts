@@ -1,14 +1,9 @@
 import { pageActions } from "../../actions";
 import type { SortBy } from "../../shared/types";
-import { usePageStore } from "../../store";
 
 export const hotelListActions = {
   changeSortBy(sortBy: SortBy) {
     pageActions.applySearchParams({ sortBy });
-  },
-
-  selectHotel(id: string) {
-    usePageStore.getState().setSelectedHotelId(id);
   },
 
   loadMore() {
@@ -19,8 +14,8 @@ export const hotelListActions = {
     pageActions.retryHotels();
   },
 
-  toggleFavorite(id: string) {
-    void pageActions.toggleFavorite(id);
+  selectHotel(id: string) {
+    pageActions.selectHotel(id);
   },
 
   toggleSelect(id: string) {
@@ -38,6 +33,10 @@ export const hotelListActions = {
 
   clearSelection() {
     pageActions.clearSelection();
+  },
+
+  toggleFavorite(id: string) {
+    void pageActions.toggleFavorite(id);
   },
 
   batchFavorite() {

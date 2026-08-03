@@ -22,6 +22,7 @@ interface HomestayPageState {
   listingDetail: ListingDetail | null;
   detailStatus: FetchStatus;
   detailListingId: string | null;
+  /** 与 detailListingId 分开：看谁与在哪看解耦，抽屉才能复用内联区已取到的详情 */
   isDetailDrawerOpen: boolean;
 
   favoriteIds: string[];

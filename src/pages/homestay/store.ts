@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 
 import { registerPageListeners, type AppStartListening } from "./listeners";
 import { confirmDialogReducer } from "./modules/confirm-dialog/slice";
-import type { TraceCommonTag } from "./shared/trace";
+import type { TraceCommonTag } from "./trace";
 import { homestayPageReducer } from "./slice";
 
 const listenerMiddleware = createListenerMiddleware();
@@ -36,10 +36,15 @@ export const selectListings = (state: RootState) => state.page.listings;
 /** 埋点通用参数从 store 派生，不在各调用点各拼一遍 */
 export const selectTraceCommonTag = createSelector(
   selectPageState,
-  (page): TraceCommonTag => ({
-    page: "homestay",
-    keyword: page.appliedFilters.keyword,
-    roomType: page.appliedFilters.roomType,
-    selectedListingId: page.selectedListingId ?? "",
-  }),
+  (page): TraceCommonTag => {
+    const { appliedFilters, selectedListingId } = page;
+    const { keyword, roomType } = appliedFilters;
+
+    return {
+      page: "homestay",
+      keyword,
+      roomType,
+      selectedListingId: selectedListingId ?? "",
+    };
+  },
 );

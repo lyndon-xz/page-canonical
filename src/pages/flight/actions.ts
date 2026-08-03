@@ -9,8 +9,8 @@ import {
   fetchFlights,
   submitBooking as submitBookingService,
 } from "./data/services";
-import { isBookingAllowed } from "./shared/gate";
-import { serializeFilters } from "./shared/params";
+import { isBookingAllowed } from "./gate";
+import { serializeFilters } from "./params";
 import type { BookingForm, FlightFilters } from "./shared/types";
 import { PageStore } from "./store";
 
@@ -154,12 +154,11 @@ export function usePageActions() {
     }
   };
 
+  // 只暴露模块层与 effects 真正消费的操作，取数实现留在内部
   return {
-    loadFlights,
     initPage,
     applyFilters,
     retryFlights,
-    loadFareRules,
     selectFlight,
     retryFareRules,
     submitBooking,

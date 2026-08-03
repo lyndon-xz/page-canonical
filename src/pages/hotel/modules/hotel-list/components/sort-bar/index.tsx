@@ -1,8 +1,14 @@
 import { hotelListActions } from "../../actions";
 import { useHotelListModel } from "../../model";
-import { SORT_OPTIONS } from "../../sort";
+import type { SortBy } from "../../../../shared/types";
 
 import styles from "./index.module.scss";
+
+const SORT_OPTIONS: { label: string; value: SortBy }[] = [
+  { label: "价格优先", value: "price" },
+  { label: "评分优先", value: "rating" },
+  { label: "距离优先", value: "distance" },
+];
 
 export default function SortBar() {
   const { sortBy } = useHotelListModel();
