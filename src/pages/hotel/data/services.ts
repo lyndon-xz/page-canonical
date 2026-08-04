@@ -11,7 +11,7 @@ import type {
 const MOCK_DELAY_MS = 300;
 
 /** 取值要让首屏填满一屏以上，否则末尾哨兵一开始就在视口内，会连锁翻页直到取完 */
-export const HOTEL_PAGE_SIZE = 12;
+const HOTEL_PAGE_SIZE = 12;
 
 const comparators: Record<SortBy, (a: Hotel, b: Hotel) => number> = {
   price: (a, b) => a.pricePerNight - b.pricePerNight,

@@ -9,7 +9,7 @@ export default function FlightCard(props: FlightCardProps) {
   const { flight, selected } = props;
 ```
 
-五个带 props 的组件（`FlightCard`、`ListingCard`、`HotelCard`、`RuleItem`、`DetailBody`）与所有 `createSelector` 的结果函数都是这个形状。
+五个带 props 的组件（`FlightCard`、`ListingCard`、`HotelCard`、`RuleItem`、`DetailBody`）、所有 `createSelector` 的结果函数与 hotel persist 的 `partialize` 都是这个形状。
 
 在签名里铺开字段有三处代价。一是加字段要改签名，字段一多 prettier 会把参数列表折成多行，类型标注跟着挤进去，签名不再是一眼能读完的一行。二是解构行没地方配注释——`inquiry-submit` 那处的 `message` 重命名必须说明原因，写在参数位里无处安放。三是丢掉 `props` / `fieldError` 这个整体名字，需要整体转发或调试打印时得重新拼回去。
 

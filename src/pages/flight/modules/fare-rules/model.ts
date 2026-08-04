@@ -39,10 +39,8 @@ export interface CategoryGroup {
   rules: RuleView[];
 }
 
-const VALUE_PLACEHOLDER = "{value}";
-
 const formatRuleText = (template: string, rule: FareRule) =>
-  template.replaceAll(VALUE_PLACEHOLDER, rule.currentValue);
+  template.replaceAll("{value}", rule.currentValue);
 
 function useFareRulesModelHook() {
   const [activeCategory, setActiveCategory] = useState(FareRuleCategory.All);

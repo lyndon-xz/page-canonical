@@ -13,14 +13,6 @@ import { store } from "./store";
 
 import styles from "./index.module.scss";
 
-const DEFAULT_INQUIRY: InquiryForm = {
-  guestName: "",
-  phone: "",
-  checkInDate: "",
-  nights: 1,
-  message: "",
-};
-
 /*
  * 必须挂在 Provider 内层，否则 effects 用不了 useAppSelector 这类依赖 context 的 hook。
  * 单独成组件则它订阅状态时，重渲染只落在这个空组件上，不牵连整棵页面子树。
@@ -32,7 +24,13 @@ function EffectsRunner() {
 
 export default function HomestayPage() {
   const methods = useForm<InquiryForm>({
-    defaultValues: DEFAULT_INQUIRY,
+    defaultValues: {
+      guestName: "",
+      phone: "",
+      checkInDate: "",
+      nights: 1,
+      message: "",
+    },
     mode: "onTouched",
   });
 

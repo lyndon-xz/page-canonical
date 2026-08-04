@@ -3,15 +3,9 @@ import { useForm } from "react-hook-form";
 import type { BookingForm } from "../../shared/types";
 import { PageStore } from "../../store";
 
-const DEFAULT_BOOKING: BookingForm = {
-  passengerName: "",
-  idNumber: "",
-  contactPhone: "",
-};
-
 export function useBookingFormModel() {
   const form = useForm<BookingForm>({
-    defaultValues: DEFAULT_BOOKING,
+    defaultValues: { passengerName: "", idNumber: "", contactPhone: "" },
     mode: "onTouched",
   });
 

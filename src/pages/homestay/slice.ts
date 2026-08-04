@@ -11,8 +11,6 @@ import type {
 
 // 被 store.ts 与 listeners.ts import，故禁止 import store 的运行时内容
 
-const DEFAULT_FILTERS: ListingFilters = { keyword: "", roomType: "" };
-
 interface HomestayPageState {
   listings: Listing[];
   listingsStatus: FetchStatus;
@@ -38,7 +36,7 @@ const initialState: HomestayPageState = {
   listings: [],
   listingsStatus: FetchStatus.Ready,
   selectedListingId: null,
-  appliedFilters: DEFAULT_FILTERS,
+  appliedFilters: { keyword: "", roomType: "" },
 
   listingDetail: null,
   detailStatus: FetchStatus.Ready,

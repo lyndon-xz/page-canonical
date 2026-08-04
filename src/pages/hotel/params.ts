@@ -1,11 +1,9 @@
 import type { SearchParams, SortBy } from "./shared/types";
 
-const SORT_VALUES: SortBy[] = ["price", "rating", "distance"];
-
 const DEFAULT_SORT: SortBy = "price";
 
 const isSortBy = (value: string): value is SortBy =>
-  (SORT_VALUES as string[]).includes(value);
+  ["price", "rating", "distance"].includes(value);
 
 export function parseSearchParams(search: string): SearchParams {
   const query = new URLSearchParams(search);

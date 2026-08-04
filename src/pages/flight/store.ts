@@ -12,8 +12,6 @@ import type {
   FlightFilters,
 } from "./shared/types";
 
-const DEFAULT_FILTERS: FlightFilters = { cabin: "" };
-
 function usePageStoreHook() {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [flightsStatus, setFlightsStatus] = useState<FetchStatus>(
@@ -22,8 +20,9 @@ function usePageStoreHook() {
   const [selectedFlightId, setSelectedFlightId] = useState<string | null>(null);
 
   /** 当前这份结果集是按什么条件取回的 */
-  const [appliedFilters, setAppliedFilters] =
-    useState<FlightFilters>(DEFAULT_FILTERS);
+  const [appliedFilters, setAppliedFilters] = useState<FlightFilters>({
+    cabin: "",
+  });
 
   /** 为空表示资格未取回或取回失败，闸门一律按不通过处理 */
   const [eligibility, setEligibility] = useState<BookingEligibility | null>(

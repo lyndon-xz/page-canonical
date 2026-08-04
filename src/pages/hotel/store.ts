@@ -11,8 +11,6 @@ const DEFAULT_PARAMS: SearchParams = {
   sortBy: "price",
 };
 
-const PERSIST_KEY = "hotel-page";
-
 /** 改动即改动存储格式，需兼容老数据 */
 interface PersistedPageState {
   appliedParams: SearchParams;
@@ -90,12 +88,13 @@ export const usePageStore = create<PageStore>()(
         set({ batchFavoriteFailures: failures }),
     }),
     {
-      name: PERSIST_KEY,
+      name: "hotel-page",
       /** 白名单：只落盘长期偏好，瞬时态与服务端快照不跨会话 */
-      partialize: (state) => ({
-        appliedParams: state.appliedParams,
-        favoriteIds: state.favoriteIds,
-      }),
+      partialize: (state) => {
+        const { appliedParams, favoriteIds } = state;
+
+        return { appliedParams, favoriteIds };
+      },
       /** 与默认值合并，避免老数据缺少后加的字段 */
       merge: (persisted, current) => {
         const saved = persisted as Partial<PersistedPageState> | undefined;
