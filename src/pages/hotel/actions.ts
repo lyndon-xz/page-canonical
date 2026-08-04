@@ -35,42 +35,37 @@ function resolveInitialParams(): SearchParams {
   return usePageStore.getState().appliedParams;
 }
 
+/**
+ * 结果集的代号，重新取首页即进入新一代。首页与翻页共用同一个：
+ * 换条件不会取消已发出的请求，旧一代的响应仍会回来，落库前须先确认自己还是当前一代。
+ */
+let resultSetGeneration = 0;
+
+const isCurrentGeneration = (generation: number) =>
+  generation === resultSetGeneration;
+
 async function loadHotels(searchParams: SearchParams) {
-  const {
-    setAppliedParams,
-    setHotelsStatus,
-    setHotels,
-    setHotelsTotal,
-    setLoadedPage,
-    setHasMore,
-    setLoadMoreStatus,
-    setSelectedHotelId,
-    setSelectedHotelIds,
-    setBatchFavoriteFailures,
-  } = usePageStore.getState();
+  const { setAppliedParams, resetResultSet, setHotelsStatus, setFirstPage } =
+    usePageStore.getState();
+
+  const generation = (resultSetGeneration += 1);
 
   setAppliedParams(searchParams);
+  resetResultSet();
   setHotelsStatus(FetchStatus.Loading);
-  // 上一轮翻页失败的状态要清掉，否则新列表仍显示失败框、哨兵不渲染，无限滚动失效
-  setLoadMoreStatus(FetchStatus.Ready);
-
-  // 先作废上一轮结果；favoriteIds 不清，那是跨结果集的用户数据
-  setHotels([]);
-  setHotelsTotal(0);
-  setLoadedPage(0);
-  setHasMore(false);
-  setSelectedHotelId(null);
-  setSelectedHotelIds([]);
-  setBatchFavoriteFailures([]);
 
   try {
-    const { items, hasMore, total } = await fetchHotelPage(searchParams, 1);
-    setHotels(items);
-    setHotelsTotal(total);
-    setLoadedPage(1);
-    setHasMore(hasMore);
+    const page = await fetchHotelPage(searchParams, 1);
+    if (!isCurrentGeneration(generation)) {
+      return;
+    }
+    setFirstPage(page);
     setHotelsStatus(FetchStatus.Ready);
   } catch {
+    // 过期请求连状态都不该动，否则会把仍进行中的那次取数的 loading 提前收掉
+    if (!isCurrentGeneration(generation)) {
+      return;
+    }
     // 结果态已在请求前清空，这里只翻状态
     setHotelsStatus(FetchStatus.Error);
   }
@@ -88,10 +83,7 @@ export const pageActions = {
       loadedPage,
       appliedParams,
       setLoadMoreStatus,
-      appendHotels,
-      setHotelsTotal,
-      setLoadedPage,
-      setHasMore,
+      appendPage,
     } = usePageStore.getState();
 
     if (
@@ -102,22 +94,21 @@ export const pageActions = {
       return;
     }
 
-    const nextPage = loadedPage + 1;
+    // 只读不递增：翻页是延续当前一代，不像换条件那样另起一代
+    const generation = resultSetGeneration;
+
     setLoadMoreStatus(FetchStatus.Loading);
     try {
-      const {
-        items,
-        hasMore: nextHasMore,
-        total,
-      } = await fetchHotelPage(appliedParams, nextPage);
-
-      appendHotels(items);
-      // 总数每页都跟服务端对齐：期间别人增删了酒店，这里要反映真实值
-      setHotelsTotal(total);
-      setLoadedPage(nextPage);
-      setHasMore(nextHasMore);
+      const page = await fetchHotelPage(appliedParams, loadedPage + 1);
+      if (!isCurrentGeneration(generation)) {
+        return;
+      }
+      appendPage(page);
       setLoadMoreStatus(FetchStatus.Ready);
     } catch {
+      if (!isCurrentGeneration(generation)) {
+        return;
+      }
       // 保留 hasMore：失败不代表没有下一页，用户可以原地重试
       setLoadMoreStatus(FetchStatus.Error);
     }

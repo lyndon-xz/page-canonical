@@ -11,33 +11,44 @@ interface FlightCardProps {
 export default function FlightCard(props: FlightCardProps) {
   const { flight, selected } = props;
   const { selectFlight } = useFlightResultsActions();
+  const {
+    id,
+    airline,
+    flightNo,
+    departTime,
+    from,
+    arriveTime,
+    to,
+    cabin,
+    price,
+  } = flight;
 
   return (
     <article
       className={styles.card}
       data-selected={selected}
-      onClick={() => selectFlight(flight.id)}
+      onClick={() => selectFlight(id)}
     >
       <div className={styles.head}>
-        <h3 className={styles.airline}>{flight.airline}</h3>
-        <span className={styles.flightNo}>{flight.flightNo}</span>
+        <h3 className={styles.airline}>{airline}</h3>
+        <span className={styles.flightNo}>{flightNo}</span>
       </div>
 
       <div className={styles.route}>
         <div className={styles.point}>
-          <div className={styles.time}>{flight.departTime}</div>
-          <div className={styles.city}>{flight.from}</div>
+          <div className={styles.time}>{departTime}</div>
+          <div className={styles.city}>{from}</div>
         </div>
         <div className={styles.line} />
         <div className={styles.point}>
-          <div className={styles.time}>{flight.arriveTime}</div>
-          <div className={styles.city}>{flight.to}</div>
+          <div className={styles.time}>{arriveTime}</div>
+          <div className={styles.city}>{to}</div>
         </div>
       </div>
 
       <div className={styles.foot}>
-        <span className={styles.cabin}>{flight.cabin}</span>
-        <span className={styles.price}>¥{flight.price}</span>
+        <span className={styles.cabin}>{cabin}</span>
+        <span className={styles.price}>¥{price}</span>
       </div>
     </article>
   );

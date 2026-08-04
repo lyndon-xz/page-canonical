@@ -33,10 +33,12 @@ export async function fetchBookingEligibility(): Promise<BookingEligibility> {
 }
 
 export async function fetchFlights(filters: FlightFilters): Promise<Flight[]> {
+  const { cabin } = filters;
+
   await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
 
   return MOCK_FLIGHTS.filter(
-    (flight) => filters.cabin === "" || flight.cabin === filters.cabin,
+    (flight) => cabin === "" || flight.cabin === cabin,
   );
 }
 

@@ -17,7 +17,10 @@ export interface FlightFilters {
   cabin: string;
 }
 
-export type SortBy = "price" | "departTime";
+/** 排序值的单一来源：比较器、排序按钮都由此派生 */
+export const SORT_BY_VALUES = ["price", "departTime"] as const;
+
+export type SortBy = (typeof SORT_BY_VALUES)[number];
 
 /** 闸门的三个输入 */
 export interface BookingEligibility {

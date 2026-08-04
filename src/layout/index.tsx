@@ -36,21 +36,25 @@ export default function Layout() {
             <span className={styles.sub}>page-canonical</span>
           </div>
           <nav className={styles.switch}>
-            {routes.map((route) => (
-              <button
-                key={route.path}
-                type="button"
-                className={
-                  route.path === active
-                    ? `${styles.stub} ${styles.stubActive}`
-                    : styles.stub
-                }
-                onClick={() => navigate(route.path)}
-              >
-                {route.name}
-                <span className={styles.stubSub}>{route.lib}</span>
-              </button>
-            ))}
+            {routes.map((route) => {
+              const { path, name, lib } = route;
+
+              return (
+                <button
+                  key={path}
+                  type="button"
+                  className={
+                    path === active
+                      ? `${styles.stub} ${styles.stubActive}`
+                      : styles.stub
+                  }
+                  onClick={() => navigate(path)}
+                >
+                  {name}
+                  <span className={styles.stubSub}>{lib}</span>
+                </button>
+              );
+            })}
           </nav>
         </div>
       </header>

@@ -23,17 +23,21 @@ const comparators: Record<SortBy, (a: Hotel, b: Hotel) => number> = {
 const FAVORITE_REJECTED_HOTEL_IDS = ["h2"];
 
 const resolveMatchedHotels = (searchParams: SearchParams): Hotel[] => {
-  const keyword = searchParams.keyword.trim().toLowerCase();
+  const { keyword, star, sortBy } = searchParams;
+  // 归一化后的关键词换个名字，避开解构出的原始 keyword
+  const normalizedKeyword = keyword.trim().toLowerCase();
 
   return MOCK_HOTELS.filter((hotel) => {
+    // 酒店的 star 重命名，避开筛选条件里的同名字段
+    const { name, city, star: hotelStar } = hotel;
+
     const matchesKeyword =
-      keyword === "" ||
-      hotel.name.toLowerCase().includes(keyword) ||
-      hotel.city.toLowerCase().includes(keyword);
-    const matchesStar =
-      searchParams.star === 0 || hotel.star === searchParams.star;
+      normalizedKeyword === "" ||
+      name.toLowerCase().includes(normalizedKeyword) ||
+      city.toLowerCase().includes(normalizedKeyword);
+    const matchesStar = star === 0 || hotelStar === star;
     return matchesKeyword && matchesStar;
-  }).sort(comparators[searchParams.sortBy]);
+  }).sort(comparators[sortBy]);
 };
 
 export async function fetchHotelPage(

@@ -34,9 +34,10 @@ export function useHotelListModel() {
   const batchFailureNames = useMemo(
     () =>
       batchFavoriteFailures.map((failure) => {
-        const hotel = hotels.find((item) => item.id === failure.hotelId);
+        const { hotelId, reason } = failure;
+        const hotel = hotels.find((item) => item.id === hotelId);
 
-        return `${hotel?.name ?? failure.hotelId}（${failure.reason}）`;
+        return `${hotel?.name ?? hotelId}（${reason}）`;
       }),
     [batchFavoriteFailures, hotels],
   );

@@ -1,9 +1,10 @@
+import { SORT_BY_VALUES } from "./shared/types";
 import type { SearchParams, SortBy } from "./shared/types";
 
 const DEFAULT_SORT: SortBy = "price";
 
 const isSortBy = (value: string): value is SortBy =>
-  ["price", "rating", "distance"].includes(value);
+  (SORT_BY_VALUES as readonly string[]).includes(value);
 
 export function parseSearchParams(search: string): SearchParams {
   const query = new URLSearchParams(search);
@@ -20,15 +21,16 @@ export function parseSearchParams(search: string): SearchParams {
 export function serializeParams(
   searchParams: SearchParams,
 ): Record<string, string> {
+  const { keyword, star, sortBy } = searchParams;
   const result: Record<string, string> = {};
-  if (searchParams.keyword.trim() !== "") {
-    result.keyword = searchParams.keyword.trim();
+  if (keyword.trim() !== "") {
+    result.keyword = keyword.trim();
   }
-  if (searchParams.star !== 0) {
-    result.star = String(searchParams.star);
+  if (star !== 0) {
+    result.star = String(star);
   }
-  if (searchParams.sortBy !== DEFAULT_SORT) {
-    result.sortBy = searchParams.sortBy;
+  if (sortBy !== DEFAULT_SORT) {
+    result.sortBy = sortBy;
   }
   return result;
 }

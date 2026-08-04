@@ -10,7 +10,10 @@ export interface Hotel {
   distanceKm: number;
 }
 
-export type SortBy = "price" | "rating" | "distance";
+/** 排序值的单一来源：校验、比较器、排序按钮都由此派生 */
+export const SORT_BY_VALUES = ["price", "rating", "distance"] as const;
+
+export type SortBy = (typeof SORT_BY_VALUES)[number];
 
 export interface SearchParams {
   keyword: string;

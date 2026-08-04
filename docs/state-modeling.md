@@ -42,7 +42,7 @@ enum FetchStatus {
 
 不用 `isLoading` + `hasError` 两个布尔：四种组合里「加载中且已失败」是非法的，得靠各处 action 手动维持互斥，一处漏清就会同时转圈又报错。判别态从类型上就排除了非法组合。
 
-`Ready` 兼作初始值，语义是「没有进行中的请求，也没有失败」，此时显示什么由内容自身决定（空列表显示空占位，有数据显示数据）。
+`Ready` 兼作初始值，语义是「没有进行中的请求，也没有失败」，此时显示什么由内容自身决定（空列表显示空占位，有数据显示数据）。UI 侧消费这个判别态的写法见[分支渲染](branching.md)。
 
 ### 为什么取数失败要进状态，而操作失败走 toast
 
@@ -58,6 +58,54 @@ enum FetchStatus {
 ### 不存失败原因
 
 `FetchStatus` 只表达「界面该显示什么」，不带失败原因。取数失败的占位文案是固定的，服务端消息没有出场的地方，存下来就是没人读的死值。原因属于日志与上报。
+
+## 枚举取值要与类型同源
+
+一个字段的合法取值有几个，就只声明一次。`SortBy` 的来源是数组，类型从数组派生：
+
+```ts
+export const SORT_BY_VALUES = ["price", "rating", "distance"] as const;
+
+export type SortBy = (typeof SORT_BY_VALUES)[number];
+```
+
+反过来手写 `type SortBy = "price" | "rating" | "distance"`，运行时想遍历这些值就得再抄一份数组，两份从此各自演进。
+
+消费点一律用 `Record<SortBy, ...>` 而不是数组，因为 `Record` 是 exhaustive 的：比较器与 sort-bar 的 `SORT_LABELS` 少一个 key 就编译不过。展示文案该留在 UI 层，但用 `Record<SortBy, string>` 而不是 `{ label, value }[]`——同样是为了这层检查。渲染时遍历 `SORT_BY_VALUES`，按钮顺序也就由声明顺序决定。
+
+比较器本身落在哪一层，由排序在哪执行决定，与取值怎么建模无关。hotel 分页加载，排序须由服务端在全量数据上做，`sortBy` 因此是取数参数，比较器在 `data/services.ts`；flight 全量在手、前端本地排，`sortBy` 只是模块内的展示态，比较器在 `modules/flight-results/model.ts`。
+
+这样加一个排序值只改 `SORT_BY_VALUES` 一行，校验自动跟随，两处查表由编译器点名。
+
+### enum 留给服务端契约
+
+`SortBy` 不用 enum，不是因为 enum 不安全，而是它一处也省不掉：`comparators`、`SORT_LABELS` 照样各写三条，URL 校验照样得写 `Object.values(SortBy).includes(raw)`。它只把 `"rating"` 换成 `SortBy.Rating`，而拼错这件事 union 已经由编译器管住了。代价是 enum 会生成运行时代码，与「类型只存在于编译期」的心智不一致，`erasableSyntaxOnly` 下还直接不可用。
+
+`FareRuleType` 与 `FareBlockReason` 用 enum，判据是**值本身是不是外部契约**。它们的字符串由服务端定义，enum 成员名把契约值与前端引用解耦：服务端把 `changeFee` 改成 `change_fee`，只改 enum 定义一处，几十个 `FareRuleType.ChangeFee` 不动。`SortBy` 的取值是前端自己定的（连 URL 参数名也是），没有这层解耦需求，需要遍历的场合反而更多。
+
+`FetchStatus` 同理不是契约，但它连字符串值都不需要，纯做判别用。
+
+### 边界上的值必须运行时收窄
+
+编译期安全只在值不越过系统边界时成立。URL、接口来的值到手是 `string`，enum 还是 union 都拦不住，唯一的办法是在边界收窄一次，且校验依据要引用同一份来源：
+
+```ts
+const isSortBy = (value: string): value is SortBy =>
+  (SORT_BY_VALUES as readonly string[]).includes(value);
+```
+
+这里另抄一个 `["price", "rating", "distance"]` 是最隐蔽的一种错：加了新排序值忘了同步，`?sortBy=popularity` 会被判为非法、静默降级成默认排序，而 `comparators` 那边有 exhaustive 检查会报错，人容易以为已经改全了。
+
+`Record` 的索引签名在边界上会撒谎，后果比降级重。`RULE_DEFINITIONS[rule.ruleType]` 的类型是 `RuleDefinition`，但服务端多下发一个前端还没定义的 `ruleType` 时它是 `undefined`，接着取 `.category` 就抛错——这行在 `useMemo` 里、渲染路径上，整个模块白屏。所以查表要显式跳过未知值：
+
+```ts
+// 服务端可能下发前端尚未定义的 ruleType，Record 的索引类型不体现这点，故须显式跳过
+const rules = fareRules.filter(
+  (rule) => RULE_DEFINITIONS[rule.ruleType]?.category === category,
+);
+```
+
+同一份数据换成 `includes` 查询就没这个问题：`fareBlockReasons.includes(blockReason)` 遇到未知值只是匹配不上。区别在于索引取值假设 key 一定存在，而查询不假设。
 
 ## 持久化只存长期偏好
 

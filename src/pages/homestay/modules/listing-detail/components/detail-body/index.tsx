@@ -50,16 +50,19 @@ export default function DetailBody(props: DetailBodyProps) {
     );
   }
 
+  const { title, city, roomType } = listing;
+  const { hostName, description, amenities, cancellationPolicy } = detail;
+
   return (
     <div>
-      <h3 className={styles.title}>{listing.title}</h3>
+      <h3 className={styles.title}>{title}</h3>
       <p className={styles.meta}>
-        {listing.city} · {listing.roomType} · 房东 {detail.hostName}
+        {city} · {roomType} · 房东 {hostName}
       </p>
-      <p className={styles.description}>{detail.description}</p>
+      <p className={styles.description}>{description}</p>
 
       <div className={styles.amenities}>
-        {detail.amenities.map((amenity) => (
+        {amenities.map((amenity) => (
           <Tag key={amenity} className={styles.amenity}>
             {amenity}
           </Tag>
@@ -67,7 +70,7 @@ export default function DetailBody(props: DetailBodyProps) {
       </div>
 
       <p className={styles.policyLabel}>退订政策</p>
-      <p className={styles.policy}>{detail.cancellationPolicy}</p>
+      <p className={styles.policy}>{cancellationPolicy}</p>
 
       {inDrawer ? (
         <div className={styles.actions}>

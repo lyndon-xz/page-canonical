@@ -1,18 +1,14 @@
-import { Button, Spin } from "antd";
-
-import { FetchStatus } from "@/lib/fetch-status";
-
 import { useFareRulesActions } from "./actions";
 import { CATEGORY_CONFIG, CATEGORY_TAB_ORDER } from "./category";
-import RuleItem from "./components/rule-item";
+import RulesBody from "./components/rules-body";
 import { FareRulesModel } from "./model";
 
 import styles from "./index.module.scss";
 
 function FareRulesInner() {
-  const { isVisible, selectedFlight, fareRulesStatus, activeCategory, groups } =
+  const { isVisible, selectedFlight, activeCategory } =
     FareRulesModel.useContainer();
-  const { changeCategory, retry } = useFareRulesActions();
+  const { changeCategory } = useFareRulesActions();
 
   if (!isVisible) {
     return null;
@@ -39,36 +35,7 @@ function FareRulesInner() {
         ))}
       </div>
 
-      {fareRulesStatus === FetchStatus.Loading ? (
-        <div className={styles.stateBox}>
-          <Spin />
-        </div>
-      ) : fareRulesStatus === FetchStatus.Error ? (
-        <div className={styles.stateBox}>
-          <p className={styles.errorText}>退改规则加载失败</p>
-          <Button size="small" onClick={retry}>
-            重试
-          </Button>
-        </div>
-      ) : (
-        <div className={styles.groups}>
-          {groups.map((group) => (
-            <article key={group.category} className={styles.group}>
-              <div className={styles.groupHead}>
-                <h3 className={styles.groupTitle}>{group.title}</h3>
-                <span className={styles.groupCount}>
-                  {group.qualifiedCount}/{group.totalCount} 项符合
-                </span>
-              </div>
-              <div className={styles.ruleGrid}>
-                {group.rules.map((rule) => (
-                  <RuleItem key={rule.ruleType} rule={rule} />
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+      <RulesBody />
     </section>
   );
 }

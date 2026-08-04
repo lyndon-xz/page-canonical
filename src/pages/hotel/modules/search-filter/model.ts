@@ -32,5 +32,10 @@ export function useSearchFilterModel() {
     })),
   );
 
-  return { keyword, star, resultCount, isLoading };
+  return {
+    keyword,
+    star,
+    resultCount,
+    isLoading,
+  };
 }

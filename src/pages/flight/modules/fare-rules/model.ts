@@ -44,7 +44,9 @@ const formatRuleText = (template: string, rule: FareRule) =>
 
 function useFareRulesModelHook() {
   const [activeCategory, setActiveCategory] = useState(FareRuleCategory.All);
-  const [expandedRuleTypes, setExpandedRuleTypes] = useState<string[]>([]);
+  const [expandedRuleTypes, setExpandedRuleTypes] = useState<FareRuleType[]>(
+    [],
+  );
 
   const {
     fareRules,
@@ -62,12 +64,15 @@ function useFareRulesModelHook() {
 
     return categories
       .map((category): CategoryGroup => {
+        // 服务端可能下发前端尚未定义的 ruleType，Record 的索引类型不体现这点，故须显式跳过
         const rules = fareRules
           .filter(
-            (rule) => RULE_DEFINITIONS[rule.ruleType].category === category,
+            (rule) => RULE_DEFINITIONS[rule.ruleType]?.category === category,
           )
           .map((rule): RuleView => {
-            const definition = RULE_DEFINITIONS[rule.ruleType];
+            const { ruleType, qualified } = rule;
+
+            const definition = RULE_DEFINITIONS[ruleType];
             const {
               standard,
               tooltip,
@@ -79,20 +84,21 @@ function useFareRulesModelHook() {
 
             const blocked =
               !!blockReason && fareBlockReasons.includes(blockReason);
-            const qualified = rule.qualified && !blocked;
+            // 与解构出的原始字段 qualified 撞名，故加工后的展示态改名
+            const displayQualified = qualified && !blocked;
 
             return {
-              ruleType: rule.ruleType,
+              ruleType,
               standard,
               tooltip,
-              qualified,
+              qualified: displayQualified,
               blocked,
               qualifiedDesc: formatRuleText(
                 resolveQualifiedDesc?.(rule) ?? qualifiedDesc,
                 rule,
               ),
               tip:
-                qualified || !tip
+                displayQualified || !tip
                   ? null
                   : {
                       title: tip.title,
@@ -102,7 +108,7 @@ function useFareRulesModelHook() {
                       ),
                       action: tip.action ?? null,
                     },
-              expanded: expandedRuleTypes.includes(rule.ruleType),
+              expanded: expandedRuleTypes.includes(ruleType),
             };
           });
 

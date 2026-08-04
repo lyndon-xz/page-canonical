@@ -9,9 +9,10 @@ export function parseFilters(search: string): FlightFilters {
 export function serializeFilters(
   filters: FlightFilters,
 ): Record<string, string> {
+  const { cabin } = filters;
   const result: Record<string, string> = {};
-  if (filters.cabin !== "") {
-    result.cabin = filters.cabin;
+  if (cabin !== "") {
+    result.cabin = cabin;
   }
   return result;
 }

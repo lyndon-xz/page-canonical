@@ -1,22 +1,14 @@
-import { Button, Empty, Spin } from "antd";
 import { useRef } from "react";
-
-import { FetchStatus } from "@/lib/fetch-status";
 
 import { useRegisterLive } from "../../live";
 
-import { useFlightResultsActions } from "./actions";
-import FlightCard from "./components/flight-card";
+import ResultsBody from "./components/results-body";
 import SortBar from "./components/sort-bar";
 import { FlightResultsModel } from "./model";
 
 import styles from "./index.module.scss";
 
 function FlightResultsInner() {
-  const { sortedFlights, flightsStatus, selectedFlightId } =
-    FlightResultsModel.useContainer();
-  const { retry } = useFlightResultsActions();
-
   const containerRef = useRef<HTMLElement>(null);
   useRegisterLive("flightResultsRef", containerRef);
 
@@ -27,32 +19,7 @@ function FlightResultsInner() {
         <SortBar />
       </header>
 
-      {flightsStatus === FetchStatus.Loading ? (
-        <div className={styles.stateBox}>
-          <Spin />
-        </div>
-      ) : flightsStatus === FetchStatus.Error ? (
-        <div className={styles.stateBox}>
-          <p className={styles.errorText}>航班列表加载失败</p>
-          <Button size="small" onClick={retry}>
-            重试
-          </Button>
-        </div>
-      ) : sortedFlights.length === 0 ? (
-        <div className={styles.stateBox}>
-          <Empty description="暂无匹配的航班" />
-        </div>
-      ) : (
-        <div className={styles.list}>
-          {sortedFlights.map((flight) => (
-            <FlightCard
-              key={flight.id}
-              flight={flight}
-              selected={flight.id === selectedFlightId}
-            />
-          ))}
-        </div>
-      )}
+      <ResultsBody />
     </section>
   );
 }

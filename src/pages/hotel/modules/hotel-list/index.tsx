@@ -1,4 +1,4 @@
-import { Alert, Button, Checkbox, Empty, Spin } from "antd";
+import { Alert, Button, Checkbox } from "antd";
 import { useRef } from "react";
 
 import { FetchStatus } from "@/lib/fetch-status";
@@ -6,7 +6,7 @@ import { FetchStatus } from "@/lib/fetch-status";
 import { useRegisterLive } from "../../live";
 
 import { hotelListActions } from "./actions";
-import HotelCard from "./components/hotel-card";
+import ListBody from "./components/list-body";
 import SortBar from "./components/sort-bar";
 import { useHotelListEffects } from "./effects";
 import { useHotelListModel } from "./model";
@@ -17,10 +17,8 @@ export default function HotelList() {
   const {
     hotels,
     hotelsStatus,
-    selectedHotelId,
     hasMore,
     loadMoreStatus,
-    favoriteIds,
     selectedHotelIds,
     isBatchFavoriting,
     batchFailureNames,
@@ -94,53 +92,7 @@ export default function HotelList() {
         </div>
       )}
 
-      {hotelsStatus === FetchStatus.Loading ? (
-        <div className={styles.stateBox}>
-          <Spin />
-        </div>
-      ) : hotelsStatus === FetchStatus.Error ? (
-        <div className={styles.stateBox}>
-          <p className={styles.errorText}>酒店列表加载失败</p>
-          <Button size="small" onClick={hotelListActions.retry}>
-            重试
-          </Button>
-        </div>
-      ) : hotels.length === 0 ? (
-        <div className={styles.stateBox}>
-          <Empty description="暂无匹配的酒店" />
-        </div>
-      ) : (
-        <>
-          <div className={styles.grid}>
-            {hotels.map((hotel) => (
-              <HotelCard
-                key={hotel.id}
-                hotel={hotel}
-                selected={hotel.id === selectedHotelId}
-                favorite={favoriteIds.includes(hotel.id)}
-                checked={selectedHotelIds.includes(hotel.id)}
-              />
-            ))}
-          </div>
-
-          {loadMoreStatus === FetchStatus.Error ? (
-            <div className={styles.loadMoreBox}>
-              <span className={styles.errorText}>下一页加载失败</span>
-              <Button size="small" onClick={hotelListActions.loadMore}>
-                重试
-              </Button>
-            </div>
-          ) : loadMoreStatus === FetchStatus.Loading ? (
-            <div className={styles.loadMoreBox}>
-              <Spin size="small" />
-            </div>
-          ) : showSentinel ? (
-            <div ref={sentinelRef} className={styles.sentinel} />
-          ) : (
-            <p className={styles.listEnd}>没有更多了</p>
-          )}
-        </>
-      )}
+      <ListBody showSentinel={showSentinel} sentinelRef={sentinelRef} />
     </section>
   );
 }

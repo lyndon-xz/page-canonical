@@ -68,20 +68,24 @@ export default function InquiryFields() {
           name="checkInDate"
           control={control}
           rules={{ required: "请选择入住日期" }}
-          render={({ field }) => (
-            <DatePicker
-              id="checkInDate"
-              style={{ width: "100%" }}
-              placeholder="请选择入住日期"
-              inputReadOnly
-              value={field.value ? dayjs(field.value) : null}
-              onChange={(_, dateString) =>
-                field.onChange(typeof dateString === "string" ? dateString : "")
-              }
-              onBlur={field.onBlur}
-              status={errors.checkInDate ? "error" : undefined}
-            />
-          )}
+          render={({ field }) => {
+            const { value, onBlur, onChange } = field;
+
+            return (
+              <DatePicker
+                id="checkInDate"
+                style={{ width: "100%" }}
+                placeholder="请选择入住日期"
+                inputReadOnly
+                value={value ? dayjs(value) : null}
+                onChange={(_, dateString) =>
+                  onChange(typeof dateString === "string" ? dateString : "")
+                }
+                onBlur={onBlur}
+                status={errors.checkInDate ? "error" : undefined}
+              />
+            );
+          }}
         />
         {errors.checkInDate && (
           <span className={styles.error}>{errors.checkInDate.message}</span>
@@ -99,23 +103,27 @@ export default function InquiryFields() {
             required: "请填写入住晚数",
             min: { value: 1, message: "至少 1 晚" },
           }}
-          render={({ field }) => (
-            <Input
-              id="nights"
-              type="number"
-              min={1}
-              status={errors.nights ? "error" : undefined}
-              name={field.name}
-              ref={field.ref}
-              value={field.value}
-              onBlur={field.onBlur}
-              onChange={(e) =>
-                field.onChange(
-                  e.target.value === "" ? undefined : Number(e.target.value),
-                )
-              }
-            />
-          )}
+          render={({ field }) => {
+            const { name, ref, value, onBlur, onChange } = field;
+
+            return (
+              <Input
+                id="nights"
+                type="number"
+                min={1}
+                status={errors.nights ? "error" : undefined}
+                name={name}
+                ref={ref}
+                value={value}
+                onBlur={onBlur}
+                onChange={(e) =>
+                  onChange(
+                    e.target.value === "" ? undefined : Number(e.target.value),
+                  )
+                }
+              />
+            );
+          }}
         />
         {errors.nights && (
           <span className={styles.error}>{errors.nights.message}</span>

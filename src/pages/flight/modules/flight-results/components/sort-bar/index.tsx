@@ -1,13 +1,14 @@
 import { useFlightResultsActions } from "../../actions";
 import { FlightResultsModel } from "../../model";
+import { SORT_BY_VALUES } from "../../../../shared/types";
 import type { SortBy } from "../../../../shared/types";
 
 import styles from "./index.module.scss";
 
-const SORT_OPTIONS: { label: string; value: SortBy }[] = [
-  { label: "价格优先", value: "price" },
-  { label: "起飞时间", value: "departTime" },
-];
+const SORT_LABELS: Record<SortBy, string> = {
+  price: "价格优先",
+  departTime: "起飞时间",
+};
 
 export default function SortBar() {
   const { sortBy } = FlightResultsModel.useContainer();
@@ -15,15 +16,15 @@ export default function SortBar() {
 
   return (
     <div className={styles.sortBar} role="group" aria-label="排序方式">
-      {SORT_OPTIONS.map((option) => (
+      {SORT_BY_VALUES.map((value) => (
         <button
-          key={option.value}
+          key={value}
           type="button"
           className={styles.option}
-          data-active={sortBy === option.value}
-          onClick={() => changeSortBy(option.value)}
+          data-active={sortBy === value}
+          onClick={() => changeSortBy(value)}
         >
-          {option.label}
+          {SORT_LABELS[value]}
         </button>
       ))}
     </div>

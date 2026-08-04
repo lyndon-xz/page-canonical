@@ -3,7 +3,12 @@ import { persist } from "zustand/middleware";
 
 import { FetchStatus } from "@/lib/fetch-status";
 
-import type { BatchFavoriteFailure, Hotel, SearchParams } from "./shared/types";
+import type {
+  BatchFavoriteFailure,
+  Hotel,
+  HotelPage,
+  SearchParams,
+} from "./shared/types";
 
 const DEFAULT_PARAMS: SearchParams = {
   keyword: "",
@@ -36,19 +41,28 @@ interface PageStore {
   isBatchFavoriting: boolean;
   batchFavoriteFailures: BatchFavoriteFailure[];
 
-  setHotels: (hotels: Hotel[]) => void;
-  appendHotels: (hotels: Hotel[]) => void;
-  setHotelsTotal: (total: number) => void;
+  /**
+   * 装载首页。列表、总数、分页游标必须整组写入：分开设会留下
+   * 「已有 12 条却 loadedPage 仍是 0」这类中间态，哨兵会照着它重复拉第 1 页。
+   */
+  setFirstPage: (page: HotelPage) => void;
+  /** 追加下一页。页码由此处自增，调用方不再各自记账 */
+  appendPage: (page: HotelPage) => void;
+
   setHotelsStatus: (status: FetchStatus) => void;
   setSelectedHotelId: (id: string | null) => void;
   setAppliedParams: (searchParams: SearchParams) => void;
-  setLoadedPage: (page: number) => void;
-  setHasMore: (hasMore: boolean) => void;
   setLoadMoreStatus: (status: FetchStatus) => void;
   setFavoriteIds: (ids: string[]) => void;
   setSelectedHotelIds: (ids: string[]) => void;
   setIsBatchFavoriting: (batchFavoriting: boolean) => void;
   setBatchFavoriteFailures: (failures: BatchFavoriteFailure[]) => void;
+
+  /**
+   * 作废上一轮结果集：列表、分页游标、以及只对这批结果成立的选中与失败项。
+   * favoriteIds 与 appliedParams 不在其中，那是跨结果集的用户数据。
+   */
+  resetResultSet: () => void;
 }
 
 export const usePageStore = create<PageStore>()(
@@ -70,15 +84,33 @@ export const usePageStore = create<PageStore>()(
       isBatchFavoriting: false,
       batchFavoriteFailures: [],
 
-      setHotels: (hotels) => set({ hotels }),
-      appendHotels: (hotels) =>
-        set((state) => ({ hotels: [...state.hotels, ...hotels] })),
-      setHotelsTotal: (total) => set({ hotelsTotal: total }),
+      setFirstPage: (page) => {
+        const { items, total, hasMore } = page;
+
+        set({
+          hotels: items,
+          hotelsTotal: total,
+          hasMore,
+          loadedPage: 1,
+        });
+      },
+      appendPage: (page) =>
+        set((state) => {
+          const { items, total, hasMore } = page;
+          const { hotels, loadedPage } = state;
+
+          return {
+            hotels: [...hotels, ...items],
+            // 总数每页都跟服务端对齐：期间别人增删了酒店，这里要反映真实值
+            hotelsTotal: total,
+            hasMore,
+            loadedPage: loadedPage + 1,
+          };
+        }),
+
       setHotelsStatus: (status) => set({ hotelsStatus: status }),
       setSelectedHotelId: (id) => set({ selectedHotelId: id }),
       setAppliedParams: (searchParams) => set({ appliedParams: searchParams }),
-      setLoadedPage: (page) => set({ loadedPage: page }),
-      setHasMore: (hasMore) => set({ hasMore }),
       setLoadMoreStatus: (status) => set({ loadMoreStatus: status }),
       setFavoriteIds: (ids) => set({ favoriteIds: ids }),
       setSelectedHotelIds: (ids) => set({ selectedHotelIds: ids }),
@@ -86,6 +118,19 @@ export const usePageStore = create<PageStore>()(
         set({ isBatchFavoriting: batchFavoriting }),
       setBatchFavoriteFailures: (failures) =>
         set({ batchFavoriteFailures: failures }),
+
+      resetResultSet: () =>
+        set({
+          hotels: [],
+          hotelsTotal: 0,
+          loadedPage: 0,
+          hasMore: false,
+          // 上一轮翻页的失败痕迹要一并清掉，否则新列表仍显示失败框、哨兵不渲染，无限滚动失效
+          loadMoreStatus: FetchStatus.Ready,
+          selectedHotelId: null,
+          selectedHotelIds: [],
+          batchFavoriteFailures: [],
+        }),
     }),
     {
       name: "hotel-page",

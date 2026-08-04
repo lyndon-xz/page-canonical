@@ -21,17 +21,21 @@ function SearchBarInner() {
     <section className={styles.searchBar}>
       <div className={styles.row}>
         <div className={styles.cabins} role="group" aria-label="舱位筛选">
-          {CABIN_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={styles.cabin}
-              data-active={cabinDraft === option.value}
-              onClick={() => changeCabin(option.value)}
-            >
-              {option.label}
-            </button>
-          ))}
+          {CABIN_OPTIONS.map((option) => {
+            const { value, label } = option;
+
+            return (
+              <button
+                key={value}
+                type="button"
+                className={styles.cabin}
+                data-active={cabinDraft === value}
+                onClick={() => changeCabin(value)}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
         <Button
           type="primary"

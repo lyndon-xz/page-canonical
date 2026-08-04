@@ -1,29 +1,30 @@
 import { hotelListActions } from "../../actions";
 import { useHotelListModel } from "../../model";
+import { SORT_BY_VALUES } from "../../../../shared/types";
 import type { SortBy } from "../../../../shared/types";
 
 import styles from "./index.module.scss";
 
-const SORT_OPTIONS: { label: string; value: SortBy }[] = [
-  { label: "价格优先", value: "price" },
-  { label: "评分优先", value: "rating" },
-  { label: "距离优先", value: "distance" },
-];
+const SORT_LABELS: Record<SortBy, string> = {
+  price: "价格优先",
+  rating: "评分优先",
+  distance: "距离优先",
+};
 
 export default function SortBar() {
   const { sortBy } = useHotelListModel();
 
   return (
     <div className={styles.sortBar} role="group" aria-label="排序方式">
-      {SORT_OPTIONS.map((option) => (
+      {SORT_BY_VALUES.map((value) => (
         <button
-          key={option.value}
+          key={value}
           type="button"
           className={styles.option}
-          data-active={sortBy === option.value}
-          onClick={() => hotelListActions.changeSortBy(option.value)}
+          data-active={sortBy === value}
+          onClick={() => hotelListActions.changeSortBy(value)}
         >
-          {option.label}
+          {SORT_LABELS[value]}
         </button>
       ))}
     </div>

@@ -40,17 +40,21 @@ export default function SearchFilter() {
       </div>
 
       <div className={styles.chips} role="group" aria-label="星级筛选">
-        {STAR_OPTIONS.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            className={styles.chip}
-            data-active={star === option.value}
-            onClick={() => searchFilterActions.updateStar(option.value)}
-          >
-            {option.label}
-          </button>
-        ))}
+        {STAR_OPTIONS.map((option) => {
+          const { value, label } = option;
+
+          return (
+            <button
+              key={value}
+              type="button"
+              className={styles.chip}
+              data-active={star === value}
+              onClick={() => searchFilterActions.updateStar(value)}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       <p className={styles.resultCount}>找到 {resultCount} 家</p>

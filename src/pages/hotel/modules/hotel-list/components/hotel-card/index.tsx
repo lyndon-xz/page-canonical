@@ -20,39 +20,40 @@ interface HotelCardProps {
 
 export default function HotelCard(props: HotelCardProps) {
   const { hotel, selected, favorite, checked } = props;
+  const { id, name, star, city, distanceKm, rating, pricePerNight } = hotel;
 
   return (
     <article
       className={styles.card}
       data-selected={selected}
       data-checked={checked}
-      onClick={() => hotelListActions.selectHotel(hotel.id)}
+      onClick={() => hotelListActions.selectHotel(id)}
     >
       <div className={styles.head}>
         {/* 阻止冒泡：勾选不应连带触发卡片的单选高亮 */}
         <Checkbox
           checked={checked}
           className={styles.checkbox}
-          aria-label={`勾选 ${hotel.name}`}
+          aria-label={`勾选 ${name}`}
           onClick={(event) => event.stopPropagation()}
-          onChange={() => hotelListActions.toggleSelect(hotel.id)}
+          onChange={() => hotelListActions.toggleSelect(id)}
         />
-        <h3 className={styles.name}>{hotel.name}</h3>
-        <span className={styles.star}>{hotel.star}星</span>
+        <h3 className={styles.name}>{name}</h3>
+        <span className={styles.star}>{star}星</span>
       </div>
 
       <div className={styles.meta}>
         <span className={styles.city}>
-          <EnvironmentOutlined /> {hotel.city}
+          <EnvironmentOutlined /> {city}
         </span>
-        <span className={styles.distance}>距市中心 {hotel.distanceKm} km</span>
+        <span className={styles.distance}>距市中心 {distanceKm} km</span>
       </div>
 
       <div className={styles.foot}>
-        {/* 评分不用星星图标：星星是星级（hotel.star）的表达，两者都用星会混淆 */}
-        <span className={styles.rating}>{hotel.rating} 分</span>
+        {/* 评分不用星星图标：星星是星级（star）的表达，两者都用星会混淆 */}
+        <span className={styles.rating}>{rating} 分</span>
         <span className={styles.price}>
-          ¥{hotel.pricePerNight}
+          ¥{pricePerNight}
           <em className={styles.unit}> / 晚</em>
         </span>
         <button
@@ -62,7 +63,7 @@ export default function HotelCard(props: HotelCardProps) {
           aria-label={favorite ? "取消收藏" : "收藏酒店"}
           onClick={(event) => {
             event.stopPropagation();
-            hotelListActions.toggleFavorite(hotel.id);
+            hotelListActions.toggleFavorite(id);
           }}
         >
           {favorite ? <HeartFilled /> : <HeartOutlined />}

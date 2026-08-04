@@ -29,17 +29,22 @@ export class InquirySubmitError extends Error {
 export async function fetchListings(
   filters: ListingFilters,
 ): Promise<Listing[]> {
+  const { keyword, roomType } = filters;
+
   await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
 
-  const keyword = filters.keyword.trim().toLowerCase();
+  // 归一化后的关键词换个名字，避开解构出的原始 keyword
+  const normalizedKeyword = keyword.trim().toLowerCase();
 
   return MOCK_LISTINGS.filter((listing) => {
+    // 房源的 roomType 重命名，避开筛选条件里的同名字段
+    const { title, city, roomType: listingRoomType } = listing;
+
     const matchesKeyword =
-      keyword === "" ||
-      listing.title.toLowerCase().includes(keyword) ||
-      listing.city.toLowerCase().includes(keyword);
-    const matchesRoomType =
-      filters.roomType === "" || listing.roomType === filters.roomType;
+      normalizedKeyword === "" ||
+      title.toLowerCase().includes(normalizedKeyword) ||
+      city.toLowerCase().includes(normalizedKeyword);
+    const matchesRoomType = roomType === "" || listingRoomType === roomType;
     return matchesKeyword && matchesRoomType;
   });
 }
