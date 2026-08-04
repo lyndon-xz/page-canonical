@@ -1,4 +1,4 @@
-import { ConfigProvider } from "antd";
+import { ConfigProvider, message } from "antd";
 import { createRoot } from "react-dom/client";
 
 import Layout from "@/layout";
@@ -15,6 +15,9 @@ ConfigProvider.config({
     <ConfigProvider theme={theme}>{children}</ConfigProvider>
   ),
 });
+
+// 默认 8px 会让 toast 整个嵌进 sticky 顶栏，落到顶栏下方的留白里才读得清
+message.config({ top: 96 });
 
 const container = document.getElementById("root");
 if (container) {

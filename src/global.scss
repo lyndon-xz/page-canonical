@@ -10,6 +10,8 @@
   --amber-soft: #faeedb;
   --ok: #6f8f5e;
   --ok-soft: #eaf0e4;
+  --danger: #b04a3a;
+  --danger-soft: #f7e4de;
   --line: #ece2d4;
   --line-soft: #f1e9dd;
   --muted: #8a7c6d;
@@ -35,4 +37,12 @@ body {
 
 .ant-btn {
   font-weight: 600;
+}
+
+/*
+ * 浮层背景与页面底色仅差一档，描边才撑得起层次。message 既没有 border token，
+ * 静态方法也读不到 config 里的 classNames，只能落到类名上。
+ */
+.ant-message-notice {
+  border: 1px solid var(--line);
 }
