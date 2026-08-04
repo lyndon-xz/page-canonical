@@ -10,6 +10,8 @@ import LoadMoreFooter from "../load-more-footer";
 
 import styles from "./index.module.scss";
 
+const { retry } = hotelListActions;
+
 interface ListBodyProps {
   /** 由父组件算好传入，与喂给观察器的是同一个值，避免渲染条件和观察条件分叉 */
   showSentinel: boolean;
@@ -39,7 +41,7 @@ export default function ListBody(props: ListBodyProps) {
     return (
       <div className={styles.stateBox}>
         <p className={styles.errorText}>酒店列表加载失败</p>
-        <Button size="small" onClick={hotelListActions.retry}>
+        <Button size="small" onClick={retry}>
           重试
         </Button>
       </div>

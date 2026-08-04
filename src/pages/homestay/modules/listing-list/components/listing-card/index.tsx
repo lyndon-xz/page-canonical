@@ -10,6 +10,8 @@ import { useListingListModel } from "../../model";
 
 import styles from "./index.module.scss";
 
+const { selectListing, toggleFavorite } = listingListActions;
+
 interface ListingCardProps {
   listing: Listing;
   selected: boolean;
@@ -18,7 +20,6 @@ interface ListingCardProps {
 export default function ListingCard(props: ListingCardProps) {
   const { listing, selected } = props;
   const { favoriteIds } = useListingListModel();
-  const { selectListing, toggleFavorite } = listingListActions;
   const { id, title, roomType, city, rating, pricePerNight } = listing;
 
   const isFavorite = favoriteIds.includes(id);

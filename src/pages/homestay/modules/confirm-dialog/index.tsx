@@ -6,6 +6,8 @@ import { SCENE_COPY } from "./scenes";
 
 import styles from "./index.module.scss";
 
+const { confirm, cancel } = confirmDialogActions;
+
 export default function ConfirmDialog() {
   const { scene, isConfirming, confirmError } = useConfirmDialogModel();
 
@@ -22,8 +24,8 @@ export default function ConfirmDialog() {
       okText={okText}
       cancelText="取消"
       confirmLoading={isConfirming}
-      onOk={confirmDialogActions.confirm}
-      onCancel={confirmDialogActions.cancel}
+      onOk={confirm}
+      onCancel={cancel}
       width={420}
     >
       {desc && <p className={styles.desc}>{desc}</p>}

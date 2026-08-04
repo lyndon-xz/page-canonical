@@ -10,6 +10,8 @@ import type { Hotel } from "../../../../shared/types";
 
 import styles from "./index.module.scss";
 
+const { selectHotel, toggleSelect, toggleFavorite } = hotelListActions;
+
 interface HotelCardProps {
   hotel: Hotel;
   selected: boolean;
@@ -27,7 +29,7 @@ export default function HotelCard(props: HotelCardProps) {
       className={styles.card}
       data-selected={selected}
       data-checked={checked}
-      onClick={() => hotelListActions.selectHotel(id)}
+      onClick={() => selectHotel(id)}
     >
       <div className={styles.head}>
         {/* 阻止冒泡：勾选不应连带触发卡片的单选高亮 */}
@@ -36,7 +38,7 @@ export default function HotelCard(props: HotelCardProps) {
           className={styles.checkbox}
           aria-label={`勾选 ${name}`}
           onClick={(event) => event.stopPropagation()}
-          onChange={() => hotelListActions.toggleSelect(id)}
+          onChange={() => toggleSelect(id)}
         />
         <h3 className={styles.name}>{name}</h3>
         <span className={styles.star}>{star}星</span>
@@ -63,7 +65,7 @@ export default function HotelCard(props: HotelCardProps) {
           aria-label={favorite ? "取消收藏" : "收藏酒店"}
           onClick={(event) => {
             event.stopPropagation();
-            hotelListActions.toggleFavorite(id);
+            toggleFavorite(id);
           }}
         >
           {favorite ? <HeartFilled /> : <HeartOutlined />}

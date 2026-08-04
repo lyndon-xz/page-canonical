@@ -5,6 +5,8 @@ import type { SortBy } from "../../../../shared/types";
 
 import styles from "./index.module.scss";
 
+const { changeSortBy } = hotelListActions;
+
 const SORT_LABELS: Record<SortBy, string> = {
   price: "价格优先",
   rating: "评分优先",
@@ -22,7 +24,7 @@ export default function SortBar() {
           type="button"
           className={styles.option}
           data-active={sortBy === value}
-          onClick={() => hotelListActions.changeSortBy(value)}
+          onClick={() => changeSortBy(value)}
         >
           {SORT_LABELS[value]}
         </button>

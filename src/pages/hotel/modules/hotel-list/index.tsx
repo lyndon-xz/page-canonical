@@ -13,6 +13,13 @@ import { useHotelListModel } from "./model";
 
 import styles from "./index.module.scss";
 
+const {
+  toggleSelectAll,
+  dismissBatchFavoriteFailures,
+  batchFavorite,
+  clearSelection,
+} = hotelListActions;
+
 export default function HotelList() {
   const {
     hotels,
@@ -49,9 +56,7 @@ export default function HotelList() {
               indeterminate={
                 selectedHotelIds.length > 0 && !isAllLoadedSelected
               }
-              onChange={() =>
-                hotelListActions.toggleSelectAll(isAllLoadedSelected)
-              }
+              onChange={() => toggleSelectAll(isAllLoadedSelected)}
             >
               全选本页
             </Checkbox>
@@ -69,7 +74,7 @@ export default function HotelList() {
           className={styles.batchAlert}
           message={`${batchFailureNames.length} 家收藏失败，已保留勾选可重试`}
           description={batchFailureNames.join("；")}
-          onClose={hotelListActions.dismissBatchFavoriteFailures}
+          onClose={dismissBatchFavoriteFailures}
         />
       )}
 
@@ -82,11 +87,11 @@ export default function HotelList() {
             size="small"
             type="primary"
             loading={isBatchFavoriting}
-            onClick={hotelListActions.batchFavorite}
+            onClick={batchFavorite}
           >
             批量收藏
           </Button>
-          <Button size="small" onClick={hotelListActions.clearSelection}>
+          <Button size="small" onClick={clearSelection}>
             清空
           </Button>
         </div>

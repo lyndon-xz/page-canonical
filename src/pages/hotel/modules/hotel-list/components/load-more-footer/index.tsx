@@ -7,6 +7,8 @@ import { hotelListActions } from "../../actions";
 
 import styles from "./index.module.scss";
 
+const { loadMore } = hotelListActions;
+
 interface LoadMoreFooterProps {
   status: FetchStatus;
   /** 由父组件算好传入，与喂给观察器的是同一个值，避免渲染条件和观察条件分叉 */
@@ -21,7 +23,7 @@ export default function LoadMoreFooter(props: LoadMoreFooterProps) {
     return (
       <div className={styles.loadMoreBox}>
         <span className={styles.errorText}>下一页加载失败</span>
-        <Button size="small" onClick={hotelListActions.loadMore}>
+        <Button size="small" onClick={loadMore}>
           重试
         </Button>
       </div>

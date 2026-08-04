@@ -8,6 +8,8 @@ import { useListingListModel } from "./model";
 
 import styles from "./index.module.scss";
 
+const { retry } = listingListActions;
+
 function ListingListBody() {
   const { listings, listingsStatus, selectedListingId } = useListingListModel();
 
@@ -23,7 +25,7 @@ function ListingListBody() {
     return (
       <div className={styles.stateBox}>
         <p className={styles.errorText}>房源列表加载失败</p>
-        <Button size="small" onClick={listingListActions.retry}>
+        <Button size="small" onClick={retry}>
           重试
         </Button>
       </div>

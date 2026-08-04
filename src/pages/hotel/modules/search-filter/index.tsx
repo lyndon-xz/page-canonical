@@ -7,6 +7,8 @@ import { useSearchFilterModel } from "./model";
 
 import styles from "./index.module.scss";
 
+const { updateKeyword, submit, updateStar } = searchFilterActions;
+
 const STAR_OPTIONS: { label: string; value: number }[] = [
   { label: "不限", value: 0 },
   { label: "三星", value: 3 },
@@ -27,14 +29,10 @@ export default function SearchFilter() {
           allowClear
           value={keyword}
           prefix={<SearchOutlined />}
-          onChange={(e) => searchFilterActions.updateKeyword(e.target.value)}
-          onPressEnter={searchFilterActions.submit}
+          onChange={(e) => updateKeyword(e.target.value)}
+          onPressEnter={submit}
         />
-        <Button
-          type="primary"
-          loading={isLoading}
-          onClick={searchFilterActions.submit}
-        >
+        <Button type="primary" loading={isLoading} onClick={submit}>
           搜索
         </Button>
       </div>
@@ -49,7 +47,7 @@ export default function SearchFilter() {
               type="button"
               className={styles.chip}
               data-active={star === value}
-              onClick={() => searchFilterActions.updateStar(value)}
+              onClick={() => updateStar(value)}
             >
               {label}
             </button>

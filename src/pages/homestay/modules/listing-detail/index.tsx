@@ -6,6 +6,8 @@ import { useListingDetailModel } from "./model";
 
 import styles from "./index.module.scss";
 
+const { closeDetailDrawer } = listingDetailActions;
+
 export default function ListingDetail() {
   const { isVisible, listing, isDrawerOpen } = useListingDetailModel();
 
@@ -25,7 +27,7 @@ export default function ListingDetail() {
 
       <Drawer
         open={isDrawerOpen}
-        onClose={listingDetailActions.closeDetailDrawer}
+        onClose={closeDetailDrawer}
         title={listing?.title ?? "房源详情"}
         width={420}
         destroyOnHidden

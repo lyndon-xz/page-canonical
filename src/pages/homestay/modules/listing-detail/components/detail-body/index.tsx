@@ -7,6 +7,9 @@ import { useListingDetailModel } from "../../model";
 
 import styles from "./index.module.scss";
 
+const { openDetailDrawer, retryDetail, toggleFavorite, requestCancelInquiry } =
+  listingDetailActions;
+
 interface DetailBodyProps {
   /** 写操作只在抽屉里给，内联区只提供展开入口 */
   inDrawer?: boolean;
@@ -15,12 +18,6 @@ interface DetailBodyProps {
 export default function DetailBody(props: DetailBodyProps) {
   const { inDrawer = false } = props;
   const { listing, detail, detailStatus, isFavorite } = useListingDetailModel();
-  const {
-    openDetailDrawer,
-    retryDetail,
-    toggleFavorite,
-    requestCancelInquiry,
-  } = listingDetailActions;
 
   if (detailStatus === FetchStatus.Loading) {
     return (

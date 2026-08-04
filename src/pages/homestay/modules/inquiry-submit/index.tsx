@@ -5,6 +5,8 @@ import { useInquirySubmitModel } from "./model";
 
 import styles from "./index.module.scss";
 
+const { submit } = inquirySubmitActions;
+
 export default function InquirySubmit() {
   const { handleSubmit, isSubmittingInquiry, inquirySubmitted } =
     useInquirySubmitModel();
@@ -14,7 +16,7 @@ export default function InquirySubmit() {
       <Button
         type="primary"
         loading={isSubmittingInquiry}
-        onClick={handleSubmit((values) => inquirySubmitActions.submit(values))}
+        onClick={handleSubmit((values) => submit(values))}
       >
         提交询价
       </Button>
