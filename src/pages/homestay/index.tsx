@@ -21,6 +21,15 @@ const DEFAULT_INQUIRY: InquiryForm = {
   message: "",
 };
 
+/*
+ * 必须挂在 Provider 内层，否则 effects 用不了 useAppSelector 这类依赖 context 的 hook。
+ * 单独成组件则它订阅状态时，重渲染只落在这个空组件上，不牵连整棵页面子树。
+ */
+function EffectsRunner() {
+  usePageEffects();
+  return null;
+}
+
 export default function HomestayPage() {
   const methods = useForm<InquiryForm>({
     defaultValues: DEFAULT_INQUIRY,
@@ -28,11 +37,11 @@ export default function HomestayPage() {
   });
 
   useRegisterLive("inquiryForm", methods);
-  usePageEffects();
 
   return (
     <Provider store={store}>
       <div className={styles.page}>
+        <EffectsRunner />
         <header className={styles.hero}>
           <p className={styles.eyebrow}>民宿 · HOMESTAY</p>
           <h1 className={styles.heroTitle}>住进当地人的家</h1>
