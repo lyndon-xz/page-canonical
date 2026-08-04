@@ -77,6 +77,8 @@ async function loadHotels(searchParams: SearchParams) {
 }
 
 export const pageActions = {
+  // ── 列表 ──
+
   /** 哨兵会连续触发，三个前置判断防并发拉同一页 */
   async loadMoreHotels() {
     const {
@@ -154,9 +156,13 @@ export const pageActions = {
     void loadHotels(usePageStore.getState().appliedParams);
   },
 
+  // ── 选中 ──
+
   selectHotel(hotelId: string) {
     usePageStore.getState().setSelectedHotelId(hotelId);
   },
+
+  // ── 多选 ──
 
   toggleSelect(hotelId: string) {
     const { selectedHotelIds, setSelectedHotelIds } = usePageStore.getState();
@@ -178,6 +184,8 @@ export const pageActions = {
   clearSelection() {
     usePageStore.getState().setSelectedHotelIds([]);
   },
+
+  // ── 收藏 ──
 
   /** 乐观更新；回滚用请求前的快照，取反在并发点击下会推到错的一边 */
   async toggleFavorite(hotelId: string) {

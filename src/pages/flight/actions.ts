@@ -33,6 +33,8 @@ export function usePageActions() {
   /** 快速切换航班时先发的请求可能后到，只有最新序号的响应允许落库 */
   const latestFareRulesRequestIdRef = useRef(0);
 
+  // ── 航班列表 ──
+
   // 被 effect 的依赖数组间接依赖，需稳定引用
   const loadFlights = useCallback(
     async (filters: FlightFilters) => {
@@ -101,6 +103,8 @@ export function usePageActions() {
     void loadFlights(appliedFilters);
   };
 
+  // ── 运价规则 ──
+
   const loadFareRules = async (flightId: string) => {
     const requestId = (latestFareRulesRequestIdRef.current += 1);
     // 过期请求连状态都不该动，否则会把仍进行中的那次请求的 loading 提前收掉
@@ -141,6 +145,8 @@ export function usePageActions() {
 
     void loadFareRules(selectedFlightId);
   };
+
+  // ── 提交预订 ──
 
   // 不接错误，只保证 loading 收尾：字段级错误要回填到表单，得由调用方拿到原错误分流
   const submitBooking = async (values: BookingForm) => {

@@ -14,6 +14,14 @@ homestay 是埋点 → 列表 → 详情 → 确认弹窗 → 收藏 → 询价�
 
 跨领域的工具型 action 置顶。homestay 的 `trackClick` 不属于任何组，谁都可能用（见[跨模块协作](cross-module.md)里的埋点参数派生）。
 
+### 分组要在代码里可见
+
+组边界用 `// ── 组名 ──` 标出来，不能只写在这份文档里。分组只存在于文档时，读者看到的是一串平铺的 action，得自己按名字猜边界；新增的人也无从判断该插在哪，只能加到末尾——组序规则于是失效。
+
+标记的作用是给扫不完的清单划边界，所以只在**分两组以上且 action 达到六个左右**时加。低于这个量级一眼就能看全，标记只是噪声：`listing-list` 三个 action 恰好分三组，标完注释比代码还多。当前需要标的是三个页面层与 `hotel-list`。
+
+标记只落在导出的集合内部。RTK 与 zustand 两页的私有件（`loadListingDetail`、`waitForHydration`、`loadHotels`）在 `pageActions` 之外，物理上已在组外，不标。flight 页的 action 连同私有取数都定义在同一个 hook 作用域里，分不开，所以标记落在私有取数之前——`loadFlights` 本就是航班列表组的底层读写。
+
 ## 组内：底层读写在前，包装它的在后
 
 `loadListings` 在 `retryListings` 之前，`commitFavorite` 在 `addFavorite` 之前，`loadFareRules` 在 `selectFlight` 与 `retryFareRules` 之前。真正碰数据的那个排前面，包装它、给它加一层交互语义的紧随其后。

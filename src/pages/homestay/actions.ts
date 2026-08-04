@@ -65,6 +65,8 @@ async function loadListingDetail(listingId: string) {
 }
 
 export const pageActions = {
+  // ── 埋点 ──
+
   /** 须在状态变更之前调用：通用参数表达「点击发生时页面处于什么上下文」 */
   trackClick(event: string, extra: Record<string, string> = {}) {
     reportTrace(event, {
@@ -72,6 +74,8 @@ export const pageActions = {
       ...extra,
     });
   },
+
+  // ── 列表 ──
 
   async loadListings(filters: ListingFilters) {
     store.dispatch(setAppliedFilters(filters));
@@ -95,6 +99,8 @@ export const pageActions = {
   retryListings() {
     void pageActions.loadListings(store.getState().page.appliedFilters);
   },
+
+  // ── 详情 ──
 
   /** 选中即切换详情：详情区跟着卡片走，避免用户还要再点一次「看详情」 */
   selectListing(listingId: string) {
@@ -120,6 +126,8 @@ export const pageActions = {
     void loadListingDetail(detailListingId);
   },
 
+  // ── 确认弹窗 ──
+
   openConfirm(scene: ConfirmScene) {
     store.dispatch(setConfirmScene(scene));
   },
@@ -127,6 +135,8 @@ export const pageActions = {
   closeConfirm() {
     store.dispatch(setConfirmScene(null));
   },
+
+  // ── 收藏 ──
 
   /** 收藏写入的唯一出口，失败向上抛：两条调用路径对失败的处置不同 */
   async commitFavorite(listingId: string) {
@@ -157,6 +167,8 @@ export const pageActions = {
     store.dispatch(setDetailListingId(listingId));
     pageActions.openConfirm(ConfirmScene.RemoveFavorite);
   },
+
+  // ── 询价 ──
 
   // 不接错误，只保证 loading 收尾：字段级错误要回填到表单，得由调用方拿到原错误分流
   async submitInquiry(values: InquiryForm) {
