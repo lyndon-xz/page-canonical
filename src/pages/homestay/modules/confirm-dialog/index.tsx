@@ -1,8 +1,8 @@
 import { Alert, Modal } from "antd";
 
 import { confirmDialogActions } from "./actions";
-import { CONFIRM_COPY } from "./copy";
 import { useConfirmDialogModel } from "./model";
+import { SCENE_COPY } from "./scenes";
 
 import styles from "./index.module.scss";
 
@@ -13,7 +13,7 @@ export default function ConfirmDialog() {
     return null;
   }
 
-  const { title, desc, okText } = CONFIRM_COPY[scene];
+  const { title, desc, okText } = SCENE_COPY[scene];
 
   return (
     <Modal
