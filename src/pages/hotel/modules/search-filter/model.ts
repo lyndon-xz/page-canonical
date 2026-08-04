@@ -21,11 +21,10 @@ export const useSearchFilterLocal = create<SearchFilterLocalState>((set) => ({
 }));
 
 export function useSearchFilterModel() {
-  const { keyword, star } = useSearchFilterLocal(
+  const draft = useSearchFilterLocal(
     useShallow((s) => ({ keyword: s.keyword, star: s.star })),
   );
-
-  const { resultCount, isLoading } = usePageStore(
+  const result = usePageStore(
     useShallow((s) => ({
       resultCount: s.hotelsTotal,
       isLoading: s.hotelsStatus === FetchStatus.Loading,
@@ -33,9 +32,7 @@ export function useSearchFilterModel() {
   );
 
   return {
-    keyword,
-    star,
-    resultCount,
-    isLoading,
+    ...draft,
+    ...result,
   };
 }
