@@ -19,8 +19,10 @@ export function useBookingFormActions() {
     } catch (error) {
       // 字段级错误落到对应输入框，不再弹 toast——同一件事说两遍
       if (error instanceof BookingSubmitError) {
-        // message 重命名避开 antd 的同名 import
-        error.fieldErrors.forEach(({ field, message: reason }) => {
+        error.fieldErrors.forEach((fieldError) => {
+          // message 重命名避开 antd 的同名 import
+          const { field, message: reason } = fieldError;
+
           form?.setError(field, { message: reason });
         });
         return;
