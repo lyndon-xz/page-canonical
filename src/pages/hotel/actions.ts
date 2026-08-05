@@ -5,11 +5,12 @@ import { FetchStatus } from "@/lib/fetch-status";
 import {
   batchFavoriteHotels,
   fetchHotelPage,
+  submitBooking as submitBookingService,
   toggleHotelFavorite,
 } from "./data/services";
 import { getLive } from "./live";
 import { parseSearchParams, serializeParams } from "./params";
-import type { SearchParams } from "./shared/types";
+import type { BookingForm, SearchParams } from "./shared/types";
 import { usePageStore } from "./store";
 
 /** storage 若换成异步实现，缺此门禁首屏会先按默认条件多拉一次 */
@@ -240,5 +241,37 @@ export const pageActions = {
 
   dismissBatchFavoriteFailures() {
     usePageStore.getState().setBatchFavoriteFailures([]);
+  },
+
+  // ── 预订 ──
+
+  // 不接错误，只保证 loading 收尾：字段级错误要回填到表单，得由调用方拿到原错误分流
+  async submitBooking(values: BookingForm) {
+    const {
+      selectedHotelId,
+      setIsSubmittingBooking,
+      setBookedHotelId,
+      setContact,
+    } = usePageStore.getState();
+
+    if (!selectedHotelId) {
+      // 抛而不是静默返回：调用方会把返回当成提交成功，接着清掉用户填的行程
+      throw new Error("请先在列表里选择一家酒店");
+    }
+
+    setIsSubmittingBooking(true);
+    // 先摘掉上一次的成功标记，否则重复提交同一家时提示会一直挂着
+    setBookedHotelId(null);
+    try {
+      await submitBookingService(selectedHotelId, values);
+      setBookedHotelId(selectedHotelId);
+
+      // 提交成功的联系人才存为常用：填了没提交出去的不算用户确认过
+      const { guestName, phone } = values;
+
+      setContact({ guestName, phone });
+    } finally {
+      setIsSubmittingBooking(false);
+    }
   },
 };

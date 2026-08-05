@@ -3,7 +3,7 @@ import { message } from "antd";
 import { pageActions } from "../../actions";
 import { InquirySubmitError } from "../../data/services";
 import { getLive } from "../../live";
-import type { InquiryForm } from "../../shared/types";
+import { ConfirmScene, type InquiryForm } from "../../shared/types";
 
 /** 只接收校验后的纯值；表单实例经 getLive 取，不从参数传入 */
 export const inquirySubmitActions = {
@@ -28,5 +28,10 @@ export const inquirySubmitActions = {
 
       message.error(error instanceof Error ? error.message : String(error));
     }
+  },
+
+  /** 撤回是破坏性的，转交二次确认；撤哪条由页面层按 submittedInquiryId 定 */
+  requestCancel() {
+    pageActions.openConfirm(ConfirmScene.CancelInquiry);
   },
 };

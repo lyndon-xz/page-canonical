@@ -37,6 +37,14 @@ export interface InquiryForm {
   message: string;
 }
 
+/**
+ * 询价的完整报文。房源不是用户填的字段，由页面上下文的选中态注入。
+ * 不带价格：服务端按房源与入住日期自行计价，前端传价会被篡改。
+ */
+export interface InquiryPayload extends InquiryForm {
+  listingId: string;
+}
+
 export interface InquiryFieldError {
   field: keyof InquiryForm;
   message: string;

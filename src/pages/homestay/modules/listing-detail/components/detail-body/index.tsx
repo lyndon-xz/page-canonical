@@ -7,8 +7,7 @@ import { useListingDetailModel } from "../../model";
 
 import styles from "./index.module.scss";
 
-const { openDetailDrawer, retryDetail, toggleFavorite, requestCancelInquiry } =
-  listingDetailActions;
+const { openDetailDrawer, retryDetail, toggleFavorite } = listingDetailActions;
 
 interface DetailBodyProps {
   /** 写操作只在抽屉里给，内联区只提供展开入口 */
@@ -73,9 +72,6 @@ export default function DetailBody(props: DetailBodyProps) {
         <div className={styles.actions}>
           <Button onClick={toggleFavorite}>
             {isFavorite ? "取消收藏" : "收藏房源"}
-          </Button>
-          <Button danger onClick={requestCancelInquiry}>
-            撤回询价
           </Button>
         </div>
       ) : (

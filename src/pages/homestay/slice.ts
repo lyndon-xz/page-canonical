@@ -29,7 +29,8 @@ interface HomestayPageState {
   confirmScene: ConfirmScene | null;
 
   isSubmittingInquiry: boolean;
-  inquirySubmitted: boolean;
+  /** 为 null 表示当前没有已提交的询价；撤回要带上它，故存 id 而不是布尔 */
+  submittedInquiryId: string | null;
 }
 
 const initialState: HomestayPageState = {
@@ -48,7 +49,7 @@ const initialState: HomestayPageState = {
   confirmScene: null,
 
   isSubmittingInquiry: false,
-  inquirySubmitted: false,
+  submittedInquiryId: null,
 };
 
 const homestayPageSlice = createSlice({
@@ -102,8 +103,8 @@ const homestayPageSlice = createSlice({
     setIsSubmittingInquiry(state, action: PayloadAction<boolean>) {
       state.isSubmittingInquiry = action.payload;
     },
-    setInquirySubmitted(state, action: PayloadAction<boolean>) {
-      state.inquirySubmitted = action.payload;
+    setSubmittedInquiryId(state, action: PayloadAction<string | null>) {
+      state.submittedInquiryId = action.payload;
     },
   },
 });
@@ -121,7 +122,7 @@ export const {
   setFavoriteIds,
   setConfirmScene,
   setIsSubmittingInquiry,
-  setInquirySubmitted,
+  setSubmittedInquiryId,
 } = homestayPageSlice.actions;
 
 export const homestayPageReducer = homestayPageSlice.reducer;

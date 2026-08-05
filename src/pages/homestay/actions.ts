@@ -21,13 +21,13 @@ import {
   setDetailListingId,
   setDetailStatus,
   setFavoriteIds,
-  setInquirySubmitted,
   setIsDetailDrawerOpen,
   setIsSubmittingInquiry,
   setListingDetail,
   setListings,
   setListingsStatus,
   setSelectedListingId,
+  setSubmittedInquiryId,
 } from "./slice";
 import { reportTrace } from "./trace";
 import { selectTraceCommonTag, store } from "./store";
@@ -172,18 +172,35 @@ export const pageActions = {
 
   // 不接错误，只保证 loading 收尾：字段级错误要回填到表单，得由调用方拿到原错误分流
   async submitInquiry(values: InquiryForm) {
+    // 询价的房源取自选中态，不进表单。UI 侧的禁用只是可用性，选中态随时可能被列表刷新清掉
+    const { selectedListingId } = store.getState().page;
+
+    if (!selectedListingId) {
+      throw new Error("请先选择要询价的房源");
+    }
+
     store.dispatch(setIsSubmittingInquiry(true));
-    store.dispatch(setInquirySubmitted(false));
+    store.dispatch(setSubmittedInquiryId(null));
     try {
-      await submitInquiryService(values);
-      store.dispatch(setInquirySubmitted(true));
+      const { inquiryId } = await submitInquiryService({
+        ...values,
+        listingId: selectedListingId,
+      });
+
+      store.dispatch(setSubmittedInquiryId(inquiryId));
     } finally {
       store.dispatch(setIsSubmittingInquiry(false));
     }
   },
 
   async cancelInquiry() {
-    await cancelInquiryService();
-    store.dispatch(setInquirySubmitted(false));
+    const { submittedInquiryId } = store.getState().page;
+
+    if (!submittedInquiryId) {
+      return;
+    }
+
+    await cancelInquiryService(submittedInquiryId);
+    store.dispatch(setSubmittedInquiryId(null));
   },
 };

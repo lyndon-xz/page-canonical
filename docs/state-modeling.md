@@ -10,21 +10,23 @@
 
 confirm-dialog 则被这条判据切成两半：弹窗开不开（`confirmScene`）归页面层，因为列表卡片与详情抽屉都能触发它；「确认中」（`isConfirming`）与提交失败信息（`confirmError`）归模块自己的 slice，它们只在弹窗自身的生命周期里有意义，触发方既不读也不该读。
 
-判据里的「读」也包括 listener 读。homestay 的 `inquirySubmitted` 看着像 inquiry-submit 的私有状态，但它必须在页面层：listener 要监听它来触发「退出当前房源」（见[跨模块协作](cross-module.md)）。
+判据里的「读」也包括 listener 读。homestay 的 `submittedInquiryId` 看着像 inquiry-submit 的私有状态，但它必须在页面层：listener 要监听它来触发「退出当前房源」（见[跨模块协作](cross-module.md)）。
 
-同一条判据下，三个页面唯一都提到页面层的是「选中项」。闸门结论只有 flight 有，收藏态只有 hotel 与 homestay 有——判据看的是消费方数量，不是字段名。
+同一条判据下，两个页面都提到页面层的是「选中项」与收藏态——判据看的是消费方数量，不是字段名。
 
 ### 用 null 代替额外的布尔
 
 `confirmScene` 为 `null` 表示弹窗关闭，没有配套的 `isOpen`。多一个布尔就多一个必须与场景同步变更的值，漏改一处就会出现「开着但没有场景」或「有场景但不显示」。
 
-同理，`BookingEligibility` 为 `null` 表示资格尚未取回或取回失败，闸门此时一律按不通过处理。它也没有配套的 loading 与 error：闸门期间受它管的模块本就不渲染，「校验中」与「不通过」在界面上是同一种表现，多存的状态没有读者。
+hotel 的 `bookedHotelId` 是同一条的延伸：为 `null` 表示本次会话还没提交过预订，而存 id 而非「已提交」布尔，是因为布尔要在换选酒店与换结果集时各清一次，漏一处就会给没提交过的那家显示成功提示；存 id 则让 UI 比对当前选中得出结论，两处都不必同步。
+
+homestay 的 `submittedInquiryId` 存 id 还多一层动机：撤回询价必须把服务端给的 id 报回去，这个值本来就要存，`inquirySubmitted` 布尔于是成了它的冗余投影。UI 需要的布尔由 model 派生（`hasSubmittedInquiry`），不在 store 里多存一份。
 
 ## 草稿态与已生效态要分开
 
 搜索框里用户正在编辑的条件，和「当前这份结果集是按什么条件取回的」，是两个值。
 
-草稿归模块（`search-bar` / `search-filter` 的 model），已生效的归页面层（`appliedFilters` / `appliedParams`）。合成一个值的话，用户每敲一个字都等于改了「结果集的口径」，而结果集并没有跟着变——之后任何基于它的判断（重试用什么条件、URL 同步什么、埋点报什么）都会错。
+草稿归模块（`search-filter` 的 model），已生效的归页面层（`appliedParams`）。合成一个值的话，用户每敲一个字都等于改了「结果集的口径」，而结果集并没有跟着变——之后任何基于它的判断（重试用什么条件、URL 同步什么、埋点报什么）都会错。
 
 hotel 页的 search-filter 还有一层：草稿的初值不能硬编码默认值。持久化恢复出来的偏好是五星，草稿写死 0 的话，筛选器显示「不限」而列表是五星的结果。
 
@@ -73,7 +75,7 @@ export type SortBy = (typeof SORT_BY_VALUES)[number];
 
 消费点一律用 `Record<SortBy, ...>` 而不是数组，因为 `Record` 是 exhaustive 的：比较器与 sort-bar 的 `SORT_LABELS` 少一个 key 就编译不过。展示文案该留在 UI 层，但用 `Record<SortBy, string>` 而不是 `{ label, value }[]`——同样是为了这层检查。渲染时遍历 `SORT_BY_VALUES`，按钮顺序也就由声明顺序决定。
 
-比较器本身落在哪一层，由排序在哪执行决定，与取值怎么建模无关。hotel 分页加载，排序须由服务端在全量数据上做，`sortBy` 因此是取数参数，比较器在 `data/services.ts`；flight 全量在手、前端本地排，`sortBy` 只是模块内的展示态，比较器在 `modules/flight-results/model.ts`。
+比较器本身落在哪一层，由排序在哪执行决定，与取值怎么建模无关。hotel 分页加载，排序须由服务端在全量数据上做，`sortBy` 因此是取数参数，比较器跟着落在 `data/services.ts`。若改成全量在手、前端本地排，`sortBy` 就退化成模块内的展示态，比较器也就该搬进模块 model。
 
 这样加一个排序值只改 `SORT_BY_VALUES` 一行，校验自动跟随，两处查表由编译器点名。
 
@@ -81,9 +83,9 @@ export type SortBy = (typeof SORT_BY_VALUES)[number];
 
 `SortBy` 不用 enum，不是因为 enum 不安全，而是它一处也省不掉：`comparators`、`SORT_LABELS` 照样各写三条，URL 校验照样得写 `Object.values(SortBy).includes(raw)`。它只把 `"rating"` 换成 `SortBy.Rating`，而拼错这件事 union 已经由编译器管住了。代价是 enum 会生成运行时代码，与「类型只存在于编译期」的心智不一致，`erasableSyntaxOnly` 下还直接不可用。
 
-`FareRuleType` 与 `FareBlockReason` 用 enum，判据是**值本身是不是外部契约**。它们的字符串由服务端定义，enum 成员名把契约值与前端引用解耦：服务端把 `changeFee` 改成 `change_fee`，只改 enum 定义一处，几十个 `FareRuleType.ChangeFee` 不动。`SortBy` 的取值是前端自己定的（连 URL 参数名也是），没有这层解耦需求，需要遍历的场合反而更多。
+该用 enum 的判据是**值本身是不是外部契约**。契约值由服务端定义时，enum 成员名把它与前端引用解耦：服务端改了那个字符串，只动 enum 定义一处，所有引用点不变。`SortBy` 的取值是前端自己定的（连 URL 参数名也是），没有这层解耦需求，需要遍历的场合反而更多。
 
-`FetchStatus` 同理不是契约，但它连字符串值都不需要，纯做判别用。
+`FetchStatus` 与 `ConfirmScene` 都不是契约，但它们连字符串值都不需要，纯做判别用：取值从不出接口、也不进 URL，成员名就是全部信息。这类归 enum，与 `SortBy` 那种「前端定义且需要遍历」的取值分属两头。
 
 ### 边界上的值必须运行时收窄
 
@@ -96,20 +98,13 @@ const isSortBy = (value: string): value is SortBy =>
 
 这里另抄一个 `["price", "rating", "distance"]` 是最隐蔽的一种错：加了新排序值忘了同步，`?sortBy=popularity` 会被判为非法、静默降级成默认排序，而 `comparators` 那边有 exhaustive 检查会报错，人容易以为已经改全了。
 
-`Record` 的索引签名在边界上会撒谎，后果比降级重。`RULE_DEFINITIONS[rule.ruleType]` 的类型是 `RuleDefinition`，但服务端多下发一个前端还没定义的 `ruleType` 时它是 `undefined`，接着取 `.category` 就抛错——这行在 `useMemo` 里、渲染路径上，整个模块白屏。所以查表要显式跳过未知值：
-
-```ts
-// 服务端可能下发前端尚未定义的 ruleType，Record 的索引类型不体现这点，故须显式跳过
-const rules = fareRules.filter(
-  (rule) => RULE_DEFINITIONS[rule.ruleType]?.category === category,
-);
-```
-
-同一份数据换成 `includes` 查询就没这个问题：`fareBlockReasons.includes(blockReason)` 遇到未知值只是匹配不上。区别在于索引取值假设 key 一定存在，而查询不假设。
+同一道边界上，用查询代替索引取值更稳。`Record<Union, T>` 的索引结果类型不带 `undefined`，服务端多下发一个前端还没定义的 key 时它在运行时就是 `undefined`，接着取字段直接抛错；若这行在渲染路径上，代价是整块白屏。`includes` 遇到未知值只是匹配不上。区别在于索引取值假设 key 一定存在，查询不假设。
 
 ## 持久化只存长期偏好
 
-hotel 页用 zustand persist，`partialize` 是白名单而不是黑名单，只落盘 `appliedParams` 与 `favoriteIds`。
+hotel 页用 zustand persist，`partialize` 是白名单而不是黑名单，只落盘 `appliedParams`、`favoriteIds` 与常用联系人 `contact`。
+
+预订表单因此被切成两半：入住人与手机号提到 `contact` 落盘，入住日期、晚数、房间数留在表单里。判据是这个值下次进页面还成不成立——联系人几乎不变，行程每单都不同，存下来只会让用户先删掉旧值再填。`contact` 只在提交成功后写入：填了没提交出去的不算用户确认过的常用信息。
 
 默认整棵 state 落盘会连瞬时态与服务端快照一起存：取数状态存下来后重进页面会停在上一次的 loading 或错误占位上；列表数据存下来是一份会过期的旧数据；多选集合与批量失败清单是一次性的操作意图与结果。这些都不该跨会话活着。
 

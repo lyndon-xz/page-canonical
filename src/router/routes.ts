@@ -1,6 +1,5 @@
 import type { ComponentType } from "react";
 
-import FlightPage from "@/pages/flight";
 import HomestayPage from "@/pages/homestay";
 import HotelPage from "@/pages/hotel";
 
@@ -26,12 +25,6 @@ export const routes = [
     name: "民宿",
     lib: "redux toolkit",
     Component: HomestayPage,
-  },
-  {
-    path: "flight",
-    name: "机票",
-    lib: "unstated-next",
-    Component: FlightPage,
   },
 ] as const satisfies readonly Route[];
 

@@ -2,7 +2,7 @@ import { MOCK_LISTING_DETAILS } from "./listing-details";
 import { MOCK_LISTINGS } from "./listings";
 import type {
   InquiryFieldError,
-  InquiryForm,
+  InquiryPayload,
   Listing,
   ListingDetail,
   ListingFilters,
@@ -24,6 +24,11 @@ export class InquirySubmitError extends Error {
     this.name = "InquirySubmitError";
     this.fieldErrors = fieldErrors;
   }
+}
+
+export interface InquirySubmitResult {
+  /** 撤回凭据：撤的是这条询价，与撤回时页面在看哪套房无关 */
+  inquiryId: string;
 }
 
 export async function fetchListings(
@@ -65,16 +70,24 @@ export async function toggleFavorite(listingId: string): Promise<void> {
   }
 }
 
-export async function submitInquiry(values: InquiryForm): Promise<void> {
+export async function submitInquiry(
+  payload: InquiryPayload,
+): Promise<InquirySubmitResult> {
   await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
 
-  if (BLOCKED_PHONES.includes(values.phone.trim())) {
+  if (BLOCKED_PHONES.includes(payload.phone.trim())) {
     throw new InquirySubmitError([
       { field: "phone", message: "该手机号暂不可用，请更换后重试" },
     ]);
   }
+
+  return { inquiryId: `iq-${payload.listingId}-${Date.now()}` };
 }
 
-export async function cancelInquiry(): Promise<void> {
+export async function cancelInquiry(inquiryId: string): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+
+  if (!inquiryId) {
+    throw new Error("询价不存在或已撤回");
+  }
 }

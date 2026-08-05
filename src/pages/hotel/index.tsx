@@ -1,4 +1,5 @@
 import { usePageEffects } from "./effects";
+import BookingForm from "./modules/booking-form";
 import HotelList from "./modules/hotel-list";
 import SearchFilter from "./modules/search-filter";
 
@@ -20,6 +21,7 @@ export default function HotelPage() {
       </header>
       <SearchFilter />
       <HotelList />
+      <BookingForm />
     </div>
   );
 }

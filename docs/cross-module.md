@@ -2,13 +2,13 @@
 
 模块之间不互相 import。需要协作时有四种手段，按耦合从低到高排列。
 
-## 一、页面层派生
+## 一、页面层共享
 
-两个模块都要的派生值，算一次放在页面层，模块从各自 model 里取。
+两个以上模块都要的值放在页面层，模块从各自 model 里取。homestay 的 `selectListings` 就在页面层：listing-list 要把它渲染成卡片，listing-detail 要按 id 从里面找出当前房源。
 
-flight 页的 `selectedFlight` 与闸门结论 `isBookingAllowed` 都是这样：booking-form 与 fare-rules 都要用，各算一遍就会漂移，也白白多遍历一次列表。
+判断标准是消费方数量。只有一个模块要的派生值留在那个模块的 model 里——homestay 的 `selectDetailListing` 只有 listing-detail 读，提到页面层反倒是页面层多担了一份没人共享的派生。等第二个模块也要时再提，那时各算一遍才会漂移，也才白白多遍历一次列表。
 
-判断标准是消费方数量。只有一个模块要的派生值留在那个模块的 model 里——homestay 的 `selectDetailListing` 只有 listing-detail 读，提到页面层反倒是页面层多担了一份没人共享的派生。等第二个模块也要时再提。
+页面根目录与 `shared/` 的分工同理：`shared/` 只放 2+ 个模块消费的内容，所以两页的 `shared/` 里都只有 `types.ts`；只被页面层骨架文件消费的东西留在页面根目录，hotel 的 `params.ts` 就是这样，它只有页面 action 一个消费方。
 
 ## 二、模块 action 转交页面 action
 
@@ -33,6 +33,7 @@ retry() {
 // pages/hotel/live.ts
 interface PageLiveMap {
   hotelListRef: RefObject<HTMLElement | null>;
+  bookingForm: UseFormReturn<BookingForm>;
 }
 export const { useRegisterLive, getLive } = createPageLive<PageLiveMap>();
 ```
@@ -51,11 +52,13 @@ export const { useRegisterLive, getLive } = createPageLive<PageLiveMap>();
 
 代价是因果变隐式：读提交 action 看不到选中会被清掉。所以 listener 里只放「结果的旁路反应」，提交自身必须完成的状态变更仍留在 action 内。
 
-监听 `setInquirySubmitted` 时要注意它也被用于重置，只有置为 `true` 才是「提交成功」。
+监听 `setSubmittedInquiryId` 时要注意它也被用于撤回与重置，只有带上 id 才是「提交成功」。
 
 ## 表单实例的共享
 
 同一个表单被两个模块使用（inquiry-fields 填写、inquiry-submit 提交）时，用 react-hook-form 的 `FormProvider` 在页面层提供，两个模块各自 `useFormContext` 取。这样两个模块都不必认识对方，也不必把表单实例塞进 live 表。
+
+hotel 的 booking-form 是一个模块，`FormProvider` 因此落在模块自己的壳里，共享方是它的字段区子组件。判据仍是 Provider 该架在共享方的共同祖先上，与模块边界无关。省掉它就得把 `control` 与 `errors` 当 props 逐个中转下去，壳又变回它想摆脱的那个大组件（见[分支渲染](branching.md)的子组件自取 model）。
 
 live 表在这里的角色是另一件事：让 action（而非组件）能拿到实例做回写。
 
@@ -69,11 +72,13 @@ homestay 的两个二次确认场景（取消收藏、撤回询价）提交动�
 
 ## 配置表驱动渲染
 
-flight 页六条退改规则展示结构完全同构，只有文案与个别分支不同。做法是一张 `RULE_DEFINITIONS` 表承载全部差异，UI 统一渲染，而不是在组件里按 `ruleType` 堆 if/switch——后者每加一条规则都要改渲染逻辑。
+上一节那种「一个模块服务多个场景」的差异，收在一张表里由 UI 统一渲染，而不是在组件里按场景堆 if/switch——后者每加一个场景都要改渲染逻辑。homestay 的 `SCENE_COPY` 就是这张表，两个确认场景的标题、按钮文案、有无补充说明全在里面，`ConfirmDialog` 只做一次 `SCENE_COPY[scene]` 查表。
 
-表里需要按数据取变体的字段配一个 `resolveXxx` 函数，返回值覆盖同名的静态字段。文案里用 `{value}` 占位当前取值。
+可选字段兼作渲染开关：`desc` 缺省的场景不渲染说明段，不必再配一个布尔。
 
-分类（`FareRuleCategory`）是前端概念，服务端只下发 `ruleType`，所以分类表放在模块内而不是 `shared/`。
+表只承载展示差异，行为差异仍在 action 里（`runByScene` 按场景分派提交动作）。把提交也塞进表意味着表里存函数，而那些函数要读 store、要 await，摆在一张文案表旁边只会让两种东西互相埋没。
+
+表放模块内（`confirm-dialog/scenes.ts`），因为只有这个模块查它；`ConfirmScene` 放 `shared/types.ts`，因为页面层 action 也要用它开弹窗。
 
 ## 埋点参数从 store 派生
 

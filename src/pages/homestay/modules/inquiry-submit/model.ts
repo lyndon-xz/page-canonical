@@ -5,9 +5,14 @@ import type { InquiryForm } from "../../shared/types";
 import { selectPageState, useAppSelector } from "../../store";
 
 const selectInquirySubmitState = createSelector(selectPageState, (page) => {
-  const { isSubmittingInquiry, inquirySubmitted } = page;
+  const { selectedListingId, isSubmittingInquiry, submittedInquiryId } = page;
 
-  return { isSubmittingInquiry, inquirySubmitted };
+  return {
+    hasInquiryListing: !!selectedListingId,
+    isSubmittingInquiry,
+    // id 本身不上界面，UI 只关心有没有可撤回的询价
+    hasSubmittedInquiry: !!submittedInquiryId,
+  };
 });
 
 export function useInquirySubmitModel() {

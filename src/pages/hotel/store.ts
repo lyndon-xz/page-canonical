@@ -5,6 +5,7 @@ import { FetchStatus } from "@/lib/fetch-status";
 
 import type {
   BatchFavoriteFailure,
+  BookingContact,
   Hotel,
   HotelPage,
   SearchParams,
@@ -16,10 +17,16 @@ const DEFAULT_PARAMS: SearchParams = {
   sortBy: "price",
 };
 
+const DEFAULT_CONTACT: BookingContact = {
+  guestName: "",
+  phone: "",
+};
+
 /** 改动即改动存储格式，需兼容老数据 */
 interface PersistedPageState {
   appliedParams: SearchParams;
   favoriteIds: string[];
+  contact: BookingContact;
 }
 
 interface PageStore {
@@ -41,6 +48,16 @@ interface PageStore {
   isBatchFavoriting: boolean;
   batchFavoriteFailures: BatchFavoriteFailure[];
 
+  /** 上次预订用的联系人，跨会话带出，免得每单重填 */
+  contact: BookingContact;
+  isSubmittingBooking: boolean;
+  /**
+   * 已提交预订的酒店 id，为 null 表示本次会话还没提交过。
+   * 存 id 而非「已提交」布尔：换选酒店与换结果集都不必同步清它，
+   * 成功提示由 UI 比对当前选中得出，少两个漏改就会留下错提示的地方。
+   */
+  bookedHotelId: string | null;
+
   /**
    * 装载首页。列表、总数、分页游标必须整组写入：分开设会留下
    * 「已有 12 条却 loadedPage 仍是 0」这类中间态，哨兵会照着它重复拉第 1 页。
@@ -57,6 +74,9 @@ interface PageStore {
   setSelectedHotelIds: (ids: string[]) => void;
   setIsBatchFavoriting: (batchFavoriting: boolean) => void;
   setBatchFavoriteFailures: (failures: BatchFavoriteFailure[]) => void;
+  setContact: (contact: BookingContact) => void;
+  setIsSubmittingBooking: (submitting: boolean) => void;
+  setBookedHotelId: (hotelId: string | null) => void;
 
   /**
    * 作废上一轮结果集：列表、分页游标、以及只对这批结果成立的选中与失败项。
@@ -83,6 +103,10 @@ export const usePageStore = create<PageStore>()(
       selectedHotelIds: [],
       isBatchFavoriting: false,
       batchFavoriteFailures: [],
+
+      contact: DEFAULT_CONTACT,
+      isSubmittingBooking: false,
+      bookedHotelId: null,
 
       setFirstPage: (page) => {
         const { items, total, hasMore } = page;
@@ -118,6 +142,10 @@ export const usePageStore = create<PageStore>()(
         set({ isBatchFavoriting: batchFavoriting }),
       setBatchFavoriteFailures: (failures) =>
         set({ batchFavoriteFailures: failures }),
+      setContact: (contact) => set({ contact }),
+      setIsSubmittingBooking: (submitting) =>
+        set({ isSubmittingBooking: submitting }),
+      setBookedHotelId: (hotelId) => set({ bookedHotelId: hotelId }),
 
       resetResultSet: () =>
         set({
@@ -136,9 +164,9 @@ export const usePageStore = create<PageStore>()(
       name: "hotel-page",
       /** 白名单：只落盘长期偏好，瞬时态与服务端快照不跨会话 */
       partialize: (state) => {
-        const { appliedParams, favoriteIds } = state;
+        const { appliedParams, favoriteIds, contact } = state;
 
-        return { appliedParams, favoriteIds };
+        return { appliedParams, favoriteIds, contact };
       },
       /** 与默认值合并，避免老数据缺少后加的字段 */
       merge: (persisted, current) => {
@@ -148,6 +176,7 @@ export const usePageStore = create<PageStore>()(
           ...current,
           ...saved,
           appliedParams: { ...DEFAULT_PARAMS, ...saved?.appliedParams },
+          contact: { ...DEFAULT_CONTACT, ...saved?.contact },
         };
       },
     },

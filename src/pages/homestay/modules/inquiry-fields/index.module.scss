@@ -1,3 +1,14 @@
+.target {
+  margin: 0 0 18px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.target[data-selected="true"] {
+  font-weight: 500;
+  color: var(--primary-strong);
+}
+
 .fields {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

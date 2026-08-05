@@ -1,5 +1,4 @@
 import { pageActions } from "../../actions";
-import { ConfirmScene } from "../../shared/types";
 import { store } from "../../store";
 
 export const listingDetailActions = {
@@ -30,9 +29,5 @@ export const listingDetailActions = {
     }
 
     void pageActions.addFavorite(detailListingId);
-  },
-
-  requestCancelInquiry() {
-    pageActions.openConfirm(ConfirmScene.CancelInquiry);
   },
 };
