@@ -7,6 +7,7 @@ import type {
   Listing,
   ListingDetail,
   ListingFilters,
+  SubmittedInquiry,
 } from "./shared/types";
 
 // 被 store.ts 与 listeners.ts import，故禁止 import store 的运行时内容
@@ -29,8 +30,8 @@ interface HomestayPageState {
   confirmScene: ConfirmScene | null;
 
   isSubmittingInquiry: boolean;
-  /** 为 null 表示当前没有已提交的询价；撤回要带上它，故存 id 而不是布尔 */
-  submittedInquiryId: string | null;
+  /** 为 null 表示当前没有已提交的询价；撤回凭 id、成功态显示 quote，故整条存下 */
+  submittedInquiry: SubmittedInquiry | null;
 }
 
 const initialState: HomestayPageState = {
@@ -49,7 +50,7 @@ const initialState: HomestayPageState = {
   confirmScene: null,
 
   isSubmittingInquiry: false,
-  submittedInquiryId: null,
+  submittedInquiry: null,
 };
 
 const homestayPageSlice = createSlice({
@@ -103,8 +104,8 @@ const homestayPageSlice = createSlice({
     setIsSubmittingInquiry(state, action: PayloadAction<boolean>) {
       state.isSubmittingInquiry = action.payload;
     },
-    setSubmittedInquiryId(state, action: PayloadAction<string | null>) {
-      state.submittedInquiryId = action.payload;
+    setSubmittedInquiry(state, action: PayloadAction<SubmittedInquiry | null>) {
+      state.submittedInquiry = action.payload;
     },
   },
 });
@@ -122,7 +123,7 @@ export const {
   setFavoriteIds,
   setConfirmScene,
   setIsSubmittingInquiry,
-  setSubmittedInquiryId,
+  setSubmittedInquiry,
 } = homestayPageSlice.actions;
 
 export const homestayPageReducer = homestayPageSlice.reducer;

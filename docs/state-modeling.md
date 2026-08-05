@@ -10,7 +10,7 @@
 
 confirm-dialog 则被这条判据切成两半：弹窗开不开（`confirmScene`）归页面层，因为列表卡片与详情抽屉都能触发它；「确认中」（`isConfirming`）与提交失败信息（`confirmError`）归模块自己的 slice，它们只在弹窗自身的生命周期里有意义，触发方既不读也不该读。
 
-判据里的「读」也包括 listener 读。homestay 的 `submittedInquiryId` 看着像 inquiry-submit 的私有状态，但它必须在页面层：listener 要监听它来触发「退出当前房源」（见[跨模块协作](cross-module.md)）。
+判据里的「读」也包括 listener 读。homestay 的 `submittedInquiry` 看着像 inquiry-submit 的私有状态，但它必须在页面层：listener 要监听它来触发「退出当前房源」（见[跨模块协作](cross-module.md)）。
 
 同一条判据下，两个页面都提到页面层的是「选中项」与收藏态——判据看的是消费方数量，不是字段名。
 
@@ -20,7 +20,7 @@ confirm-dialog 则被这条判据切成两半：弹窗开不开（`confirmScene`
 
 hotel 的 `bookedHotelId` 是同一条的延伸：为 `null` 表示本次会话还没提交过预订，而存 id 而非「已提交」布尔，是因为布尔要在换选酒店与换结果集时各清一次，漏一处就会给没提交过的那家显示成功提示；存 id 则让 UI 比对当前选中得出结论，两处都不必同步。
 
-homestay 的 `submittedInquiryId` 存 id 还多一层动机：撤回询价必须把服务端给的 id 报回去，这个值本来就要存，`inquirySubmitted` 布尔于是成了它的冗余投影。UI 需要的布尔由 model 派生（`hasSubmittedInquiry`），不在 store 里多存一份。
+homestay 的 `submittedInquiry` 存整条结果还多一层动机：撤回要把服务端给的 `inquiryId` 报回去，成功态要显示服务端算出的 `quote` 与回显的房源标题，这几个值同生同灭。配一个「已提交」布尔就是它们的冗余投影，UI 判断「询到价了没有」看整条在不在即可。
 
 ## 草稿态与已生效态要分开
 

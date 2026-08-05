@@ -2,6 +2,8 @@
 
 `actions.ts` 是页面里唯一一处「所有可能发生的事」的清单，页面层与模块层共用同一套排布规则。它只影响可读性，但顺序一乱，读者就只能靠搜索定位，也没人知道新增的 action 该放哪——默认往文件末尾加。
 
+本文是[声明顺序](declaration-order.md)在这个文件上的特化。
+
 ## 私有内容在前，导出的集合在后
 
 请求序号、`waitForHydration`、`resolveInitialParams`、confirm-dialog 的 `runByScene` 这类只服务本文件的内容排在导出之前。它们是实现细节，插在 action 之间会打断清单。

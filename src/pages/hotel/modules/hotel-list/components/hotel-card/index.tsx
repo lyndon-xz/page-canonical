@@ -5,8 +5,8 @@ import {
 } from "@ant-design/icons";
 import { Checkbox } from "antd";
 
-import { hotelListActions } from "../../actions";
 import type { Hotel } from "../../../../shared/types";
+import { hotelListActions } from "../../actions";
 
 import styles from "./index.module.scss";
 

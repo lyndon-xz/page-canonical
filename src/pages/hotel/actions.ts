@@ -9,7 +9,7 @@ import {
   toggleHotelFavorite,
 } from "./data/services";
 import { getLive } from "./live";
-import { parseSearchParams, serializeParams } from "./params";
+import { parseSearchParams, serializeParams } from "./shared/params";
 import type { BookingForm, SearchParams } from "./shared/types";
 import { usePageStore } from "./store";
 

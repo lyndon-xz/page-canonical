@@ -1,5 +1,4 @@
-import { SORT_BY_VALUES } from "./shared/types";
-import type { SearchParams, SortBy } from "./shared/types";
+import { SORT_BY_VALUES, type SearchParams, type SortBy } from "./types";
 
 const DEFAULT_SORT: SortBy = "price";
 

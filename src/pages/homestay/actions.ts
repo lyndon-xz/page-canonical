@@ -9,6 +9,7 @@ import {
   submitInquiry as submitInquiryService,
   toggleFavorite as toggleFavoriteService,
 } from "./data/services";
+import { reportTrace } from "./shared/trace";
 import {
   ConfirmScene,
   type InquiryForm,
@@ -27,9 +28,8 @@ import {
   setListings,
   setListingsStatus,
   setSelectedListingId,
-  setSubmittedInquiryId,
+  setSubmittedInquiry,
 } from "./slice";
-import { reportTrace } from "./trace";
 import { selectTraceCommonTag, store } from "./store";
 
 /** 连续点开不同房源时先发的请求可能后到，只有最新序号的响应允许落库 */
@@ -180,27 +180,27 @@ export const pageActions = {
     }
 
     store.dispatch(setIsSubmittingInquiry(true));
-    store.dispatch(setSubmittedInquiryId(null));
+    store.dispatch(setSubmittedInquiry(null));
     try {
-      const { inquiryId } = await submitInquiryService({
+      const submitted = await submitInquiryService({
         ...values,
         listingId: selectedListingId,
       });
 
-      store.dispatch(setSubmittedInquiryId(inquiryId));
+      store.dispatch(setSubmittedInquiry(submitted));
     } finally {
       store.dispatch(setIsSubmittingInquiry(false));
     }
   },
 
   async cancelInquiry() {
-    const { submittedInquiryId } = store.getState().page;
+    const { submittedInquiry } = store.getState().page;
 
-    if (!submittedInquiryId) {
+    if (!submittedInquiry) {
       return;
     }
 
-    await cancelInquiryService(submittedInquiryId);
-    store.dispatch(setSubmittedInquiryId(null));
+    await cancelInquiryService(submittedInquiry.inquiryId);
+    store.dispatch(setSubmittedInquiry(null));
   },
 };

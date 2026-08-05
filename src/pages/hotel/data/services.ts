@@ -1,4 +1,3 @@
-import { MOCK_HOTELS } from "./hotels";
 import type {
   BatchFavoriteFailure,
   BatchFavoriteResult,
@@ -10,35 +9,15 @@ import type {
   SortBy,
 } from "../shared/types";
 
-const MOCK_DELAY_MS = 300;
+import { MOCK_HOTELS } from "./hotels";
 
-/** 取值要让首屏填满一屏以上，否则末尾哨兵一开始就在视口内，会连锁翻页直到取完 */
-const HOTEL_PAGE_SIZE = 12;
+const MOCK_DELAY_MS = 300;
 
 const comparators: Record<SortBy, (a: Hotel, b: Hotel) => number> = {
   price: (a, b) => a.pricePerNight - b.pricePerNight,
   rating: (a, b) => b.rating - a.rating,
   distance: (a, b) => a.distanceKm - b.distanceKm,
 };
-
-/** 该酒店的收藏接口固定失败，用于演示乐观更新后的回滚 */
-const FAVORITE_REJECTED_HOTEL_IDS = ["h2"];
-
-/** 该酒店订不到，用于演示非字段级的提交错误走 toast */
-const BOOKING_REJECTED_HOTEL_IDS = ["h5"];
-
-/** 命中的手机号提交预订会被拒，用于演示服务端字段级错误回填 */
-const BLOCKED_PHONES = ["13800000000"];
-
-export class BookingSubmitError extends Error {
-  readonly fieldErrors: BookingFieldError[];
-
-  constructor(fieldErrors: BookingFieldError[]) {
-    super("预订提交失败");
-    this.name = "BookingSubmitError";
-    this.fieldErrors = fieldErrors;
-  }
-}
 
 const resolveMatchedHotels = (searchParams: SearchParams): Hotel[] => {
   const { keyword, star, sortBy } = searchParams;
@@ -58,6 +37,9 @@ const resolveMatchedHotels = (searchParams: SearchParams): Hotel[] => {
   }).sort(comparators[sortBy]);
 };
 
+/** 取值要让首屏填满一屏以上，否则末尾哨兵一开始就在视口内，会连锁翻页直到取完 */
+const HOTEL_PAGE_SIZE = 12;
+
 export async function fetchHotelPage(
   searchParams: SearchParams,
   page: number,
@@ -74,6 +56,9 @@ export async function fetchHotelPage(
     total: matched.length,
   };
 }
+
+/** 该酒店的收藏接口固定失败，用于演示乐观更新后的回滚 */
+const FAVORITE_REJECTED_HOTEL_IDS = ["h2"];
 
 export async function toggleHotelFavorite(hotelId: string): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
@@ -101,6 +86,22 @@ export async function batchFavoriteHotels(
   });
 
   return { succeededIds, failures };
+}
+
+/** 该酒店订不到，用于演示非字段级的提交错误走 toast */
+const BOOKING_REJECTED_HOTEL_IDS = ["h5"];
+
+/** 命中的手机号提交预订会被拒，用于演示服务端字段级错误回填 */
+const BLOCKED_PHONES = ["13800000000"];
+
+export class BookingSubmitError extends Error {
+  readonly fieldErrors: BookingFieldError[];
+
+  constructor(fieldErrors: BookingFieldError[]) {
+    super("预订提交失败");
+    this.name = "BookingSubmitError";
+    this.fieldErrors = fieldErrors;
+  }
 }
 
 /** 预订的是哪家酒店由服务端另收：它是页面的选中态，不是表单字段 */

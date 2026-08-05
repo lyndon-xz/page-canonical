@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 
 import { registerPageListeners, type AppStartListening } from "./listeners";
 import { confirmDialogReducer } from "./modules/confirm-dialog/slice";
-import type { TraceCommonTag } from "./trace";
+import type { TraceCommonTag } from "./shared/trace";
 import { homestayPageReducer } from "./slice";
 
 const listenerMiddleware = createListenerMiddleware();

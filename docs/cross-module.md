@@ -8,7 +8,9 @@
 
 判断标准是消费方数量。只有一个模块要的派生值留在那个模块的 model 里——homestay 的 `selectDetailListing` 只有 listing-detail 读，提到页面层反倒是页面层多担了一份没人共享的派生。等第二个模块也要时再提，那时各算一遍才会漂移，也才白白多遍历一次列表。
 
-页面根目录与 `shared/` 的分工同理：`shared/` 只放 2+ 个模块消费的内容，所以两页的 `shared/` 里都只有 `types.ts`；只被页面层骨架文件消费的东西留在页面根目录，hotel 的 `params.ts` 就是这样，它只有页面 action 一个消费方。
+页面根目录与 `shared/` 的分工是另一条轴：`shared/` 收页面内所有非骨架的共享件，页面根只留分层骨架（`index.tsx`、`store.ts`、`slice.ts`、`actions.ts`、`effects.ts`、`listeners.ts`、`live.ts`）。所以 hotel 的 `params.ts` 与 homestay 的 `trace.ts` 都在 `shared/` 里，尽管前者只有页面 action 一个消费方、跟「跨模块」无关。
+
+判据是消费方出不出单个模块的范围，不是「跨不跨模块」。只被一个模块消费的仍留在那个模块内（`confirm-dialog/scenes.ts`），第二个页面开始消费时再上提 `src/`。页面根之所以不留这类文件：骨架是封闭集合，读者扫一眼页面根就该认全这个页面有哪几层，混进概念文件后得先读内容才知道哪个是层、哪个是辅助件。
 
 ## 二、模块 action 转交页面 action
 
@@ -52,7 +54,7 @@ export const { useRegisterLive, getLive } = createPageLive<PageLiveMap>();
 
 代价是因果变隐式：读提交 action 看不到选中会被清掉。所以 listener 里只放「结果的旁路反应」，提交自身必须完成的状态变更仍留在 action 内。
 
-监听 `setSubmittedInquiryId` 时要注意它也被用于撤回与重置，只有带上 id 才是「提交成功」。
+监听 `setSubmittedInquiry` 时要注意它也被用于撤回与重置，只有带上询价才是「提交成功」。
 
 ## 表单实例的共享
 
