@@ -35,14 +35,12 @@ export default function InquirySubmit() {
         提交询价
       </Button>
 
-      {/* 报价留在页面上：它是询价的结果本身，撤回才会清掉。
-          失败反过来走 toast——提交失败不改变界面，用户只需即时知道没成 */}
+      {/* 报价留在页面上：它是询价的结果本身，撤回才会清掉 */}
       {submittedInquiry && (
         <>
           <span className={styles.feedback} data-status="success">
             {quoteText(submittedInquiry)}
           </span>
-          {/* 撤回入口跟着这条询价走，故与报价同生共死 */}
           <Button danger size="small" onClick={requestCancel}>
             撤回询价
           </Button>

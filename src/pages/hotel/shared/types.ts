@@ -42,7 +42,7 @@ export interface BatchFavoriteResult {
   failures: BatchFavoriteFailure[];
 }
 
-/** 常用联系人，与一次性的行程字段分开：只有它跨会话落盘 */
+/** 常用联系人：与每单重填的行程字段分开，可跨会话复用 */
 export interface BookingContact {
   guestName: string;
   phone: string;

@@ -104,7 +104,7 @@ export class BookingSubmitError extends Error {
   }
 }
 
-/** 预订的是哪家酒店由服务端另收：它是页面的选中态，不是表单字段 */
+/** hotelId 单独入参：它是页面的选中态，不是表单字段 */
 export async function submitBooking(
   hotelId: string,
   values: BookingForm,

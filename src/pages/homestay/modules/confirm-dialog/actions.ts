@@ -4,7 +4,7 @@ import { store } from "../../store";
 
 import { setConfirmError, setIsConfirming } from "./slice";
 
-/** 场景决定提交分支；弹窗只负责编排 loading 与关闭时机，不掺业务判断 */
+/** 分派与编排分开：场景分支收在这里，confirm 只管 loading 与关闭时机 */
 async function runByScene(scene: ConfirmScene, listingId: string | null) {
   if (scene === ConfirmScene.RemoveFavorite) {
     if (!listingId) {
@@ -31,7 +31,7 @@ export const confirmDialogActions = {
       await runByScene(confirmScene, detailListingId);
       pageActions.closeConfirm();
     } catch (err) {
-      // 失败时不关弹窗、不吞错：把原因摆在用户眼前，让他能原地重试
+      // 失败时不关弹窗，把原因摆在用户眼前，让他能原地重试
       store.dispatch(
         setConfirmError(err instanceof Error ? err.message : String(err)),
       );

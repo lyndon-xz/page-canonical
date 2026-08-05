@@ -153,7 +153,7 @@ export const pageActions = {
     );
   },
 
-  /** 失败不改变界面结构，故用 toast；不吞掉——没人接的 rejection 等于失败静默 */
+  /** 在这里接住 commitFavorite 的抛错：失败不改变界面结构，故用 toast 提示 */
   async addFavorite(listingId: string) {
     try {
       await pageActions.commitFavorite(listingId);

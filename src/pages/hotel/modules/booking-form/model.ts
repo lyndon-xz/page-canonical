@@ -6,13 +6,14 @@ import { usePageStore } from "../../store";
 
 export function useBookingFormModel() {
   const form = useForm<BookingForm>({
+    // useForm 的泛型不要求 defaultValues 写全，satisfies 才校验字段完整
     defaultValues: {
       guestName: "",
       phone: "",
       checkInDate: "",
       nights: 1,
       rooms: 1,
-    },
+    } satisfies BookingForm,
     mode: "onTouched",
   });
   const { control } = form;

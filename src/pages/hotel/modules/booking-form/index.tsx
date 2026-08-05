@@ -55,8 +55,7 @@ export default function BookingForm() {
         {totalPrice !== null && (
           <span className={styles.total}>合计 ¥{totalPrice}</span>
         )}
-        {/* 成功态留在页面上：它是「这家已订」这件事本身。
-            失败反过来走 toast——提交失败不改变界面，用户只需即时知道没成 */}
+        {/* 成功态留在页面上：它是「这家已订」这件事本身 */}
         {bookingSubmitted && (
           <span className={styles.feedback}>预订已提交，酒店会尽快确认</span>
         )}

@@ -37,7 +37,6 @@ export default function DetailBody(props: DetailBodyProps) {
     );
   }
 
-  // 详情接口可能返回 null，此时列表项虽在也无内容可展示
   if (!listing || !detail) {
     return (
       <div className={styles.stateBox}>

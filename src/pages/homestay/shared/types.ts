@@ -53,7 +53,7 @@ export interface InquiryQuote {
   pricePerNight: number;
   /** 服务端确认的晚数：表单在提交成功后被重置，前端手上不再有它 */
   nights: number;
-  /** 折扣与杂费都算在内，故不等于单价乘晚数，前端不自行相乘 */
+  /** 已含长住折扣，故不等于单价乘晚数，前端不自行相乘 */
   totalPrice: number;
 }
 

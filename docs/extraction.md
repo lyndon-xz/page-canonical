@@ -26,6 +26,20 @@ const isSortBy = (value: string): value is SortBy =>
 
 常量上的类型标注也常被当成不能内联的理由，实际上使用处的上下文通常已经把类型钉住了。默认筛选条件内联进 `initialState: HomestayPageState` 后由后者提供类型，草稿态的初值内联进 `create<SearchFilterLocalState>(...)` 由泛型参数提供，两处都没丢检查。
 
+但要确认承接位的类型真的是完整类型。`useForm` 的 `defaultValues` 是 `DeepPartial<TFieldValues>`，写了 `useForm<InquiryForm>` 也不校验字段齐不齐，内联后漏一个 `nights` 编译照样通过，问题留到运行时：该字段初值成了 `undefined`，输入框从非受控切到受控，参与计算的数字字段还会算出 `NaN`。这类位置补一个 `satisfies` 把完整性校验找回来：
+
+```ts
+defaultValues: {
+  guestName: "",
+  phone: "",
+  checkInDate: "",
+  nights: 1,
+  message: "",
+} satisfies InquiryForm,
+```
+
+值仍在使用处，没多出一个名字，漏字段时报 TS1360 直接点出缺哪个。
+
 ## 名字承担解释职责时才抽
 
 ```ts
@@ -57,7 +71,7 @@ const methods = useForm<InquiryForm>({
     checkInDate: "",
     nights: 1,
     message: "",
-  },
+  } satisfies InquiryForm,
   mode: "onTouched",
 });
 ```

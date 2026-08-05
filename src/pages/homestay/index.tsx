@@ -13,10 +13,7 @@ import { store } from "./store";
 
 import styles from "./index.module.scss";
 
-/*
- * 必须挂在 Provider 内层，否则 effects 用不了 useAppSelector 这类依赖 context 的 hook。
- * 单独成组件则它订阅状态时，重渲染只落在这个空组件上，不牵连整棵页面子树。
- */
+// 单独成组件才能让 effects 跑在 Provider 内层，用得上依赖 context 的 hook
 function EffectsRunner() {
   usePageEffects();
   return null;
@@ -24,13 +21,14 @@ function EffectsRunner() {
 
 export default function HomestayPage() {
   const methods = useForm<InquiryForm>({
+    // useForm 的泛型不要求 defaultValues 写全，satisfies 才校验字段完整
     defaultValues: {
       guestName: "",
       phone: "",
       checkInDate: "",
       nights: 1,
       message: "",
-    },
+    } satisfies InquiryForm,
     mode: "onTouched",
   });
 
