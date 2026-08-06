@@ -29,13 +29,6 @@ async function waitForHydration() {
   });
 }
 
-function resolveInitialParams(): SearchParams {
-  return (
-    parseSearchParams(window.location.search) ??
-    usePageStore.getState().appliedParams
-  );
-}
-
 let resultSetGeneration = 0;
 
 const isCurrentGeneration = (generation: number) =>
@@ -72,7 +65,12 @@ export const pageActions = {
 
   async initPage() {
     await waitForHydration();
-    await loadHotels(resolveInitialParams());
+
+    const initialParams =
+      parseSearchParams(window.location.search) ??
+      usePageStore.getState().appliedParams;
+
+    await loadHotels(initialParams);
   },
 
   applySearchParams(patch: Partial<SearchParams>) {
