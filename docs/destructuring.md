@@ -9,13 +9,27 @@ export default function HotelCard(props: HotelCardProps) {
   const { hotel, selected, favorite, checked } = props;
 ```
 
-所有带 props 的组件（`HotelCard`、`ListingCard`、`DetailBody`、`ListBody`、`LoadMoreFooter`）、所有 `createSelector` 的结果函数与 hotel persist 的 `partialize` 都是这个形状。
+所有带 props 的组件（`HotelCard`、`ListingCard`、`DetailBody`、`ListBody`、`LoadMoreFooter`）、所有收 `state` 的 selector 与 hotel persist 的 `partialize` 都是这个形状。
 
 在签名里铺开字段有三处代价。一是加字段要改签名，字段一多 prettier 会把参数列表折成多行，类型标注跟着挤进去，签名不再是一眼能读完的一行。二是解构行没地方配注释——`inquiry-submit` 那处的 `message` 重命名必须说明原因，写在参数位里无处安放。三是丢掉 `props` / `fieldError` 这个整体名字，需要整体转发或调试打印时得重新拼回去。
 
 ## 前缀读到第二次就解构
 
 字段数不是判据，同一前缀在同一作用域被读两次就解构，同一个字段读两次也算。`serializeParams` 里 `keyword` 判空与写入各读一次，所以 `searchParams` 整体拆开；而 `batchFavorite` 末尾的 `failures.map((failure) => failure.hotelId)` 只读一次，点号就是终点，改块体去换掉一个前缀是净亏——同一个 `BatchFavoriteFailure`，在 model 里要同时读 `hotelId` 与 `reason` 时就该解构。
+
+model 的投影同样照这条走。homestay 走 RTK，state 下分 `page` 与 `confirmDialog` 两片，投影多半要读同一片的好几个字段，所以先解构那一片，字面量里只留字段名：
+
+```ts
+useAppSelector((s) => {
+  const { listings, listingsStatus, selectedListingId } = s.page;
+
+  return { listings, listingsStatus, selectedListingId };
+}, shallowEqual);
+```
+
+代价是字段名写两遍，换掉的是 `s.page.` 逐行重复。只读一片里的一个字段时（`inquiry-fields` 的 `s.page.submittedInquiry`）就直接点出来，不必为一次读改块体。
+
+hotel 走 zustand，state 是扁平的，`s` 本身就是那一片，解构它只会把字段名白写两遍，所以 `useShallow((s) => ({ ... }))` 保持字面量形式。判据没变，变的是路径里有没有第二段可省。
 
 调用结果是另一回事，它必须落成变量才能用，落就落成解构，取一个字段也一样：
 

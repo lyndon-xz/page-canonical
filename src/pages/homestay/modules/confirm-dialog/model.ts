@@ -1,39 +1,35 @@
-import { createSelector } from "@reduxjs/toolkit";
 import { shallowEqual } from "react-redux";
 
 import { ConfirmScene } from "../../shared/confirm";
-import { selectListings, useAppSelector, type RootState } from "../../store";
+import { useAppSelector, type RootState } from "../../store";
 
 // 破坏性操作的确认要指名对象，否则这次确认只是一次多余的点击
-const selectConfirmTarget = createSelector(
-  selectListings,
-  (state: RootState) => state.page.confirmRequest,
-  (state: RootState) => state.page.submittedInquiry,
-  (listings, request, submittedInquiry) => {
-    if (!request) {
-      return null;
-    }
+const selectConfirmTarget = (state: RootState) => {
+  const { confirmRequest, listings, submittedInquiry } = state.page;
 
-    if (request.scene === ConfirmScene.RemoveFavorite) {
-      const { listingId } = request;
+  if (!confirmRequest) {
+    return null;
+  }
 
-      return (
-        listings.find((listing) => listing.id === listingId)?.title ?? null
-      );
-    }
+  if (confirmRequest.scene === ConfirmScene.RemoveFavorite) {
+    const { listingId } = confirmRequest;
 
-    return submittedInquiry?.listingTitle ?? null;
-  },
-);
+    return listings.find((listing) => listing.id === listingId)?.title ?? null;
+  }
+
+  return submittedInquiry?.listingTitle ?? null;
+};
 
 export function useConfirmDialogModel() {
-  return useAppSelector(
-    (s) => ({
-      scene: s.page.confirmRequest?.scene ?? null,
+  return useAppSelector((s) => {
+    const { confirmRequest } = s.page;
+    const { isConfirming, confirmError } = s.confirmDialog;
+
+    return {
+      scene: confirmRequest?.scene ?? null,
       target: selectConfirmTarget(s),
-      isConfirming: s.confirmDialog.isConfirming,
-      confirmError: s.confirmDialog.confirmError,
-    }),
-    shallowEqual,
-  );
+      isConfirming,
+      confirmError,
+    };
+  }, shallowEqual);
 }

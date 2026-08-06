@@ -4,9 +4,9 @@
 
 ## 一、页面层共享
 
-两个以上模块都要的值放在页面层，模块从各自 model 里取。homestay 的 `selectListings` 就在页面层：listing-list 要把它渲染成卡片，listing-detail 要按 id 从里面找出当前房源。
+两个以上模块都要的值放在页面层，模块从各自 model 里取。homestay 的 `listings` 就在页面 slice 里：listing-list 要把它渲染成卡片，confirm-dialog 要按 id 找出待确认房源的标题，listing-detail 与 inquiry-fields 经 `selectSelectedListing` 取当前那一间。
 
-判断标准是消费方数量。只有一个模块要的派生值留在那个模块的 model 里——homestay 的 `selectDetailListing` 只有 listing-detail 读，提到页面层反倒是页面层多担了一份没人共享的派生。等第二个模块也要时再提，那时各算一遍才会漂移，也才白白多遍历一次列表。
+判断标准是消费方数量，派生值也照这条走。`selectSelectedListing` 被 listing-detail 与 inquiry-fields 同读，所以在页面层——两处各写一遍 `find` 会漂移，也白白多遍历一次列表。反过来 `selectConfirmTarget` 只有 confirm-dialog 读，留在模块 model 里，提上去就是页面层多担一份没人共享的派生。等第二个模块也要时再提。
 
 页面根目录与 `shared/` 的分工是另一条轴：`shared/` 收页面内所有非骨架的共享件，页面根只留分层骨架（`index.tsx`、`store.ts`、`slice.ts`、`actions.ts`、`effects.ts`、`listeners.ts`、`live.ts`）。所以 hotel 的 `params.ts`、homestay 的 `filters.ts` 与 `trace.ts` 都在 `shared/` 里，尽管前两者各自只有一个消费方、跟「跨模块」无关。
 

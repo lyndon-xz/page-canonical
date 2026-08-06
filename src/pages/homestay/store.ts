@@ -1,8 +1,4 @@
-import {
-  configureStore,
-  createListenerMiddleware,
-  createSelector,
-} from "@reduxjs/toolkit";
+import { configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
 
 import { registerPageListeners, type AppStartListening } from "./listeners";
@@ -29,22 +25,25 @@ registerPageListeners(listenerMiddleware.startListening as AppStartListening);
 
 export const useAppSelector = useSelector.withTypes<RootState>();
 
-export const selectListings = (state: RootState) => state.page.listings;
+/**
+ * 详情与询价都要「当前在看哪一间」，find 一份放页面层，模块各取所需。
+ * 房源基本信息一律认列表项：详情接口只返回描述类字段，标题价格不在那儿。
+ */
+export const selectSelectedListing = (state: RootState) => {
+  const { listings, selectedListingId } = state.page;
 
-const selectPageState = (state: RootState) => state.page;
+  return listings.find((listing) => listing.id === selectedListingId) ?? null;
+};
 
 /** 埋点通用参数从 store 派生，不在各调用点各拼一遍 */
-export const selectTraceCommonTag = createSelector(
-  selectPageState,
-  (page): TraceCommonTag => {
-    const { appliedFilters, selectedListingId } = page;
-    const { keyword, roomType } = appliedFilters;
+export const selectTraceCommonTag = (state: RootState): TraceCommonTag => {
+  const { appliedFilters, selectedListingId } = state.page;
+  const { keyword, roomType } = appliedFilters;
 
-    return {
-      page: "homestay",
-      keyword,
-      roomType,
-      selectedListingId: selectedListingId ?? "",
-    };
-  },
-);
+  return {
+    page: "homestay",
+    keyword,
+    roomType,
+    selectedListingId: selectedListingId ?? "",
+  };
+};

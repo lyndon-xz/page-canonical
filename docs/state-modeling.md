@@ -52,11 +52,39 @@ useAppSelector(
 createSelector(selectPageState, (page) => ({ ...挑几个字段 }));
 ```
 
-它看着有记忆化，实际一次也没命中。任一字段变更都产生新的 `page` 引用，缓存随之作废，结果函数重跑并返回一个新的对象字面量，而 `useSelector` 默认按引用比较——于是每次 dispatch 都重渲染全部订阅方。homestay 有过这个问题：一次 `setIsSubmittingInquiry` 会连带重渲染列表、七张卡片、详情区与弹窗，而它们要的字段一个都没变。
+它看着有记忆化，实际一次也没命中：任一字段变更都产生新的 `page` 引用，缓存随之作废，结果函数重跑，返回一个新的对象字面量。
 
-`createSelector` 该用在有真实计算的派生上，且**输入必须细到字段**。`selectDetailListing` 要在列表里 `find` 出当前房源，输入是 `listings` 与 `selectedListingId` 两个字段，所以只在这两者变时才重算，返回的还是数组里那个对象的原引用，投影层的浅比较能直接判等。
+配上 `shallowEqual` 时，它的渲染行为与内联投影没有差别。所以问题不在这次跑得对不对，而在这块招牌是假的——读者看到 `createSelector` 会以为引用是稳定的，于是把外层的 `shallowEqual` 当多余的删掉。删掉的那一刻才真的退化：`useSelector` 默认按引用比较，每次 dispatch 重渲染全部订阅方。homestay 有过这个症状，一次 `setIsSubmittingInquiry` 连带重渲染列表、七张卡片、详情区与弹窗，而它们要的字段一个都没变。白挂的抽象比没有抽象贵，代价就在这里。
 
-两层分工由此清楚：`createSelector` 管「算贵的东西别重复算」，投影加浅比较管「字段没变就别惊动组件」。少了后者，前者算得再准也会被外层的新对象吃掉。
+嫌投影字面量塞在 hook 里不好读，提出去命名是可以的，但写成普通函数：
+
+```ts
+const selectModel = (s: RootState) => ({ ...挑几个字段 });
+```
+
+## selector 一律写成普通函数
+
+订阅粒度由投影加浅比较解决之后，`createSelector` 就没有位置了。本仓库所有 selector 都是同一个形状，没有例外：
+
+```ts
+export const selectSelectedListing = (state: RootState) => {
+  const { listings, selectedListingId } = state.page;
+
+  return listings.find((listing) => listing.id === selectedListingId) ?? null;
+};
+```
+
+`createSelector` 要挣到自己那层包装，得同时满足三条，缺一条就是白挂：
+
+1. **返回的是新建的对象或数组。** 读字段、`find` 出数组里的元素、返回字符串这类原始值，引用或值本来就稳，记忆化无事可做。`selectSelectedListing` 与 `selectConfirmTarget` 都卡在这条：前者返回数组里那个对象的原引用，后者返回一个标题字符串。
+2. **结果要参与订阅判等。** `selectTraceCommonTag` 确实新建对象，但它只在 action 里 `store.getState()` 读一次就扔，没人比较它的引用。
+3. **输入能细到字段。** 细不到就是整块 `page`，缓存永不命中，退化成上一节那个反面例子。
+
+三条同时成立的形状是「`filter`/`sort`/`map` 出一个新数组，且结果要进组件」——那时少了记忆化不是慢一点，是每次都给下游一个新引用、判等必挂。
+
+这种派生本仓库只有一处：hotel 的 `batchFailureNames` 把批量收藏的失败 id `map` 成带酒店名的文案。它的缓存放在 model 的 `useMemo` 里，而不是一个记忆化 selector。这样分工干净：selector 只管从 state 里读，缓存归 model；zustand 那边本来也没有 `createSelector`，两栈于是是同一个写法。
+
+判据因此不必每次现推：**selector 一律普通函数，要缓存的新数组交给 model 的 `useMemo`。** 统一成一种形状的收益比省下一次七元素的 `find` 大得多——读者不必在每个 selector 前先判断它属于哪一派。
 
 ## 草稿态与已生效态要分开
 
