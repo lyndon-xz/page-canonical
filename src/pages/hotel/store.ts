@@ -3,13 +3,10 @@ import { persist } from "zustand/middleware";
 
 import { FetchStatus } from "@/lib/fetch-status";
 
-import type {
-  BatchFavoriteFailure,
-  BookingContact,
-  Hotel,
-  HotelPage,
-  SearchParams,
-} from "./shared/types";
+import type { BookingContact } from "./shared/booking";
+import type { BatchFavoriteFailure } from "./shared/favorite";
+import type { Hotel, HotelPage } from "./shared/hotel";
+import type { SearchParams } from "./shared/params";
 
 const DEFAULT_PARAMS: SearchParams = {
   keyword: "",

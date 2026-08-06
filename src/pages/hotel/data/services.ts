@@ -1,13 +1,10 @@
+import type { BookingFieldError, BookingForm } from "../shared/booking";
 import type {
   BatchFavoriteFailure,
   BatchFavoriteResult,
-  BookingFieldError,
-  BookingForm,
-  Hotel,
-  HotelPage,
-  SearchParams,
-  SortBy,
-} from "../shared/types";
+} from "../shared/favorite";
+import type { Hotel, HotelPage } from "../shared/hotel";
+import type { SearchParams, SortBy } from "../shared/params";
 
 import { MOCK_HOTELS } from "./hotels";
 

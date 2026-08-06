@@ -6,16 +6,16 @@
 
 ## import 分区
 
-按来源分区，区间空行分隔：内建 → 第三方 → `@/` 别名 → `../` → `./` → 样式表。整体是由外而内，`vite.config.ts` 的 `path` 单独占第一区就是这个缘故。组内按 import 路径的字典序，效果同样是由远及近——`"../../../../shared/types"` 自然排在 `"../../actions"` 前面，`../` 整区排在 `./` 整区前面。
+按来源分区，区间空行分隔：内建 → 第三方 → `@/` 别名 → `../` → `./` → 样式表。整体是由外而内，`vite.config.ts` 的 `path` 单独占第一区就是这个缘故。组内按 import 路径的字典序，效果同样是由远及近——`"../../../../shared/hotel"` 自然排在 `"../../actions"` 前面，`../` 整区排在 `./` 整区前面。
 
-按字典序而不是「按重要性」或「先值后类型」，是因为字典序不需要判断。`homestay/data/services.ts` 一度把 `"./listings"` 排在 `"../shared/types"` 之前，`sort-bar` 把 `"../../../../shared/types"` 排在 `"../../actions"` 之后，两处都不是有意为之，只是加 import 时顺手接在末尾。
+按字典序而不是「按重要性」或「先值后类型」，是因为字典序不需要判断。`homestay/data/services.ts` 一度把 `"./listings"` 排在 `"../shared/listing"` 之前，`sort-bar` 把 `"../../../../shared/params"` 排在 `"../../actions"` 之后，两处都不是有意为之，只是加 import 时顺手接在末尾。
 
 样式表单独一区且排最后：它不参与逻辑，`styles.xxx` 要对照的是文件末尾的 JSX。
 
-同一个模块只出现一次。`shared/params.ts` 与 `sort-bar` 曾把值与类型分两行从同一个 `types` 取，`verbatimModuleSyntax` 下用行内 `type` 修饰就能合成一行：
+同一个模块只出现一次。概念文件里值与类型同处，从它取东西时两者常一起要，`verbatimModuleSyntax` 下用行内 `type` 修饰就能合成一行，不必值一行类型一行：
 
 ```ts
-import { SORT_BY_VALUES, type SearchParams, type SortBy } from "./types";
+import { SORT_BY_VALUES, type SortBy } from "../../../../shared/params";
 ```
 
 分两行不会报错，但下一个人改其中一行时容易漏掉另一行。
@@ -66,7 +66,7 @@ function buildQuote(listing: Listing, payload: InquiryPayload): InquiryQuote {
 - 状态层（`slice.ts` / `store.ts`）按状态的生命周期分组，跨结果集的用户数据与瞬时态各成一块
 - `data/services.ts` 按用户触达这些接口的先后
 
-于是 homestay 的 `actions.ts` 是「确认弹窗 → 收藏」（`requestRemoveFavorite` 要调 `openConfirm`，依赖把它前移），`slice.ts` 是「收藏 → 确认弹窗」（`favoriteIds` 是跨结果集的用户数据，`confirmScene` 是瞬时态）。hotel 的「多选」与「收藏」在两层也是反的。
+于是 homestay 的 `actions.ts` 是「确认弹窗 → 收藏」（`toggleFavorite` 要调 `openConfirm`，依赖把它前移），`slice.ts` 是「收藏 → 确认弹窗」（`favoriteIds` 是跨结果集的用户数据，`confirmRequest` 是瞬时态）。hotel 的「多选」与「收藏」在两层也是反的。
 
 这类不一致不是漂移。硬拉平总会让一边的依据失效：把 slice 改成 actions 的序，`favoriteIds` 就被夹进两块瞬时态之间；把 actions 改成 slice 的序，`openConfirm` 就排到调用它的人后面。判断依据留在各自文件内，读者在哪个文件里都能自证。
 

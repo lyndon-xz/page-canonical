@@ -26,13 +26,13 @@ homestay 是埋点 → 列表 → 详情 → 确认弹窗 → 收藏 → 询价�
 
 ## 组内：底层读写在前，包装它的在后
 
-`loadListings` 在 `retryListings` 之前，`commitFavorite` 在 `addFavorite` 与 `requestRemoveFavorite` 之前。真正碰数据的那个排前面，包装它、给它加一层交互语义的紧随其后。
+`loadListings` 在 `retryListings` 之前，`commitFavorite` 在 `addFavorite` 与 `toggleFavorite` 之前。真正碰数据的那个排前面，包装它、给它加一层交互语义的紧随其后。
 
 成对的 `open`/`close`、`select`/`clear` 相邻。重试与清错（`retryXxx`、`dismissXxx`）排在所属组末尾——它们是失败路径的收尾，不是主线。
 
 ## 被依赖的排在依赖它的之前
 
-`openConfirm` 排在收藏组之前，因为 `requestRemoveFavorite` 要调它；`loadHotels` 排在 `initPage` 之前，`loadListingDetail` 排在 `selectListing` 与 `retryDetail` 之前。
+`openConfirm` 排在收藏组之前，因为 `toggleFavorite` 要调它；`loadHotels` 排在 `initPage` 之前，`loadListingDetail` 排在 `selectListing` 与 `retryDetail` 之前。
 
 两页的 action 都是对象字面量方法，互调靠 `pageActions.xxx` 延迟解析，顺序写反了也不会报错，所以这条全靠手动维持。
 

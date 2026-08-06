@@ -1,4 +1,4 @@
-import { SORT_BY_VALUES, type SortBy } from "../../../../shared/types";
+import { SORT_BY_VALUES, type SortBy } from "../../../../shared/params";
 import { hotelListActions } from "../../actions";
 import { useHotelListModel } from "../../model";
 

@@ -2,22 +2,39 @@ import { DatePicker, Input } from "antd";
 import dayjs from "dayjs";
 import { Controller } from "react-hook-form";
 
+import type { Listing } from "../../shared/listing";
+
 import { useInquiryFieldsModel } from "./model";
 
 import styles from "./index.module.scss";
 
 const { TextArea } = Input;
 
+/**
+ * 提交成功即退出该房源，此时选中态为空但询价并没有「还没开始」，
+ * 少了中间这一态就会与下方的报价成功提示互相打脸。
+ */
+function targetText(listing: Listing | null, hasSubmittedInquiry: boolean) {
+  if (listing) {
+    return `为「${listing.title}」询价 · ¥${listing.pricePerNight} / 晚`;
+  }
+
+  if (hasSubmittedInquiry) {
+    return "本次询价已提交，撤回后可重新选择房源";
+  }
+
+  return "请先在上方选择要询价的房源";
+}
+
 export default function InquiryFields() {
-  const { control, errors, listing } = useInquiryFieldsModel();
+  const { control, errors, listing, hasSubmittedInquiry } =
+    useInquiryFieldsModel();
 
   return (
     <>
       {/* 询价挂在哪套房上必须写在表单里：房源不是可填字段，用户只能从这里确认 */}
       <p className={styles.target} data-selected={!!listing}>
-        {listing
-          ? `为「${listing.title}」询价 · ¥${listing.pricePerNight} / 晚`
-          : "请先在上方选择要询价的房源"}
+        {targetText(listing, hasSubmittedInquiry)}
       </p>
 
       <div className={styles.fields}>
@@ -28,11 +45,15 @@ export default function InquiryFields() {
           <Controller
             name="guestName"
             control={control}
-            rules={{ required: "请填写入住人" }}
+            rules={{
+              required: "请填写入住人",
+              maxLength: { value: 20, message: "入住人姓名不超过 20 字" },
+            }}
             render={({ field }) => (
               <Input
                 id="guestName"
                 placeholder="请输入入住人姓名"
+                maxLength={20}
                 status={errors.guestName ? "error" : undefined}
                 {...field}
               />
@@ -85,6 +106,8 @@ export default function InquiryFields() {
                   style={{ width: "100%" }}
                   placeholder="请选择入住日期"
                   inputReadOnly
+                  // 过去的日期无从入住，交给控件挡掉，别等服务端算完报价再报错
+                  disabledDate={(current) => current.isBefore(dayjs(), "day")}
                   value={value ? dayjs(value) : null}
                   onChange={(_, dateString) =>
                     onChange(typeof dateString === "string" ? dateString : "")
@@ -110,6 +133,10 @@ export default function InquiryFields() {
             rules={{
               required: "请填写入住晚数",
               min: { value: 1, message: "至少 1 晚" },
+              max: { value: 30, message: "单次询价最多 30 晚" },
+              // 半晚无从计价，而 number 输入框本身不阻止小数
+              validate: (value) =>
+                Number.isInteger(value) || "入住晚数须为整数",
             }}
             render={({ field }) => {
               const { name, ref, value, onBlur, onChange } = field;
@@ -119,6 +146,8 @@ export default function InquiryFields() {
                   id="nights"
                   type="number"
                   min={1}
+                  max={30}
+                  step={1}
                   status={errors.nights ? "error" : undefined}
                   name={name}
                   ref={ref}
@@ -147,15 +176,22 @@ export default function InquiryFields() {
           <Controller
             name="message"
             control={control}
+            rules={{ maxLength: { value: 200, message: "备注不超过 200 字" } }}
             render={({ field }) => (
               <TextArea
                 id="message"
                 rows={3}
                 placeholder="补充你的入住需求（选填）"
+                maxLength={200}
+                showCount
+                status={errors.message ? "error" : undefined}
                 {...field}
               />
             )}
           />
+          {errors.message && (
+            <span className={styles.error}>{errors.message.message}</span>
+          )}
         </div>
       </div>
     </>

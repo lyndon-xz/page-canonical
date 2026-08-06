@@ -8,12 +8,12 @@ import InquiryFields from "./modules/inquiry-fields";
 import InquirySubmit from "./modules/inquiry-submit";
 import ListingDetail from "./modules/listing-detail";
 import ListingList from "./modules/listing-list";
-import type { InquiryForm } from "./shared/types";
+import type { InquiryForm } from "./shared/inquiry";
 import { store } from "./store";
 
 import styles from "./index.module.scss";
 
-// 单独成组件才能让 effects 跑在 Provider 内层，用得上依赖 context 的 hook
+// 单独成组件并挂在 Provider 内层：effects 要订阅状态时，重渲染只落在这个空组件上
 function EffectsRunner() {
   usePageEffects();
   return null;

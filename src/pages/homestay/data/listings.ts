@@ -1,4 +1,4 @@
-import type { Listing } from "../shared/types";
+import type { Listing } from "../shared/listing";
 
 export const MOCK_LISTINGS: Listing[] = [
   {

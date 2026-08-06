@@ -9,7 +9,7 @@ import styles from "./index.module.scss";
 const { confirm, cancel } = confirmDialogActions;
 
 export default function ConfirmDialog() {
-  const { scene, isConfirming, confirmError } = useConfirmDialogModel();
+  const { scene, target, isConfirming, confirmError } = useConfirmDialogModel();
 
   if (!scene) {
     return null;
@@ -28,6 +28,7 @@ export default function ConfirmDialog() {
       onCancel={cancel}
       width={420}
     >
+      {target && <p className={styles.target}>{target}</p>}
       {desc && <p className={styles.desc}>{desc}</p>}
       {confirmError && (
         <Alert

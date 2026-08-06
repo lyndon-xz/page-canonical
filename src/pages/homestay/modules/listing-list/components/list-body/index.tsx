@@ -11,7 +11,13 @@ import styles from "./index.module.scss";
 const { retry } = listingListActions;
 
 export default function ListBody() {
-  const { listings, listingsStatus, selectedListingId } = useListingListModel();
+  const {
+    listings,
+    listingsStatus,
+    selectedListingId,
+    favoriteIds,
+    favoritingIds,
+  } = useListingListModel();
 
   if (listingsStatus === FetchStatus.Loading) {
     return (
@@ -42,13 +48,19 @@ export default function ListBody() {
 
   return (
     <div className={styles.grid}>
-      {listings.map((listing) => (
-        <ListingCard
-          key={listing.id}
-          listing={listing}
-          selected={listing.id === selectedListingId}
-        />
-      ))}
+      {listings.map((listing) => {
+        const { id } = listing;
+
+        return (
+          <ListingCard
+            key={id}
+            listing={listing}
+            selected={id === selectedListingId}
+            favorite={favoriteIds.includes(id)}
+            favoriting={favoritingIds.includes(id)}
+          />
+        );
+      })}
     </div>
   );
 }

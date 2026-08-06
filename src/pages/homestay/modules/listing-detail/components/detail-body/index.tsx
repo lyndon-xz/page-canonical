@@ -16,7 +16,8 @@ interface DetailBodyProps {
 
 export default function DetailBody(props: DetailBodyProps) {
   const { inDrawer = false } = props;
-  const { listing, detail, detailStatus, isFavorite } = useListingDetailModel();
+  const { listing, detail, detailStatus, isFavorite, isFavoriting } =
+    useListingDetailModel();
 
   if (detailStatus === FetchStatus.Loading) {
     return (
@@ -69,7 +70,7 @@ export default function DetailBody(props: DetailBodyProps) {
 
       {inDrawer ? (
         <div className={styles.actions}>
-          <Button onClick={toggleFavorite}>
+          <Button loading={isFavoriting} onClick={toggleFavorite}>
             {isFavorite ? "取消收藏" : "收藏房源"}
           </Button>
         </div>

@@ -58,8 +58,8 @@ const { title, desc, okText } = SCENE_COPY[scene];
 上一节末尾的位置规则管的是 `props` 与 hook 返回值，它们每次渲染都要重新取。对象形态的 actions 不是：`hotelListActions` 是模块级常量，方法引用从模块求值那一刻就固定了。解构因此放在 import 之后、组件之前：
 
 ```tsx
+import type { Hotel } from "../../../../shared/hotel";
 import { hotelListActions } from "../../actions";
-import type { Hotel } from "../../../../shared/types";
 
 import styles from "./index.module.scss";
 
@@ -74,17 +74,19 @@ export default function HotelCard(props: HotelCardProps) {
 
 判据是文件的角色，不是前缀读了几次。
 
-模块的 `actions.ts` 是层级边界文件，整个文件的意义就是把 UI 的意图转交给页面层，`pageActions.` 标出的是「这一句出了本模块」。所以这里的前缀都保留，同一个函数里读到第二次也照旧——`listing-detail` 的 `openDetailDrawer` 连着调 `trackClick` 与 `openDetailDrawer`，`listing-list` 的 `toggleFavorite` 里 `pageActions` 出现三次。这是「前缀读到第二次就解构」的例外：前缀在这里是信息，不是噪声。
+模块的 `actions.ts` 是层级边界文件，整个文件的意义就是把 UI 的意图转交给页面层，`pageActions.` 标出的是「这一句出了本模块」。所以这里的前缀都保留，同一个函数里读到第二次也照旧——`listing-detail` 的 `openDetailDrawer` 与 `listing-list` 的 `selectListing` 都是连着调 `trackClick` 与那个同名的页面 action。这是「前缀读到第二次就解构」的例外：前缀在这里是信息，不是噪声。
 
 三种形态下它各自还多担一层作用。
 
 **混层时它是唯一的层级标记。** 模块自己的状态写入与 `pageActions` 挨着出现：
 
 ```ts
-cancel() {
-  store.dispatch(setConfirmError(null));
+store.dispatch(setIsConfirming(true));
+store.dispatch(setConfirmError(null));
+try {
+  await runByScene(confirmRequest);
   pageActions.closeConfirm();
-},
+}
 ```
 
 仓库里有两处：`confirm-dialog` 有自己的 slice，`search-filter` 有模块本地的 zustand store。
@@ -97,7 +99,7 @@ closeDetailDrawer() {
 },
 ```
 
-对象字面量的方法名不构成作用域绑定，这里调到的仍是解构出来的那个，但读者得先想一遍才敢确认。`listing-detail` 有三个方法是这个形状，`listing-list` 与 `hotel-list` 各有一个。
+对象字面量的方法名不构成作用域绑定，这里调到的仍是解构出来的那个，但读者得先想一遍才敢确认。这是转交方法里最常见的形状，`listing-detail` 的三个方法与 `hotel-list` 的大半都是。
 
 **不同名转交时它标出被转交的动作属于哪一层。** `inquiry-submit` 的 `submit` 转交 `submitInquiry`、`requestCancel` 转交 `openConfirm`，裸着读不出这两个动作是页面级的。
 

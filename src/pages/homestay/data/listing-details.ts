@@ -1,4 +1,4 @@
-import type { ListingDetail } from "../shared/types";
+import type { ListingDetail } from "../shared/listing";
 
 export const MOCK_LISTING_DETAILS: Record<string, ListingDetail> = {
   l1: {

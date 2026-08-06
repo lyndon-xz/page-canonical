@@ -8,7 +8,15 @@
 
 以 homestay 的详情为例。「当前看哪个房源的详情」这组状态触发方是 listing-list（卡片上的入口），消费方是 listing-detail，所以整组归页面层。
 
-confirm-dialog 则被这条判据切成两半：弹窗开不开（`confirmScene`）归页面层，因为列表卡片与详情抽屉都能触发它；「确认中」（`isConfirming`）与提交失败信息（`confirmError`）归模块自己的 slice，它们只在弹窗自身的生命周期里有意义，触发方既不读也不该读。
+confirm-dialog 则被这条判据切成两半：弹窗开不开、要处理什么（`confirmRequest`）归页面层，因为列表卡片与详情抽屉都能触发它；「确认中」（`isConfirming`）与提交失败信息（`confirmError`）归模块自己的 slice，它们只在弹窗自身的生命周期里有意义，触发方既不读也不该读。
+
+### 只在某个开关期间有意义的状态，生命周期就挂在那个开关上
+
+上面这两个模块本地态在弹窗关闭后没有任何意义，所以它们的复位由 slice 直接监听 `confirmRequest` 的变更（RTK 的 `extraReducers`），而不是由每个关闭方各自记得清一下。
+
+指望关闭方自觉的写法漏得很隐蔽：确认成功后关闭、换结果集时关闭，这两条路径都不经过「取消」按钮，于是上一次的报错会活到下次开弹窗，用户一打开就看到一条与当前操作无关的错误。关闭弹窗的路径只会越来越多，而每条新路径都是一次漏清的机会。
+
+绑在开关上之后，模块 action 里只剩一处清理，管的也是另一件事：同一次弹窗内重试前要摘掉上次的报错。跨弹窗的复位与单次弹窗内的重试是两个时间尺度，不该由同一句代码兼任。
 
 判据里的「读」也包括 listener 读。homestay 的 `submittedInquiry` 看着像 inquiry-submit 的私有状态，但它必须在页面层：listener 要监听它来触发「退出当前房源」（见[跨模块协作](cross-module.md)）。
 
@@ -16,11 +24,39 @@ confirm-dialog 则被这条判据切成两半：弹窗开不开（`confirmScene`
 
 ### 用 null 代替额外的布尔
 
-`confirmScene` 为 `null` 表示弹窗关闭，没有配套的 `isOpen`。多一个布尔就多一个必须与场景同步变更的值，漏改一处就会出现「开着但没有场景」或「有场景但不显示」。
+`confirmRequest` 为 `null` 表示弹窗关闭，没有配套的 `isOpen`。多一个布尔就多一个必须与它同步变更的值，漏改一处就会出现「开着但没有场景」或「有场景但不显示」。
 
 hotel 的 `bookedHotelId` 是同一条的延伸：为 `null` 表示本次会话还没提交过预订，而存 id 而非「已提交」布尔，是因为布尔要在换选酒店与换结果集时各清一次，漏一处就会给没提交过的那家显示成功提示；存 id 则让 UI 比对当前选中得出结论，两处都不必同步。
 
 homestay 的 `submittedInquiry` 存整条结果还多一层动机：撤回要把服务端给的 `inquiryId` 报回去，成功态要显示服务端算出的 `quote` 与回显的房源标题，这几个值同生同灭。配一个「已提交」布尔就是它们的冗余投影，UI 判断「询到价了没有」看整条在不在即可。
+
+## model 按字段投影，不整块订阅
+
+状态归属定下来之后，模块怎么读它是另一件事。两页的 model 都是同一个形状：投出一个只含本模块要的字段的对象，交由逐字段的浅比较决定要不要重渲染。zustand 那边是 `useShallow`，RTK 那边是 `useSelector` 的第二个参数 `shallowEqual`。
+
+```ts
+useAppSelector(
+  (s) => ({
+    listings: s.page.listings,
+    listingsStatus: s.page.listingsStatus,
+    selectedListingId: s.page.selectedListingId,
+  }),
+  shallowEqual,
+);
+```
+
+反面写法是拿整块 state 喂 `createSelector`：
+
+```ts
+// 别这样：输入是整个 page
+createSelector(selectPageState, (page) => ({ ...挑几个字段 }));
+```
+
+它看着有记忆化，实际一次也没命中。任一字段变更都产生新的 `page` 引用，缓存随之作废，结果函数重跑并返回一个新的对象字面量，而 `useSelector` 默认按引用比较——于是每次 dispatch 都重渲染全部订阅方。homestay 有过这个问题：一次 `setIsSubmittingInquiry` 会连带重渲染列表、七张卡片、详情区与弹窗，而它们要的字段一个都没变。
+
+`createSelector` 该用在有真实计算的派生上，且**输入必须细到字段**。`selectDetailListing` 要在列表里 `find` 出当前房源，输入是 `listings` 与 `selectedListingId` 两个字段，所以只在这两者变时才重算，返回的还是数组里那个对象的原引用，投影层的浅比较能直接判等。
+
+两层分工由此清楚：`createSelector` 管「算贵的东西别重复算」，投影加浅比较管「字段没变就别惊动组件」。少了后者，前者算得再准也会被外层的新对象吃掉。
 
 ## 草稿态与已生效态要分开
 
@@ -79,6 +115,10 @@ export type SortBy = (typeof SORT_BY_VALUES)[number];
 
 这样加一个排序值只改 `SORT_BY_VALUES` 一行，校验自动跟随，两处查表由编译器点名。
 
+homestay 的房型（`ROOM_TYPE_VALUES` / `RoomType`）是同一个形状。它不像 `sortBy` 那样有 exhaustive 的查表来兜底，但一样越过 URL 这道边界，所以更需要这份来源：裸 `string` 的字段看不出取值是封闭的，任何一处手写字面量都不会有人点名。
+
+「不限」用空串表达（`RoomType | ""`），与 hotel 的 `star: 0` 是同一招：不另加一个「是否筛选房型」的布尔，也就没有两个值要同步。
+
 ### enum 留给服务端契约
 
 `SortBy` 不用 enum，不是因为 enum 不安全，而是它一处也省不掉：`comparators`、`SORT_LABELS` 照样各写三条，URL 校验照样得写 `Object.values(SortBy).includes(raw)`。它只把 `"rating"` 换成 `SortBy.Rating`，而拼错这件事 union 已经由编译器管住了。代价是 enum 会生成运行时代码，与「类型只存在于编译期」的心智不一致，`erasableSyntaxOnly` 下还直接不可用。
@@ -97,6 +137,10 @@ const isSortBy = (value: string): value is SortBy =>
 ```
 
 这里另抄一个 `["price", "rating", "distance"]` 是最隐蔽的一种错：加了新排序值忘了同步，`?sortBy=popularity` 会被判为非法、静默降级成默认排序，而 `comparators` 那边有 exhaustive 检查会报错，人容易以为已经改全了。
+
+**收窄的结果要降级到一个合法值，不能原样落库。** homestay 的房型非法时回落为「不限」，hotel 的排序回落为默认排序、星级回落为 0。原样放过去的话，`?roomType=豪华` 会一路传到筛选里得出一个空列表——用户看到的是「这地方没房」，而不是「这个筛选值不存在」，而页面上并没有筛选 UI 能让他改回来。
+
+一个字段少了这层收窄，症状就是这样：不报错、不为空、只是安静地给出错误答案。
 
 同一道边界上，用查询代替索引取值更稳。`Record<Union, T>` 的索引结果类型不带 `undefined`，服务端多下发一个前端还没定义的 key 时它在运行时就是 `undefined`，接着取字段直接抛错；若这行在渲染路径上，代价是整块白屏。`includes` 遇到未知值只是匹配不上。区别在于索引取值假设 key 一定存在，查询不假设。
 

@@ -1,6 +1,6 @@
 import { Button } from "antd";
 
-import type { SubmittedInquiry } from "../../shared/types";
+import type { SubmittedInquiry } from "../../shared/inquiry";
 
 import { inquirySubmitActions } from "./actions";
 import { useInquirySubmitModel } from "./model";

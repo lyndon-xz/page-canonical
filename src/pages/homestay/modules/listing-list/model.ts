@@ -1,23 +1,22 @@
-import { createSelector } from "@reduxjs/toolkit";
+import { shallowEqual } from "react-redux";
 
-import { selectListings, selectPageState, useAppSelector } from "../../store";
+import { useAppSelector } from "../../store";
 
-const selectListingListModel = createSelector(
-  selectPageState,
-  selectListings,
-  (page, listings) => {
-    const { listingsStatus, selectedListingId, favoriteIds } = page;
-
-    return {
-      listings,
-      listingsCount: listings.length,
-      listingsStatus,
-      selectedListingId,
-      favoriteIds,
-    };
-  },
-);
-
+/**
+ * 投影 + shallowEqual，而不是 createSelector(selectPageState, ...)：
+ * 后者以整块 page 为输入，page 里任一字段变更都会顶掉缓存、返回新对象字面量，
+ * 引用相等判定必然失败，等于每次 dispatch 都重渲染全部订阅方。
+ */
 export function useListingListModel() {
-  return useAppSelector(selectListingListModel);
+  return useAppSelector(
+    (s) => ({
+      listings: s.page.listings,
+      listingsCount: s.page.listings.length,
+      listingsStatus: s.page.listingsStatus,
+      selectedListingId: s.page.selectedListingId,
+      favoriteIds: s.page.favoriteIds,
+      favoritingIds: s.page.favoritingIds,
+    }),
+    shallowEqual,
+  );
 }

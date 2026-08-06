@@ -9,8 +9,12 @@ import {
   toggleHotelFavorite,
 } from "./data/services";
 import { getLive } from "./live";
-import { parseSearchParams, serializeParams } from "./shared/params";
-import type { BookingForm, SearchParams } from "./shared/types";
+import type { BookingForm } from "./shared/booking";
+import {
+  parseSearchParams,
+  serializeParams,
+  type SearchParams,
+} from "./shared/params";
 import { usePageStore } from "./store";
 
 /** storage 若换成异步实现，缺此门禁首屏会先按默认条件多拉一次 */

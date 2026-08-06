@@ -1,10 +1,6 @@
 import type { TypedStartListening } from "@reduxjs/toolkit";
 
-import {
-  clearDetailContext,
-  setSelectedListingId,
-  setSubmittedInquiry,
-} from "./slice";
+import { exitListing, setSubmittedInquiry } from "./slice";
 import type { AppDispatch, RootState } from "./store";
 
 export type AppStartListening = TypedStartListening<RootState, AppDispatch>;
@@ -19,8 +15,7 @@ export function registerPageListeners(startListening: AppStartListening) {
         return;
       }
 
-      api.dispatch(setSelectedListingId(null));
-      api.dispatch(clearDetailContext());
+      api.dispatch(exitListing());
     },
   });
 }

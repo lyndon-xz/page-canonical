@@ -8,26 +8,22 @@ export const listingDetailActions = {
   },
 
   closeDetailDrawer() {
+    pageActions.trackClick("detail_drawer_close");
     pageActions.closeDetailDrawer();
   },
 
   retryDetail() {
+    pageActions.trackClick("detail_retry");
     pageActions.retryDetail();
   },
 
-  /** 收藏是新增操作、即点即改；取消收藏是破坏性的，转交二次确认 */
   toggleFavorite() {
-    const { detailListingId, favoriteIds } = store.getState().page;
+    const { selectedListingId } = store.getState().page;
 
-    if (!detailListingId) {
+    if (!selectedListingId) {
       return;
     }
 
-    if (favoriteIds.includes(detailListingId)) {
-      pageActions.requestRemoveFavorite(detailListingId);
-      return;
-    }
-
-    void pageActions.addFavorite(detailListingId);
+    pageActions.toggleFavorite(selectedListingId);
   },
 };

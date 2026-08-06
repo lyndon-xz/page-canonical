@@ -1,12 +1,13 @@
+import dayjs from "dayjs";
+
+import type { ListingFilters } from "../shared/filters";
 import type {
   InquiryFieldError,
   InquiryPayload,
   InquiryQuote,
-  Listing,
-  ListingDetail,
-  ListingFilters,
   SubmittedInquiry,
-} from "../shared/types";
+} from "../shared/inquiry";
+import type { Listing, ListingDetail } from "../shared/listing";
 
 import { MOCK_LISTING_DETAILS } from "./listing-details";
 import { MOCK_LISTINGS } from "./listings";
@@ -65,15 +66,20 @@ const LONG_STAY_DISCOUNT = 0.9;
 
 function buildQuote(listing: Listing, payload: InquiryPayload): InquiryQuote {
   const { checkInDate, nights } = payload;
+  const { pricePerNight: basePrice } = listing;
 
-  // checkInDate 的格式由 InquiryForm 约定为 YYYY-MM-DD
-  const month = Number(checkInDate.slice(5, 7));
-  const rate = PEAK_MONTHS.includes(month) ? PEAK_SURCHARGE_RATE : 1;
-  const pricePerNight = Math.round(listing.pricePerNight * rate);
-  const gross = pricePerNight * nights;
+  // 逐晚判定旺季：一段入住可能跨月，整段按入住月算会把跨出旺季的那几晚也加上价
+  let gross = 0;
+  for (let night = 0; night < nights; night += 1) {
+    // checkInDate 的格式由 InquiryForm 约定为 YYYY-MM-DD
+    const month = dayjs(checkInDate).add(night, "day").month() + 1;
+    const rate = PEAK_MONTHS.includes(month) ? PEAK_SURCHARGE_RATE : 1;
+
+    gross += Math.round(basePrice * rate);
+  }
 
   return {
-    pricePerNight,
+    pricePerNight: Math.round(gross / nights),
     nights,
     totalPrice:
       nights >= LONG_STAY_NIGHTS

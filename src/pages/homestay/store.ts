@@ -29,9 +29,9 @@ registerPageListeners(listenerMiddleware.startListening as AppStartListening);
 
 export const useAppSelector = useSelector.withTypes<RootState>();
 
-export const selectPageState = (state: RootState) => state.page;
-
 export const selectListings = (state: RootState) => state.page.listings;
+
+const selectPageState = (state: RootState) => state.page;
 
 /** 埋点通用参数从 store 派生，不在各调用点各拼一遍 */
 export const selectTraceCommonTag = createSelector(

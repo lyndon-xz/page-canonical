@@ -8,7 +8,9 @@
 
 判断标准是消费方数量。只有一个模块要的派生值留在那个模块的 model 里——homestay 的 `selectDetailListing` 只有 listing-detail 读，提到页面层反倒是页面层多担了一份没人共享的派生。等第二个模块也要时再提，那时各算一遍才会漂移，也才白白多遍历一次列表。
 
-页面根目录与 `shared/` 的分工是另一条轴：`shared/` 收页面内所有非骨架的共享件，页面根只留分层骨架（`index.tsx`、`store.ts`、`slice.ts`、`actions.ts`、`effects.ts`、`listeners.ts`、`live.ts`）。所以 hotel 的 `params.ts` 与 homestay 的 `trace.ts` 都在 `shared/` 里，尽管前者只有页面 action 一个消费方、跟「跨模块」无关。
+页面根目录与 `shared/` 的分工是另一条轴：`shared/` 收页面内所有非骨架的共享件，页面根只留分层骨架（`index.tsx`、`store.ts`、`slice.ts`、`actions.ts`、`effects.ts`、`listeners.ts`、`live.ts`）。所以 hotel 的 `params.ts`、homestay 的 `filters.ts` 与 `trace.ts` 都在 `shared/` 里，尽管前两者各自只有一个消费方、跟「跨模块」无关。
+
+URL 参数解析是这条的典型：它只被 effects 或页面 action 调一次，但它是一件独立的概念——把边界上的字符串收窄成页面的取数条件。写进 `effects.ts` 会让那一层同时承担「什么时候取数」和「取数条件怎么来的」两件事。而它与取值来源本就该同处一个文件：hotel 的 `params.ts` 里 `SORT_BY_VALUES` 定义取值、`SortBy` 由它派生、`parseSearchParams` 拿它校验，加一个排序值只改一行。
 
 判据是消费方出不出单个模块的范围，不是「跨不跨模块」。只被一个模块消费的仍留在那个模块内（`confirm-dialog/scenes.ts`），第二个页面开始消费时再上提 `src/`。页面根之所以不留这类文件：骨架是封闭集合，读者扫一眼页面根就该认全这个页面有哪几层，混进概念文件后得先读内容才知道哪个是层、哪个是辅助件。
 
@@ -48,7 +50,7 @@ export const { useRegisterLive, getLive } = createPageLive<PageLiveMap>();
 
 ## 四、listener：结果的旁路反应
 
-有一类联动的触发方与受影响方完全不同：homestay 的「询价提交成功 → 退出当前房源」，牵涉 listing-list 的选中态与 listing-detail 的详情内容，触发它的却是 inquiry-submit。
+有一类联动的触发方与受影响方完全不同：homestay 的「询价提交成功 → 退出当前房源」，牵涉 listing-list 的选中态与 listing-detail 的详情内容，触发它的却是 inquiry-submit。listener 里只需 `exitListing` 一句——这组状态在状态层已经是一个整体（见[取数与编排](data-fetching.md)的作废结果集一节），旁路反应不必自己知道它由哪几个字段组成。
 
 写进提交 action 会让提交方知道另外两个模块的存在。落在 listener 里，三方都只认这条 action，互不相识。
 
@@ -66,7 +68,7 @@ live 表在这里的角色是另一件事：让 action（而非组件）能拿�
 
 ## 一个模块服务多个触发方
 
-homestay 的两个二次确认场景（取消收藏、撤回询价）提交动作不同，但弹窗结构完全一致、只有文案有别。做法是共用一个 confirm-dialog 模块，由 `confirmScene` 决定文案与提交分支。
+homestay 的两个二次确认场景（取消收藏、撤回询价）提交动作不同，但弹窗结构完全一致、只有文案有别。做法是共用一个 confirm-dialog 模块，由 `confirmRequest` 决定文案与提交分支。
 
 复制两份弹窗的代价是「确认中」的 loading 与关闭时机各写一遍，改一处漏一处。
 
@@ -80,7 +82,15 @@ homestay 的两个二次确认场景（取消收藏、撤回询价）提交动�
 
 表只承载展示差异，行为差异仍在 action 里（`runByScene` 按场景分派提交动作）。把提交也塞进表意味着表里存函数，而那些函数要读 store、要 await，摆在一张文案表旁边只会让两种东西互相埋没。
 
-表放模块内（`confirm-dialog/scenes.ts`），因为只有这个模块查它；`ConfirmScene` 放 `shared/types.ts`，因为页面层 action 也要用它开弹窗。
+表放模块内（`confirm-dialog/scenes.ts`），因为只有这个模块查它；`ConfirmScene` 与 `ConfirmRequest` 放 `shared/confirm.ts`，因为页面层 action 也要用它们开弹窗。
+
+### 操作对象随场景一起进来，不借道别的状态
+
+`confirmRequest` 是判别联合而不是光秃秃一个 scene：取消收藏那一支带着 `listingId`，撤回询价那一支不带（撤哪条由 `submittedInquiry` 定）。
+
+这里曾经走过一条捷径：开弹窗前先把「详情区在看谁」对齐到目标房源，弹窗再从那儿读。代价是那个字段从此有两个含义，改一个必然动另一个——列表卡片上一次取消收藏的点击就会把详情区切走，而详情内容并不跟着重取，于是详情区显示 A 的描述配 B 的标题。判别联合把目标关进它所属的那一支，「取消收藏必须有目标房源」也从运行时的防御分支变成编译期约束。
+
+判据可以推广：**一个字段只该有一个含义。** 两个概念挤在一个字段上时，它们各自的变更路径会互相溢出，而类型系统一句话都不会说。
 
 ## 埋点参数从 store 派生
 
@@ -88,8 +98,14 @@ homestay 的两个二次确认场景（取消收藏、撤回询价）提交动�
 
 `trackClick` 必须在状态变更之前调用。通用参数表达「点击发生时页面处于什么上下文」，本次操作的目标由 extra 带。先改状态再上报，选中类事件就会把新选中当成旧上下文。
 
+**同一个动作在多处触发时，埋点跟着业务规则一起放在页面层。** homestay 的收藏切换在列表卡片与详情抽屉各有入口，`listing_favorite_toggle` 报在 `pageActions.toggleFavorite` 里，两个入口的事件名与参数因此必然一致。分别报的下场是漏一处：列表报了、抽屉没报，报表上看不出这两处其实是同一个动作，也就无从比较哪个入口更常用。
+
+覆盖面本身也要过一遍。转化路径上的动作（提交、撤回）比浏览类动作更值得报，而它们恰恰最容易漏——浏览类动作写在最显眼的卡片组件里，提交藏在表单的回调深处。
+
 ## 循环依赖约束
 
 RTK 页的 `slice.ts` 被 `store.ts` 组装、被 `listeners.ts` 取 action creator，因此 slice 不能 import store 的运行时内容，需要类型时一律 type-only import。模块的 slice 同理。
+
+模块 slice 取页面 slice 的 action creator 不在此列：`confirm-dialog/slice.ts` 为了在 `extraReducers` 里监听弹窗开关，要 import 页面 slice 的 `setConfirmRequest`。这个方向是单向的——页面 slice 不认识任何模块，两者都不认识 store，成不了环。禁止的是指向 store 的那条边，不是指向页面 slice 的。
 
 listener middleware 用 `prepend` 而不是 `concat` 装配：让监听器在其它中间件处理该 action 之前就登记上。

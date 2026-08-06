@@ -3,11 +3,14 @@ import { message } from "antd";
 import { pageActions } from "../../actions";
 import { InquirySubmitError } from "../../data/services";
 import { getLive } from "../../live";
-import { ConfirmScene, type InquiryForm } from "../../shared/types";
+import { ConfirmScene } from "../../shared/confirm";
+import type { InquiryForm } from "../../shared/inquiry";
 
 /** 只接收校验后的纯值；表单实例经 getLive 取，不从参数传入 */
 export const inquirySubmitActions = {
   async submit(values: InquiryForm) {
+    pageActions.trackClick("inquiry_submit");
+
     // 先捕获实例：await 期间页面可能重挂载，之后再取会把本次的错误写进新表单
     const form = getLive("inquiryForm");
 
@@ -32,6 +35,7 @@ export const inquirySubmitActions = {
 
   /** 撤回是破坏性的，转交二次确认；撤哪条由页面层按 submittedInquiry 定 */
   requestCancel() {
-    pageActions.openConfirm(ConfirmScene.CancelInquiry);
+    pageActions.trackClick("inquiry_cancel_request");
+    pageActions.openConfirm({ scene: ConfirmScene.CancelInquiry });
   },
 };

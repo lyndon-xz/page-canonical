@@ -43,6 +43,10 @@ return ...;
 
 `ListBody` 与 `DetailBody` 都自己调模块的 model hook，和 `SortBar` 一样。父组件不做数据中转，否则 body 用到的每个字段都要在壳上过一遍 props，壳也就重新变成了它想摆脱的那个大组件。
 
+列表项这一层反过来：`HotelCard` 与 `ListingCard` 都不取 model，`selected` / `favorite` / `favoriting` 全从 `ListBody` 传下去。差别在于卡片是同一份数据的重复渲染单元——自取 model 会让订阅数随列表条数增长，而它要的每个字段都是父组件已经拿在手里、按 id 切一下就得的布尔。传下去比各自订阅省，也让卡片退化成纯函数，给定 props 就能单独渲染与调试。
+
+同一个模块里两种拿法都出现才是要避免的。homestay 曾经 `selected` 走 props 而 `favoriteIds` 自取 model，读者无从判断下一个字段该走哪条路。
+
 例外是必须与别处保持同一份的值。`showSentinel` 由 `HotelList` 算好，一路交给 `useHotelListEffects` 与 `LoadMoreFooter`（后者经 `ListBody` 转发）：哨兵的渲染条件与观察器的挂载条件必须是同一个表达式，各算一遍就会出现哨兵在 DOM 里但没人观察它（见取数与编排的同一节）。`sentinelRef` 同理，ref 由持有 effect 的那一方声明。
 
 `sentinelRef` 走具名 prop 而不是 React 19 的 `ref`：`LoadMoreFooter` 只在哨兵这一个分支把它挂到根元素上，用 `ref` 会让人以为任何分支下都能从这个组件拿到节点。

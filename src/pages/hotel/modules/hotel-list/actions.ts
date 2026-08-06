@@ -1,5 +1,5 @@
 import { pageActions } from "../../actions";
-import type { SortBy } from "../../shared/types";
+import type { SortBy } from "../../shared/params";
 
 export const hotelListActions = {
   // ── 列表 ──

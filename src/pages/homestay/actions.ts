@@ -9,19 +9,18 @@ import {
   submitInquiry as submitInquiryService,
   toggleFavorite as toggleFavoriteService,
 } from "./data/services";
+import { ConfirmScene, type ConfirmRequest } from "./shared/confirm";
+import type { ListingFilters } from "./shared/filters";
+import type { InquiryForm } from "./shared/inquiry";
 import { reportTrace } from "./shared/trace";
 import {
-  ConfirmScene,
-  type InquiryForm,
-  type ListingFilters,
-} from "./shared/types";
-import {
-  clearDetailContext,
+  addFavoriteId,
+  finishFavoriting,
+  removeFavoriteId,
+  resetResultSet,
   setAppliedFilters,
-  setConfirmScene,
-  setDetailListingId,
+  setConfirmRequest,
   setDetailStatus,
-  setFavoriteIds,
   setIsDetailDrawerOpen,
   setIsSubmittingInquiry,
   setListingDetail,
@@ -29,23 +28,24 @@ import {
   setListingsStatus,
   setSelectedListingId,
   setSubmittedInquiry,
+  startFavoriting,
 } from "./slice";
 import { selectTraceCommonTag, store } from "./store";
 
 /** 连续点开不同房源时先发的请求可能后到，只有最新序号的响应允许落库 */
 let latestDetailRequestId = 0;
 
-/** 调用前须先把 detailListingId 对齐到该房源，否则响应会被 isCurrent 判为过期丢弃 */
+/** 调用前须先把 selectedListingId 对齐到该房源，否则响应会被 isCurrent 判为过期丢弃 */
 async function loadListingDetail(listingId: string) {
   const requestId = (latestDetailRequestId += 1);
 
   /*
-   * 两个条件缺一不可：序号最新排掉被后续请求顶掉的，目标未变排掉详情已被清空的。
-   * 少了后者，请求进行中时清空详情（如提交询价成功）仍会把它写回空掉的 store。
+   * 两个条件缺一不可：序号最新排掉被后续请求顶掉的，选中未变排掉已退出该房源的。
+   * 少了后者，请求进行中时退出房源（如提交询价成功）仍会把详情写回已清空的 store。
    */
   const isCurrent = () =>
     requestId === latestDetailRequestId &&
-    store.getState().page.detailListingId === listingId;
+    store.getState().page.selectedListingId === listingId;
 
   store.dispatch(setDetailStatus(FetchStatus.Loading));
   try {
@@ -80,18 +80,14 @@ export const pageActions = {
   async loadListings(filters: ListingFilters) {
     store.dispatch(setAppliedFilters(filters));
     store.dispatch(setListingsStatus(FetchStatus.Loading));
-
-    // 先作废上一轮结果；favoriteIds 不清，那是跨结果集的用户数据
-    store.dispatch(setListings([]));
-    store.dispatch(setSelectedListingId(null));
-    store.dispatch(clearDetailContext());
-    store.dispatch(setConfirmScene(null));
+    store.dispatch(resetResultSet());
 
     try {
       const listings = await fetchListings(filters);
       store.dispatch(setListings(listings));
       store.dispatch(setListingsStatus(FetchStatus.Ready));
     } catch {
+      // 结果态已在请求前清空，这里只翻状态
       store.dispatch(setListingsStatus(FetchStatus.Error));
     }
   },
@@ -105,7 +101,6 @@ export const pageActions = {
   /** 选中即切换详情：详情区跟着卡片走，避免用户还要再点一次「看详情」 */
   selectListing(listingId: string) {
     store.dispatch(setSelectedListingId(listingId));
-    store.dispatch(setDetailListingId(listingId));
     void loadListingDetail(listingId);
   },
 
@@ -118,22 +113,22 @@ export const pageActions = {
   },
 
   retryDetail() {
-    const { detailListingId } = store.getState().page;
+    const { selectedListingId } = store.getState().page;
 
-    if (!detailListingId) {
+    if (!selectedListingId) {
       return;
     }
-    void loadListingDetail(detailListingId);
+    void loadListingDetail(selectedListingId);
   },
 
   // ── 确认弹窗 ──
 
-  openConfirm(scene: ConfirmScene) {
-    store.dispatch(setConfirmScene(scene));
+  openConfirm(request: ConfirmRequest) {
+    store.dispatch(setConfirmRequest(request));
   },
 
   closeConfirm() {
-    store.dispatch(setConfirmScene(null));
+    store.dispatch(setConfirmRequest(null));
   },
 
   // ── 收藏 ──
@@ -141,16 +136,18 @@ export const pageActions = {
   /** 收藏写入的唯一出口，失败向上抛：两条调用路径对失败的处置不同 */
   async commitFavorite(listingId: string) {
     const { favoriteIds } = store.getState().page;
+    // 点击那一刻的收藏态决定本次是收还是取消；落库走增删 reducer，不拿这份快照做覆盖
     const wasFavorite = favoriteIds.includes(listingId);
 
-    await toggleFavoriteService(listingId);
-    store.dispatch(
-      setFavoriteIds(
-        wasFavorite
-          ? favoriteIds.filter((id) => id !== listingId)
-          : [...favoriteIds, listingId],
-      ),
-    );
+    store.dispatch(startFavoriting(listingId));
+    try {
+      await toggleFavoriteService(listingId);
+      store.dispatch(
+        wasFavorite ? removeFavoriteId(listingId) : addFavoriteId(listingId),
+      );
+    } finally {
+      store.dispatch(finishFavoriting(listingId));
+    }
   },
 
   /** 在这里接住 commitFavorite 的抛错：失败不改变界面结构，故用 toast 提示 */
@@ -162,10 +159,34 @@ export const pageActions = {
     }
   },
 
-  /** 确认弹窗按 detailListingId 定位房源，故开弹窗前先把它对齐到目标房源 */
-  requestRemoveFavorite(listingId: string) {
-    store.dispatch(setDetailListingId(listingId));
-    pageActions.openConfirm(ConfirmScene.RemoveFavorite);
+  /**
+   * 收藏是新增操作、即点即改；取消收藏是破坏性的，转交二次确认。
+   * 规则收在页面层：列表卡片与详情抽屉都要它，各写一份必然漂移。
+   */
+  toggleFavorite(listingId: string) {
+    const { favoriteIds, favoritingIds } = store.getState().page;
+
+    // 悲观更新期间心标不动，不挡住会让用户以为没点上而重复提交
+    if (favoritingIds.includes(listingId)) {
+      return;
+    }
+
+    const willFavorite = !favoriteIds.includes(listingId);
+
+    pageActions.trackClick("listing_favorite_toggle", {
+      listingId,
+      willFavorite: String(willFavorite),
+    });
+
+    if (willFavorite) {
+      void pageActions.addFavorite(listingId);
+      return;
+    }
+
+    pageActions.openConfirm({
+      scene: ConfirmScene.RemoveFavorite,
+      listingId,
+    });
   },
 
   // ── 询价 ──

@@ -2,7 +2,7 @@ import { DatePicker, Input, InputNumber } from "antd";
 import dayjs from "dayjs";
 import { Controller, useFormContext } from "react-hook-form";
 
-import type { BookingForm } from "../../../../shared/types";
+import type { BookingForm } from "../../../../shared/booking";
 
 import styles from "./index.module.scss";
 

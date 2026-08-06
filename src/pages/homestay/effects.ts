@@ -1,21 +1,12 @@
 import { useEffect } from "react";
 
 import { pageActions } from "./actions";
-import type { ListingFilters } from "./shared/types";
-
-function parseFilters(search: string): ListingFilters {
-  const query = new URLSearchParams(search);
-  const keyword = query.get("keyword") ?? "";
-  const roomType = query.get("roomType") ?? "";
-  return { keyword, roomType };
-}
+import { parseFilters } from "./shared/filters";
 
 const { loadListings } = pageActions;
 
 export function usePageEffects() {
   useEffect(() => {
-    const filters = parseFilters(window.location.search);
-
-    void loadListings(filters);
+    void loadListings(parseFilters(window.location.search));
   }, []);
 }

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useShallow } from "zustand/react/shallow";
 
-import type { BookingForm } from "../../shared/types";
+import type { BookingForm } from "../../shared/booking";
 import { usePageStore } from "../../store";
 
 /**

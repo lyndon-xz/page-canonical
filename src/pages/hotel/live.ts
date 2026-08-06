@@ -3,7 +3,7 @@ import type { UseFormReturn } from "react-hook-form";
 
 import { createPageLive } from "@/lib/live";
 
-import type { BookingForm } from "./shared/types";
+import type { BookingForm } from "./shared/booking";
 
 interface PageLiveMap {
   /** hotel-list 的列表容器，供页面层换搜索条件后滚动回顶；筛选与排序都会触发 */
