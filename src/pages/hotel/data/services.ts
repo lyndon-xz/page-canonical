@@ -34,20 +34,27 @@ const resolveMatchedHotels = (searchParams: SearchParams): Hotel[] => {
 
 const HOTEL_PAGE_SIZE = 12;
 
+const SEARCH_REJECTED_KEYWORD = "error";
+
 export async function fetchHotelPage(
   searchParams: SearchParams,
   page: number,
 ): Promise<HotelPage> {
   await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
 
+  if (searchParams.keyword.trim().toLowerCase() === SEARCH_REJECTED_KEYWORD) {
+    throw new Error("酒店列表服务暂不可用");
+  }
+
   const matched = resolveMatchedHotels(searchParams);
   const start = (page - 1) * HOTEL_PAGE_SIZE;
   const items = matched.slice(start, start + HOTEL_PAGE_SIZE);
+  const total = matched.length;
 
   return {
     items,
-    hasMore: start + items.length < matched.length,
-    total: matched.length,
+    hasMore: start + items.length < total,
+    total,
   };
 }
 

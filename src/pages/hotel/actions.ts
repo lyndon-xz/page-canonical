@@ -8,11 +8,10 @@ import {
   submitBooking as submitBookingService,
   toggleHotelFavorite,
 } from "./data/services";
-import { getLive } from "./live";
 import type { BookingForm } from "./shared/booking";
 import {
   parseSearchParams,
-  serializeParams,
+  writeParamsToUrl,
   type SearchParams,
 } from "./shared/params";
 import { usePageStore } from "./store";
@@ -31,11 +30,10 @@ async function waitForHydration() {
 }
 
 function resolveInitialParams(): SearchParams {
-  if (window.location.search) {
-    return parseSearchParams(window.location.search);
-  }
-
-  return usePageStore.getState().appliedParams;
+  return (
+    parseSearchParams(window.location.search) ??
+    usePageStore.getState().appliedParams
+  );
 }
 
 let resultSetGeneration = 0;
@@ -50,6 +48,7 @@ async function loadHotels(searchParams: SearchParams) {
   const generation = (resultSetGeneration += 1);
 
   setAppliedParams(searchParams);
+  writeParamsToUrl(searchParams);
   resetResultSet();
   setHotelsStatus(FetchStatus.Loading);
 
@@ -70,6 +69,17 @@ async function loadHotels(searchParams: SearchParams) {
 
 export const pageActions = {
   // ── 列表 ──
+
+  async initPage() {
+    await waitForHydration();
+    await loadHotels(resolveInitialParams());
+  },
+
+  applySearchParams(patch: Partial<SearchParams>) {
+    const { appliedParams } = usePageStore.getState();
+
+    void loadHotels({ ...appliedParams, ...patch });
+  },
 
   async loadMoreHotels() {
     const {
@@ -106,29 +116,6 @@ export const pageActions = {
       }
       setLoadMoreStatus(FetchStatus.Error);
     }
-  },
-
-  async initPage() {
-    await waitForHydration();
-    await loadHotels(resolveInitialParams());
-  },
-
-  applySearchParams(patch: Partial<SearchParams>) {
-    const searchParams = { ...usePageStore.getState().appliedParams, ...patch };
-
-    void loadHotels(searchParams);
-
-    getLive("hotelListRef")?.current?.scrollIntoView({
-      behavior: "auto",
-      block: "start",
-    });
-
-    const query = new URLSearchParams(serializeParams(searchParams)).toString();
-    history.replaceState(
-      null,
-      "",
-      query ? `?${query}` : window.location.pathname,
-    );
   },
 
   retryHotels() {
@@ -185,7 +172,6 @@ export const pageActions = {
   async batchFavorite() {
     const {
       selectedHotelIds,
-      favoriteIds,
       isBatchFavoriting,
       setFavoriteIds,
       setSelectedHotelIds,
@@ -197,16 +183,27 @@ export const pageActions = {
       return;
     }
 
+    const generation = resultSetGeneration;
+
     setIsBatchFavoriting(true);
     setBatchFavoriteFailures([]);
     try {
       const { succeededIds, failures } =
         await batchFavoriteHotels(selectedHotelIds);
+      const { favoriteIds } = usePageStore.getState();
 
       setFavoriteIds([...new Set([...favoriteIds, ...succeededIds])]);
+
+      if (!isCurrentGeneration(generation)) {
+        return;
+      }
       setBatchFavoriteFailures(failures);
       setSelectedHotelIds(failures.map((failure) => failure.hotelId));
     } catch (err) {
+      if (!isCurrentGeneration(generation)) {
+        return;
+      }
+
       const reason = err instanceof Error ? err.message : String(err);
 
       setBatchFavoriteFailures(

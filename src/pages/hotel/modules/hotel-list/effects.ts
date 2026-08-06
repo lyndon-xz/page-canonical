@@ -1,16 +1,34 @@
 import { useEffect, type RefObject } from "react";
 
+import { usePageStore } from "../../store";
+
 import { hotelListActions } from "./actions";
 
 const { loadMore } = hotelListActions;
 
-export function useHotelListEffects(
+export function useScrollBackOnResultSet(
+  listRef: RefObject<HTMLElement | null>,
+) {
+  const appliedParams = usePageStore((s) => s.appliedParams);
+
+  useEffect(() => {
+    const list = listRef.current;
+
+    if (!list || list.getBoundingClientRect().top >= 0) {
+      return;
+    }
+
+    list.scrollIntoView({ behavior: "auto", block: "start" });
+  }, [appliedParams, listRef]);
+}
+
+export function useLoadMoreOnSentinel(
   sentinelRef: RefObject<HTMLElement | null>,
-  isMounted: boolean,
+  showSentinel: boolean,
 ) {
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!isMounted || !sentinel) {
+    if (!showSentinel || !sentinel) {
       return;
     }
 
@@ -22,5 +40,5 @@ export function useHotelListEffects(
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [sentinelRef, isMounted]);
+  }, [sentinelRef, showSentinel]);
 }

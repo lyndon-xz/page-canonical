@@ -1,14 +1,10 @@
 import { Alert, Button, Checkbox } from "antd";
 import { useRef } from "react";
 
-import { FetchStatus } from "@/lib/fetch-status";
-
-import { useRegisterLive } from "../../live";
-
 import { hotelListActions } from "./actions";
 import ListBody from "./components/list-body";
 import SortBar from "./components/sort-bar";
-import { useHotelListEffects } from "./effects";
+import { useLoadMoreOnSentinel, useScrollBackOnResultSet } from "./effects";
 import { useHotelListModel } from "./model";
 
 import styles from "./index.module.scss";
@@ -23,26 +19,17 @@ const {
 export default function HotelList() {
   const {
     hotels,
-    hotelsStatus,
-    hasMore,
-    loadMoreStatus,
     selectedHotelIds,
     isBatchFavoriting,
     batchFailureNames,
     isAllLoadedSelected,
+    showSentinel,
   } = useHotelListModel();
 
   const listRef = useRef<HTMLElement>(null);
-  useRegisterLive("hotelListRef", listRef);
-
-  const showSentinel =
-    hotelsStatus === FetchStatus.Ready &&
-    loadMoreStatus === FetchStatus.Ready &&
-    hotels.length > 0 &&
-    hasMore;
-
   const sentinelRef = useRef<HTMLDivElement>(null);
-  useHotelListEffects(sentinelRef, showSentinel);
+  useScrollBackOnResultSet(listRef);
+  useLoadMoreOnSentinel(sentinelRef, showSentinel);
 
   return (
     <section ref={listRef} className={styles.hotelList}>
@@ -95,7 +82,7 @@ export default function HotelList() {
         </div>
       )}
 
-      <ListBody showSentinel={showSentinel} sentinelRef={sentinelRef} />
+      <ListBody sentinelRef={sentinelRef} />
     </section>
   );
 }

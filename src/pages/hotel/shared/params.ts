@@ -8,40 +8,69 @@ export interface SearchParams {
   sortBy: SortBy;
 }
 
-const DEFAULT_SORT: SortBy = "price";
+export const DEFAULT_SEARCH_PARAMS: SearchParams = {
+  keyword: "",
+  star: 0,
+  sortBy: "price",
+};
 
 const isSortBy = (value: string): value is SortBy =>
   (SORT_BY_VALUES as readonly string[]).includes(value);
 
-export function parseSearchParams(search: string): SearchParams {
+export function parseSearchParams(search: string): SearchParams | null {
   const query = new URLSearchParams(search);
-  const keyword = query.get("keyword") ?? "";
-  const rawStar = Number(query.get("star"));
-  const star =
-    Number.isInteger(rawStar) && rawStar >= 1 && rawStar <= 5 ? rawStar : 0;
-  const rawSortBy = query.get("sortBy") ?? "";
-  const sortBy = isSortBy(rawSortBy) ? rawSortBy : DEFAULT_SORT;
+  const rawKeyword = query.get("keyword");
+  const rawStar = query.get("star");
+  const rawSortBy = query.get("sortBy");
+
+  if (rawKeyword === null && rawStar === null && rawSortBy === null) {
+    return null;
+  }
+
+  const {
+    keyword: defaultKeyword,
+    star: defaultStar,
+    sortBy: defaultSortBy,
+  } = DEFAULT_SEARCH_PARAMS;
+  const star = Number(rawStar);
 
   return {
-    keyword,
-    star,
-    sortBy,
+    keyword: rawKeyword ?? defaultKeyword,
+    star: Number.isInteger(star) && star >= 1 && star <= 5 ? star : defaultStar,
+    sortBy:
+      rawSortBy !== null && isSortBy(rawSortBy) ? rawSortBy : defaultSortBy,
   };
 }
 
-export function serializeParams(
-  searchParams: SearchParams,
-): Record<string, string> {
+function serializeParams(searchParams: SearchParams): Record<string, string> {
   const { keyword, star, sortBy } = searchParams;
+  const {
+    keyword: defaultKeyword,
+    star: defaultStar,
+    sortBy: defaultSortBy,
+  } = DEFAULT_SEARCH_PARAMS;
+  const trimmedKeyword = keyword.trim();
   const result: Record<string, string> = {};
-  if (keyword.trim() !== "") {
-    result.keyword = keyword.trim();
+
+  if (trimmedKeyword !== defaultKeyword) {
+    result.keyword = trimmedKeyword;
   }
-  if (star !== 0) {
+  if (star !== defaultStar) {
     result.star = String(star);
   }
-  if (sortBy !== DEFAULT_SORT) {
+  if (sortBy !== defaultSortBy) {
     result.sortBy = sortBy;
   }
+
   return result;
+}
+
+export function writeParamsToUrl(searchParams: SearchParams) {
+  const query = new URLSearchParams(serializeParams(searchParams)).toString();
+
+  history.replaceState(
+    null,
+    "",
+    query ? `?${query}` : window.location.pathname,
+  );
 }

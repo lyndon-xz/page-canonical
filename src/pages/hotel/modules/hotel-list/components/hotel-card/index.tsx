@@ -38,7 +38,16 @@ export default function HotelCard(props: HotelCardProps) {
           onClick={(event) => event.stopPropagation()}
           onChange={() => toggleSelect(id)}
         />
-        <h3 className={styles.name}>{name}</h3>
+        <h3 className={styles.name}>
+          <button
+            type="button"
+            className={styles.nameButton}
+            aria-pressed={selected}
+            onClick={() => selectHotel(id)}
+          >
+            {name}
+          </button>
+        </h3>
         <span className={styles.star}>{star}星</span>
       </div>
 

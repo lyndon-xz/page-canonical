@@ -7,31 +7,26 @@ import { usePageStore } from "../../store";
 
 interface SearchFilterLocalState {
   keyword: string;
-  star: number;
   setKeyword: (keyword: string) => void;
-  setStar: (star: number) => void;
 }
 
 export const useSearchFilterLocal = create<SearchFilterLocalState>((set) => ({
   keyword: "",
-  star: 0,
   setKeyword: (keyword) => set({ keyword }),
-  setStar: (star) => set({ star }),
 }));
 
 export function useSearchFilterModel() {
-  const draft = useSearchFilterLocal(
-    useShallow((s) => ({ keyword: s.keyword, star: s.star })),
-  );
-  const result = usePageStore(
+  const keyword = useSearchFilterLocal((s) => s.keyword);
+  const state = usePageStore(
     useShallow((s) => ({
+      star: s.appliedParams.star,
       resultCount: s.hotelsTotal,
       isLoading: s.hotelsStatus === FetchStatus.Loading,
     })),
   );
 
   return {
-    ...draft,
-    ...result,
+    keyword,
+    ...state,
   };
 }

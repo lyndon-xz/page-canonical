@@ -2,6 +2,7 @@ import { pageActions } from "../../actions";
 import type { SortBy } from "../../shared/params";
 
 export const hotelListActions = {
+  // ── 列表 ──
 
   changeSortBy(sortBy: SortBy) {
     pageActions.applySearchParams({ sortBy });
@@ -15,9 +16,13 @@ export const hotelListActions = {
     pageActions.retryHotels();
   },
 
+  // ── 选中 ──
+
   selectHotel(id: string) {
     pageActions.selectHotel(id);
   },
+
+  // ── 多选 ──
 
   toggleSelect(id: string) {
     pageActions.toggleSelect(id);
@@ -34,6 +39,8 @@ export const hotelListActions = {
   clearSelection() {
     pageActions.clearSelection();
   },
+
+  // ── 收藏 ──
 
   toggleFavorite(id: string) {
     void pageActions.toggleFavorite(id);

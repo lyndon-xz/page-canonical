@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 
+import { FetchStatus } from "@/lib/fetch-status";
+
 import { usePageStore } from "../../store";
 
 export function useHotelListModel() {
@@ -19,7 +21,8 @@ export function useHotelListModel() {
     })),
   );
   const { batchFavoriteFailures, ...rest } = state;
-  const { hotels, selectedHotelIds } = rest;
+  const { hotels, hotelsStatus, hasMore, loadMoreStatus, selectedHotelIds } =
+    rest;
 
   const batchFailureNames = useMemo(
     () =>
@@ -37,5 +40,10 @@ export function useHotelListModel() {
     batchFailureNames,
     isAllLoadedSelected:
       hotels.length > 0 && selectedHotelIds.length === hotels.length,
+    showSentinel:
+      hotelsStatus === FetchStatus.Ready &&
+      loadMoreStatus === FetchStatus.Ready &&
+      hotels.length > 0 &&
+      hasMore,
   };
 }

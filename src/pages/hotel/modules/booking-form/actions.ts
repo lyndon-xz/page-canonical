@@ -12,11 +12,9 @@ export const bookingFormActions = {
     try {
       await pageActions.submitBooking(values);
 
-      if (form) {
-        form.resetField("checkInDate");
-        form.resetField("nights");
-        form.resetField("rooms");
-      }
+      form?.resetField("checkInDate");
+      form?.resetField("nights");
+      form?.resetField("rooms");
     } catch (error) {
       if (error instanceof BookingSubmitError) {
         error.fieldErrors.forEach((fieldError) => {

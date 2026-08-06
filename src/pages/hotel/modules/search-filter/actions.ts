@@ -7,12 +7,14 @@ export const searchFilterActions = {
     useSearchFilterLocal.getState().setKeyword(keyword);
   },
 
-  updateStar(star: number) {
-    useSearchFilterLocal.getState().setStar(star);
+  submit() {
+    const { keyword } = useSearchFilterLocal.getState();
+
+    pageActions.applySearchParams({ keyword });
   },
 
-  submit() {
-    const { keyword, star } = useSearchFilterLocal.getState();
+  updateStar(star: number) {
+    const { keyword } = useSearchFilterLocal.getState();
 
     pageActions.applySearchParams({ keyword, star });
   },

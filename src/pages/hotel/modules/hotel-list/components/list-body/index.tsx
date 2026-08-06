@@ -13,17 +13,15 @@ import styles from "./index.module.scss";
 const { retry } = hotelListActions;
 
 interface ListBodyProps {
-  showSentinel: boolean;
   sentinelRef: RefObject<HTMLDivElement | null>;
 }
 
 export default function ListBody(props: ListBodyProps) {
-  const { showSentinel, sentinelRef } = props;
+  const { sentinelRef } = props;
   const {
     hotels,
     hotelsStatus,
     selectedHotelId,
-    loadMoreStatus,
     favoriteIds,
     selectedHotelIds,
   } = useHotelListModel();
@@ -58,22 +56,22 @@ export default function ListBody(props: ListBodyProps) {
   return (
     <>
       <div className={styles.grid}>
-        {hotels.map((hotel) => (
-          <HotelCard
-            key={hotel.id}
-            hotel={hotel}
-            selected={hotel.id === selectedHotelId}
-            favorite={favoriteIds.includes(hotel.id)}
-            checked={selectedHotelIds.includes(hotel.id)}
-          />
-        ))}
+        {hotels.map((hotel) => {
+          const { id } = hotel;
+
+          return (
+            <HotelCard
+              key={id}
+              hotel={hotel}
+              selected={id === selectedHotelId}
+              favorite={favoriteIds.includes(id)}
+              checked={selectedHotelIds.includes(id)}
+            />
+          );
+        })}
       </div>
 
-      <LoadMoreFooter
-        status={loadMoreStatus}
-        showSentinel={showSentinel}
-        sentinelRef={sentinelRef}
-      />
+      <LoadMoreFooter sentinelRef={sentinelRef} />
     </>
   );
 }

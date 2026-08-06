@@ -55,7 +55,9 @@ export default function SearchFilter() {
         })}
       </div>
 
-      <p className={styles.resultCount}>找到 {resultCount} 家</p>
+      <p className={styles.resultCount}>
+        {isLoading ? "搜索中…" : `找到 ${resultCount} 家`}
+      </p>
     </section>
   );
 }

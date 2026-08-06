@@ -28,7 +28,7 @@ interface HomestayPageState {
 
 const initialState: HomestayPageState = {
   listings: [],
-  listingsStatus: FetchStatus.Ready,
+  listingsStatus: FetchStatus.Loading,
   selectedListingId: null,
   appliedFilters: { keyword: "", roomType: "" },
 

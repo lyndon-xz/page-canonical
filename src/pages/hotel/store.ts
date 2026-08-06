@@ -6,13 +6,7 @@ import { FetchStatus } from "@/lib/fetch-status";
 import type { BookingContact } from "./shared/booking";
 import type { BatchFavoriteFailure } from "./shared/favorite";
 import type { Hotel, HotelPage } from "./shared/hotel";
-import type { SearchParams } from "./shared/params";
-
-const DEFAULT_PARAMS: SearchParams = {
-  keyword: "",
-  star: 0,
-  sortBy: "price",
-};
+import { DEFAULT_SEARCH_PARAMS, type SearchParams } from "./shared/params";
 
 const DEFAULT_CONTACT: BookingContact = {
   guestName: "",
@@ -69,9 +63,9 @@ export const usePageStore = create<PageStore>()(
     (set) => ({
       hotels: [],
       hotelsTotal: 0,
-      hotelsStatus: FetchStatus.Ready,
+      hotelsStatus: FetchStatus.Loading,
       selectedHotelId: null,
-      appliedParams: DEFAULT_PARAMS,
+      appliedParams: DEFAULT_SEARCH_PARAMS,
 
       loadedPage: 0,
       hasMore: false,
@@ -135,6 +129,7 @@ export const usePageStore = create<PageStore>()(
           selectedHotelId: null,
           selectedHotelIds: [],
           batchFavoriteFailures: [],
+          bookedHotelId: null,
         }),
     }),
     {
@@ -150,7 +145,7 @@ export const usePageStore = create<PageStore>()(
         return {
           ...current,
           ...saved,
-          appliedParams: { ...DEFAULT_PARAMS, ...saved?.appliedParams },
+          appliedParams: { ...DEFAULT_SEARCH_PARAMS, ...saved?.appliedParams },
           contact: { ...DEFAULT_CONTACT, ...saved?.contact },
         };
       },

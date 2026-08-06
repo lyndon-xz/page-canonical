@@ -7,10 +7,11 @@ import { usePageStore } from "../../store";
 
 export function useBookingFormEffects(form: UseFormReturn<BookingForm>) {
   const contact = usePageStore(
-    useShallow((s) => ({
-      guestName: s.contact.guestName,
-      phone: s.contact.phone,
-    })),
+    useShallow((s) => {
+      const { guestName, phone } = s.contact;
+
+      return { guestName, phone };
+    }),
   );
 
   useEffect(() => {
