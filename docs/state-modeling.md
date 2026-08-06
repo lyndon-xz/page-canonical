@@ -220,6 +220,6 @@ hotel 页用 zustand persist，`partialize` 是白名单而不是黑名单，只
 
 首屏取数要等恢复完成（`waitForHydration`）。localStorage 的恢复是同步的，这道门禁当下不起作用，但 storage 换成异步实现后，少了它首屏会先按默认条件拉一次、恢复后再拉一次，用户看到列表闪一下。
 
-恢复出来的偏好不是最高优先级：URL 显式带了筛选条件就以 URL 为准（`resolveInitialParams`）。分享链接与带参刷新是用户的明示意图，持久化偏好是隐式的，不该盖掉明示。
+恢复出来的偏好不是最高优先级：URL 显式带了筛选条件就以 URL 为准（`initPage` 里 `parseSearchParams(...) ?? appliedParams` 这个落点）。分享链接与带参刷新是用户的明示意图，持久化偏好是隐式的，不该盖掉明示。
 
 **「URL 带了条件」要按本页自己的参数判断，不能看 query 串是否非空。** `if (window.location.search)` 对 `?ref=wechat` 这类无关参数同样成立，于是持久化的五星偏好被整份丢掉、静默降级成默认条件。这个判断的依据必须与解析用的是同一批 key，所以由 `parseSearchParams` 自己给出答案——一个本页参数都没读到就返回 `null`，调用方 `?? ` 到持久化值即可。判断与解析共用同一批 `query.get`，加参数时不会漏掉其中一处。

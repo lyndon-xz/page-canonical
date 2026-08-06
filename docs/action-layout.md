@@ -6,7 +6,7 @@
 
 ## 私有内容在前，导出的集合在后
 
-请求序号、`waitForHydration`、`resolveInitialParams`、confirm-dialog 的 `runByScene` 这类只服务本文件的内容排在导出之前。它们是实现细节，插在 action 之间会打断清单。
+请求序号、`waitForHydration`、confirm-dialog 的 `runByScene` 这类只服务本文件的内容排在导出之前。它们是实现细节，插在 action 之间会打断清单。
 
 ## 按业务领域分组，组序跟随用户在页面上的推进顺序
 
@@ -22,7 +22,7 @@ homestay 是埋点 → 列表 → 详情 → 确认弹窗 → 收藏 → 询价�
 
 标记的作用是给扫不完的清单划边界，所以只在**分两组以上且 action 达到六个左右**时加。低于这个量级一眼就能看全，标记只是噪声：`listing-list` 三个 action 恰好分三组，标完注释比代码还多。当前需要标的是两个页面层与 `hotel-list`。
 
-标记只落在导出的集合内部。私有件（`waitForHydration`、`resolveInitialParams`、`loadHotels`、`loadListingDetail`）在 `pageActions` 之外，物理上已在组外，不标。
+标记只落在导出的集合内部。私有件（`waitForHydration`、`loadHotels`、`loadListingDetail`）在 `pageActions` 之外，物理上已在组外，不标。
 
 ## 组内：底层读写在前，包装它的在后
 
@@ -30,7 +30,7 @@ homestay 是埋点 → 列表 → 详情 → 确认弹窗 → 收藏 → 询价�
 
 成对的 `open`/`close`、`select`/`clear` 相邻。重试与清错（`retryXxx`、`dismissXxx`）排在所属组末尾——它们是失败路径的收尾，不是主线。
 
-组内也照「用户推进顺序」排。hotel 的列表组是 `initPage` → `applySearchParams` → `loadMoreHotels` → `retryHotels`：进页面、换条件、翻页、失败重试。`initPage` 领头还有一层原因——[声明顺序](declaration-order.md)规定私有件的簇内次序跟着「对应的导出 action 谁在前」，而 `waitForHydration` → `resolveInitialParams` → `loadHotels` 正是 `initPage` 那三句的顺序。`initPage` 若不在组首，文件上下两半的依据就对不上了。
+组内也照「用户推进顺序」排。hotel 的列表组是 `initPage` → `applySearchParams` → `loadMoreHotels` → `retryHotels`：进页面、换条件、翻页、失败重试。`initPage` 领头还有一层原因——[声明顺序](declaration-order.md)规定私有件的簇内次序跟着「对应的导出 action 谁在前」，而 `waitForHydration` → `loadHotels` 正是 `initPage` 那两句的顺序。`initPage` 若不在组首，文件上下两半的依据就对不上了。
 
 ## 被依赖的排在依赖它的之前
 

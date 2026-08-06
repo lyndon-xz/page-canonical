@@ -56,7 +56,7 @@ function buildQuote(listing: Listing, payload: InquiryPayload): InquiryQuote {
 
 这条全靠手动维持。函数体里的引用到调用时才求值，把常量或 helper 放到消费者之后照样能跑，编译器不会点名。
 
-`actions.ts` 是这条规则的特化场景，私有件与组序另见 [Action 排布](action-layout.md)。它多一条约束：私有件插不进导出的对象字面量，所以整块排在导出之前，簇内顺序改由「对应的导出 action 谁在前」以及该 action 内部的调用次序决定。hotel 的 `waitForHydration` → `resolveInitialParams` → `loadHotels` 就是 `initPage` 里那三句的顺序。
+`actions.ts` 是这条规则的特化场景，私有件与组序另见 [Action 排布](action-layout.md)。它多一条约束：私有件插不进导出的对象字面量，所以整块排在导出之前，簇内顺序改由「对应的导出 action 谁在前」以及该 action 内部的调用次序决定。hotel 的 `waitForHydration` → `loadHotels` 就是 `initPage` 里那两句的顺序。
 
 ## 组序由文件的角色决定，不跨文件强行对齐
 

@@ -2,6 +2,8 @@
 
 一个名字要么被复用，要么解释了值本身。两者都不成立就别抽。
 
+这条说的是值。抽一层函数另有判据，见后面的函数抽取一节。
+
 该留下的名字放在文件哪个位置，见[声明顺序](declaration-order.md)。
 
 ## 只用一次的字面值写在使用处
@@ -83,6 +85,73 @@ const methods = useForm<InquiryForm>({
 复用则另当别论。hotel 的 `DEFAULT_CONTACT` 留着，因为 store 初值与 persist 的 `merge` 各用一次——`merge` 要拿默认值补齐老数据缺的字段（见[状态建模](state-modeling.md)的持久化一节），两处必须是同一份值。
 
 `DEFAULT_SEARCH_PARAMS` 是同一条，但消费方跨了文件，落点也就跟着走。除了 store 那两处，`parseSearchParams` 要拿它作非法值的落点、`serializeParams` 要拿它判断「等于默认值就从 URL 里省掉」。四处必须是同一份值，所以它归 `params.ts`——那里已经住着 `SORT_BY_VALUES` 与 `SearchParams`，默认值是这个概念的一部分。留在 `store.ts` 的代价是同一组默认值在两个文件各写一遍：改了 `params.ts` 里的默认排序，store 那份还是旧的字面量，而「URL 该省略哪个参数」正是靠这份值决定的。
+
+## 函数抽取看形态转换与抽象层级
+
+值的判据是复用与解释，抽一层函数还要多看两条：函数体相对调用处是不是同层级的透传，抽出去有没有把「怎么做」挡在名字后面。行数不是判据，只被一处调用也不是判据。
+
+透传的那种抽了等于没抽：
+
+```ts
+function resolveInitialParams(): SearchParams {
+  return (
+    parseSearchParams(window.location.search) ??
+    usePageStore.getState().appliedParams
+  );
+}
+```
+
+函数体是一个跟调用处同层级的表达式，名字「解析初始参数」只是把它重说一遍，读者跳过去并不会知道更多，只是多跳一次。并回 `initPage` 之后那两行本来就读得懂：
+
+```ts
+async initPage() {
+  await waitForHydration();
+
+  const initialParams =
+    parseSearchParams(window.location.search) ??
+    usePageStore.getState().appliedParams;
+
+  await loadHotels(initialParams);
+},
+```
+
+homestay 那边同一件事从来就是一行——`effects.ts` 里直接 `void loadListings(parseFilters(window.location.search))`，没有中间那层壳。
+
+反过来，`initPage` 第一句的 `waitForHydration` 该留着：
+
+```ts
+async function waitForHydration() {
+  if (usePageStore.persist.hasHydrated()) {
+    return;
+  }
+
+  await new Promise<void>((resolve) => {
+    const unsubscribe = usePageStore.persist.onFinishHydration(() => {
+      unsubscribe();
+      resolve();
+    });
+  });
+}
+```
+
+它把回调订阅（还得自己 `unsubscribe`）转成可 `await` 的形态，外加一个已水合的早退分支——这是一层适配，不是换个名字。它同时隔开了层级：`initPage` 读起来是「等水合、按初始参数加载」两步流程，内联进去这两步会被 Promise 构造和取消订阅盖住。这道门禁为什么必须在取数之前，见[状态建模](state-modeling.md)的持久化一节。
+
+形态转换不限于异步管道。confirm-dialog 的 `runByScene` 也只有一个调用方，作用是把「哪个场景走哪个动作」收敛成一个 `await`：
+
+```ts
+try {
+  await runByScene(confirmRequest);
+  pageActions.closeConfirm();
+} catch (err) { ... }
+```
+
+`confirm()` 于是只剩置 loading、执行、关弹窗、落错误四步。把两个场景的分支塞回 `try` 块中间，这条主线就断了。
+
+homestay 的 `addFavorite` 是错误处理上的同一形状。`commitFavorite` 把失败抛给调用方，`addFavorite` 在它外面只做一件事：把失败终结成一条 toast。它同样只有一个调用方，但名字划出的是「谁负责用户反馈」这条边界——确认弹窗走的是另一条路径，失败要留在弹窗里（见[取数与编排](data-fetching.md)的错误处理分工一节）。
+
+复用则和值那边一样另当别论。`isCurrentGeneration`、`loadHotels`、`loadListingDetail`、`commitFavorite` 都有多个调用方，判据到复用这一层就够了，不必再问形态。
+
+自检方式：并回调用处，主线流程会被管道细节盖住吗？不会就并回去。留下的私有函数排在文件哪个位置，见 [Action 排布](action-layout.md)。
 
 ## 只在本文件用就不 export
 
