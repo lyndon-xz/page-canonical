@@ -70,9 +70,15 @@ export default function HotelCard(props: HotelCardProps) {
 
 放进组件体里，它会和 `useHotelListModel()` 那行并列，暗示它也随渲染变化；搬到顶层后组件体只剩渲染真正依赖的东西。`hotel-card`、`list-body`、`sort-bar`、`listing-card`、`confirm-dialog` 都是这个形状，取一个方法（`load-more-footer` 的 `loadMore`）也一样。
 
-## 跨层的 pageActions 不解构
+## 模块 actions.ts 的前缀不解构
 
-UI 消费的一定是本模块的 actions，来源唯一，`onClick={loadMore}` 不会有「这是哪一层的动作」的疑问。模块的 `actions.ts` 里不然，本模块的 slice action 与页面层的 `pageActions` 挨着出现，前缀是唯一的层级标记：
+判据是文件的角色，不是前缀读了几次。
+
+模块的 `actions.ts` 是层级边界文件，整个文件的意义就是把 UI 的意图转交给页面层，`pageActions.` 标出的是「这一句出了本模块」。所以这里的前缀都保留，同一个函数里读到第二次也照旧——`listing-detail` 的 `openDetailDrawer` 连着调 `trackClick` 与 `openDetailDrawer`，`listing-list` 的 `toggleFavorite` 里 `pageActions` 出现三次。这是「前缀读到第二次就解构」的例外：前缀在这里是信息，不是噪声。
+
+三种形态下它各自还多担一层作用。
+
+**混层时它是唯一的层级标记。** 模块自己的状态写入与 `pageActions` 挨着出现：
 
 ```ts
 cancel() {
@@ -81,9 +87,23 @@ cancel() {
 },
 ```
 
-所以 `pageActions` 一律带前缀读，即便同一个函数里读到第二次也照旧——`listing-detail` 的 `openDetailDrawer` 连着调 `trackClick` 与 `openDetailDrawer`，`listing-list` 的 `toggleFavorite` 里 `pageActions` 出现三次。这是「前缀读到第二次就解构」的例外：前缀在这里是信息，不是噪声。
+仓库里有两处：`confirm-dialog` 有自己的 slice，`search-filter` 有模块本地的 zustand store。
 
-页面层 `actions.ts` 内部的 `pageActions.loadListings` 是另一回事。对象字面量的方法引用不到自身，那处前缀是语法要求，不表示跨层。
+**同名转交时解构会读成自我递归。** 转交方法的名字常跟着被转交的页面 action 取：
+
+```ts
+closeDetailDrawer() {
+  closeDetailDrawer();
+},
+```
+
+对象字面量的方法名不构成作用域绑定，这里调到的仍是解构出来的那个，但读者得先想一遍才敢确认。`listing-detail` 有三个方法是这个形状，`listing-list` 与 `hotel-list` 各有一个。
+
+**不同名转交时它标出被转交的动作属于哪一层。** `inquiry-submit` 的 `submit` 转交 `submitInquiry`、`requestCancel` 转交 `openConfirm`，裸着读不出这两个动作是页面级的。
+
+不是边界文件的地方就按上一节解构。UI 组件与 `effects.ts` 只是使用 action，来源唯一，`onClick={loadMore}` 与 `void loadListings(filters)` 都不会有「这是哪一层的动作」的疑问。
+
+页面层 `actions.ts` 内部的 `pageActions.loadListings` 不进这套判断。对象字面量的方法引用不到自身，那处前缀是语法要求，不表示跨层。
 
 ## 三类前缀不拆
 

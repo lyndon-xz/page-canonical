@@ -2,6 +2,8 @@ import { useEffect, type RefObject } from "react";
 
 import { hotelListActions } from "./actions";
 
+const { loadMore } = hotelListActions;
+
 /**
  * 列表末尾哨兵进入视口即拉下一页。
  *
@@ -21,7 +23,7 @@ export function useHotelListEffects(
 
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) {
-        hotelListActions.loadMore();
+        loadMore();
       }
     });
     observer.observe(sentinel);

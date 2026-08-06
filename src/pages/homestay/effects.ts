@@ -10,10 +10,12 @@ function parseFilters(search: string): ListingFilters {
   return { keyword, roomType };
 }
 
+const { loadListings } = pageActions;
+
 export function usePageEffects() {
   useEffect(() => {
     const filters = parseFilters(window.location.search);
 
-    void pageActions.loadListings(filters);
+    void loadListings(filters);
   }, []);
 }
