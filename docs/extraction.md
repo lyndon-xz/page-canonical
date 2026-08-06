@@ -13,7 +13,7 @@
 }
 ```
 
-hotel 的 persist 键就写在配置里。若先起一个 `PERSIST_KEY` 再引用，读者要跳一次才看到值是什么，而这个值和它唯一的用途从此隔在文件两头。同类的还有 `scrollIntoView({ behavior: "auto", block: "start" })` 的选项对象与 `useRegisterLive("hotelListRef", listRef)` 里的 key 字面量。
+hotel 的 persist 键就写在配置里。若先起一个 `PERSIST_KEY` 再引用，读者要跳一次才看到值是什么，而这个值和它唯一的用途从此隔在文件两头。同类的还有 `scrollIntoView({ behavior: "auto", block: "start" })` 的选项对象与 `useRegisterLive("bookingForm", form)` 里的 key 字面量。
 
 抽出去有时还会引入额外摩擦：
 
@@ -80,10 +80,14 @@ const methods = useForm<InquiryForm>({
 
 真正该留在顶层的只有前两类：名字本身就是解释，或者值插不进任何调用处。
 
-复用则另当别论。hotel 的 `DEFAULT_PARAMS` 与 `DEFAULT_CONTACT` 留着，因为 store 初值与 persist 的 `merge` 各用一次——`merge` 要拿默认值补齐老数据缺的字段（见[状态建模](state-modeling.md)的持久化一节），两处必须是同一份值。
+复用则另当别论。hotel 的 `DEFAULT_CONTACT` 留着，因为 store 初值与 persist 的 `merge` 各用一次——`merge` 要拿默认值补齐老数据缺的字段（见[状态建模](state-modeling.md)的持久化一节），两处必须是同一份值。
+
+`DEFAULT_SEARCH_PARAMS` 是同一条，但消费方跨了文件，落点也就跟着走。除了 store 那两处，`parseSearchParams` 要拿它作非法值的落点、`serializeParams` 要拿它判断「等于默认值就从 URL 里省掉」。四处必须是同一份值，所以它归 `params.ts`——那里已经住着 `SORT_BY_VALUES` 与 `SearchParams`，默认值是这个概念的一部分。留在 `store.ts` 的代价是同一组默认值在两个文件各写一遍：改了 `params.ts` 里的默认排序，store 那份还是旧的字面量，而「URL 该省略哪个参数」正是靠这份值决定的。
 
 ## 只在本文件用就不 export
 
 `HOTEL_PAGE_SIZE` 只被 `services.ts` 自己的两处切片用到，所以不 export；两页各自的 `MOCK_DELAY_MS` 同理。多余的暴露面会让人以为别处依赖它，重构时不敢动。
+
+`serializeParams` 是这条的另一种形状：它曾经 export 给页面 action 拼 query 串，后来 URL 写入收回 `params.ts` 自己承担（见[跨模块协作](cross-module.md)的 `shared/` 一节），它就只剩 `writeParamsToUrl` 一个消费方。降成私有之后，外部认识的是「把条件同步到地址栏」这个动作，而不是中间那张 `Record<string, string>`——少一个 export 就少一种被别处依赖的形状。
 
 反过来，`export` 出去但当前只有一个消费方的不算多余——`MOCK_HOTELS`、`MOCK_LISTINGS`、`MOCK_LISTING_DETAILS` 都只被同目录的服务函数 import，数据与服务分层本就是这个形状，暴露面与调用次数是两回事。

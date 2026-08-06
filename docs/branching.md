@@ -47,9 +47,13 @@ return ...;
 
 同一个模块里两种拿法都出现才是要避免的。homestay 曾经 `selected` 走 props 而 `favoriteIds` 自取 model，读者无从判断下一个字段该走哪条路。
 
-例外是必须与别处保持同一份的值。`showSentinel` 由 `HotelList` 算好，一路交给 `useHotelListEffects` 与 `LoadMoreFooter`（后者经 `ListBody` 转发）：哨兵的渲染条件与观察器的挂载条件必须是同一个表达式，各算一遍就会出现哨兵在 DOM 里但没人观察它（见取数与编排的同一节）。`sentinelRef` 同理，ref 由持有 effect 的那一方声明。
+必须与别处保持同一份的值，靠 model 同源，不靠父组件算好往下传。`showSentinel`（哨兵该不该渲染）要同时被 `LoadMoreFooter` 的分支和观察器的挂载条件用上，各算一遍就会出现哨兵在 DOM 里但没人观察它（见取数与编排的同一节）。它由四个状态字段推导，所以落在 `useHotelListModel` 里，两个消费方各自从 model 取——同一个 model 的同一个字段，比「父组件算好、一路 props 传下去」是更强的同源保证，也不必让 `ListBody` 替 `LoadMoreFooter` 中转一手。
 
-`sentinelRef` 走具名 prop 而不是 React 19 的 `ref`：`LoadMoreFooter` 只在哨兵这一个分支把它挂到根元素上，用 `ref` 会让人以为任何分支下都能从这个组件拿到节点。
+派生逻辑因此不该留在壳里。`HotelList` 曾经在组件体里算这个布尔，等于把一段状态推导漏在 UI 层：`ListBody` 与 `LoadMoreFooter` 想用就只能从它手上接 props，而它自己并不消费这个值。
+
+`sentinelRef` 是另一回事，它必须走 props：ref 由持有 effect 的那一方声明，所以 `listRef` 与 `sentinelRef` 都在 `HotelList` 里 `useRef`，前者留给自己的根节点，后者交给 `LoadMoreFooter` 挂到哨兵上。走具名 prop 而不是 React 19 的 `ref`，是因为 `LoadMoreFooter` 只在哨兵这一个分支把它挂上去，用 `ref` 会让人以为任何分支下都能从这个组件拿到节点。
+
+参数名两端要一致。观察器那个 effect 收的就是 `showSentinel`，叫 `isMounted` 之类的通名会让人当成 React 的挂载标志，而它其实是哨兵的渲染条件。
 
 ## 样式跟着节点走
 
@@ -57,4 +61,4 @@ class 定义随它修饰的节点进子组件自己的 `index.module.scss`。`st
 
 ## 二元分支仍然用三元
 
-这条规则只针对多分支链。`DetailBody` 末尾按 `inDrawer` 二选一、`value={value ? dayjs(value) : null}` 这类值三元都保持原样：单层三元没有嵌套，改成早返回要么多抽一个组件，要么在正常路径中间插一句 return。只有一个分支时用 `&&`，`{hotels.length > 0 && <Checkbox ... />}` 就是它该有的样子。
+这条规则只针对多分支链。`DetailBody` 末尾按 `inDrawer` 二选一、`value={value ? dayjs(value) : null}`、search-filter 那行按 `isLoading` 在「搜索中…」与「找到 N 家」之间二选一，这类值三元都保持原样：单层三元没有嵌套，改成早返回要么多抽一个组件，要么在正常路径中间插一句 return。只有一个分支时用 `&&`，`{hotels.length > 0 && <Checkbox ... />}` 就是它该有的样子。

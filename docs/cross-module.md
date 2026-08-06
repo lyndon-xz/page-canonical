@@ -10,7 +10,9 @@
 
 页面根目录与 `shared/` 的分工是另一条轴：`shared/` 收页面内所有非骨架的共享件，页面根只留分层骨架（`index.tsx`、`store.ts`、`slice.ts`、`actions.ts`、`effects.ts`、`listeners.ts`、`live.ts`）。所以 hotel 的 `params.ts`、homestay 的 `filters.ts` 与 `trace.ts` 都在 `shared/` 里，尽管前两者各自只有一个消费方、跟「跨模块」无关。
 
-URL 参数解析是这条的典型：它只被 effects 或页面 action 调一次，但它是一件独立的概念——把边界上的字符串收窄成页面的取数条件。写进 `effects.ts` 会让那一层同时承担「什么时候取数」和「取数条件怎么来的」两件事。而它与取值来源本就该同处一个文件：hotel 的 `params.ts` 里 `SORT_BY_VALUES` 定义取值、`SortBy` 由它派生、`parseSearchParams` 拿它校验，加一个排序值只改一行。
+URL 参数解析是这条的典型：它只被页面 action 调一次，但它是一件独立的概念——把边界上的字符串收窄成页面的取数条件。写进 `effects.ts` 会让那一层同时承担「什么时候取数」和「取数条件怎么来的」两件事。而它与取值来源本就该同处一个文件：hotel 的 `params.ts` 里 `SORT_BY_VALUES` 定义取值、`SortBy` 由它派生、`parseSearchParams` 拿它校验、`DEFAULT_SEARCH_PARAMS` 给出非法值的落点，加一个排序值只改一行。
+
+**读 URL 与写 URL 是同一件事的两面，归同一个文件。** 写在 action 里的话，「URL 里的参数长什么样」就分散成两处：一处解析、一处拼串，加参数、改参数名或改默认值时得同时想起两边。所以 `params.ts` 一并提供 `writeParamsToUrl`，`serializeParams` 退成它的私有件——外部只需要「把这份条件同步到地址栏」这一个动作，不需要知道中间那张 `Record<string, string>`。文件因此从纯转换变成带一个副作用，函数名把这件事说清即可。
 
 判据是消费方出不出单个模块的范围，不是「跨不跨模块」。只被一个模块消费的仍留在那个模块内（`confirm-dialog/scenes.ts`），第二个页面开始消费时再上提 `src/`。页面根之所以不留这类文件：骨架是封闭集合，读者扫一眼页面根就该认全这个页面有哪几层，混进概念文件后得先读内容才知道哪个是层、哪个是辅助件。
 
@@ -29,22 +31,25 @@ retry() {
 
 ## 三、live 表：把活对象交给 action
 
-表单实例、DOM ref 这类「活对象」不能进状态层——它们不可序列化、身份可变，放进 store 会破坏状态的可比较性。但 action 有时确实需要它们：提交失败要 `setError` 回填表单，换筛选条件后要滚动到列表顶部。
+表单实例、DOM 节点这类「活对象」不能进状态层——它们不可序列化、身份可变，放进 store 会破坏状态的可比较性。但 action 有时确实需要它们：提交失败要 `setError` 把字段错误回填到表单，而表单实例只有持有它的组件拿得到。
 
 `lib/live.ts` 提供 `createPageLive<M>()`，按页面自己的 key→类型映射生成一对读写入口：
 
 ```ts
 // pages/hotel/live.ts
 interface PageLiveMap {
-  hotelListRef: RefObject<HTMLElement | null>;
   bookingForm: UseFormReturn<BookingForm>;
 }
 export const { useRegisterLive, getLive } = createPageLive<PageLiveMap>();
 ```
 
-持有方在自己的组件里 `useRegisterLive("hotelListRef", ref)`，消费方在 action 里 `getLive("hotelListRef")`。两端受同一张表约束，key 拼错或值类型不对都在编译期报错。
+持有方在自己的组件里 `useRegisterLive("bookingForm", form)`，消费方在 action 里 `getLive("bookingForm")`。两端受同一张表约束，key 拼错或值类型不对都在编译期报错。
 
 每个页面的 `live.ts` 就是这张跨模块契约表，谁注册、谁消费写在表上的字段注释里。
+
+**进这张表的门槛是「非得在 action 里拿到它」。** 由状态变更驱动的视图副作用不算——那是 effects 的活。hotel 的「换条件后视口回到列表顶部」一度走这张表：action 里 `getLive("hotelListRef")` 再 `scrollIntoView`。代价是那句滚动跑在 React 提交重置后的布局之前，量的是一份即将被丢弃的布局（细节见[取数与编排](data-fetching.md)的分页一节）。挪进 hotel-list 的 effects 之后，ref 由持有它的模块自己用，表里那一行也就不必存在了。
+
+判据因此不是「是不是活对象」，而是**消费方在哪一层**：action 要用的进表，组件与 effects 自己能拿到的不进。
 
 注意 `createPageLive` 每次调用持有独立的 `Map`，页面之间互不影响；但这个 Map 是模块级的，仅适用于 CSR SPA。SSR 下要改成每请求实例化并经 Context 提供，否则会跨请求串用。
 

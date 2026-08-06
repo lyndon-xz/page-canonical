@@ -30,6 +30,8 @@ homestay 是埋点 → 列表 → 详情 → 确认弹窗 → 收藏 → 询价�
 
 成对的 `open`/`close`、`select`/`clear` 相邻。重试与清错（`retryXxx`、`dismissXxx`）排在所属组末尾——它们是失败路径的收尾，不是主线。
 
+组内也照「用户推进顺序」排。hotel 的列表组是 `initPage` → `applySearchParams` → `loadMoreHotels` → `retryHotels`：进页面、换条件、翻页、失败重试。`initPage` 领头还有一层原因——[声明顺序](declaration-order.md)规定私有件的簇内次序跟着「对应的导出 action 谁在前」，而 `waitForHydration` → `resolveInitialParams` → `loadHotels` 正是 `initPage` 那三句的顺序。`initPage` 若不在组首，文件上下两半的依据就对不上了。
+
 ## 被依赖的排在依赖它的之前
 
 `openConfirm` 排在收藏组之前，因为 `toggleFavorite` 要调它；`loadHotels` 排在 `initPage` 之前，`loadListingDetail` 排在 `selectListing` 与 `retryDetail` 之前。

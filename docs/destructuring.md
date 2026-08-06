@@ -15,7 +15,9 @@ export default function HotelCard(props: HotelCardProps) {
 
 ## 前缀读到第二次就解构
 
-字段数不是判据，同一前缀在同一作用域被读两次就解构，同一个字段读两次也算。`serializeParams` 里 `keyword` 判空与写入各读一次，所以 `searchParams` 整体拆开；而 `batchFavorite` 末尾的 `failures.map((failure) => failure.hotelId)` 只读一次，点号就是终点，改块体去换掉一个前缀是净亏——同一个 `BatchFavoriteFailure`，在 model 里要同时读 `hotelId` 与 `reason` 时就该解构。
+字段数不是判据，同一前缀在同一作用域被读两次就解构，同一个字段读两次也算。`serializeParams` 里 `star` 判等与写入各读一次，所以 `searchParams` 整体拆开；而 `batchFavorite` 末尾的 `failures.map((failure) => failure.hotelId)` 只读一次，点号就是终点，改块体去换掉一个前缀是净亏——同一个 `BatchFavoriteFailure`，在 model 里要同时读 `hotelId` 与 `reason` 时就该解构。
+
+同一个函数里解构两个同形状的对象时，按下文「撞名时重命名」处理，而不是退回点号。`serializeParams` 与 `parseSearchParams` 都要同时读入参和 `DEFAULT_SEARCH_PARAMS`，三个字段名逐一撞上，所以默认值那份整体改名：`{ keyword: defaultKeyword, star: defaultStar, sortBy: defaultSortBy }`。前缀留着的写法（`DEFAULT_SEARCH_PARAMS.sortBy`）会让「当前值」与「默认值」在同一行里一个裸名一个带前缀，读者得靠有没有前缀来分辨语义。
 
 model 的投影同样照这条走。homestay 走 RTK，state 下分 `page` 与 `confirmDialog` 两片，投影多半要读同一片的好几个字段，所以先解构那一片，字面量里只留字段名：
 
@@ -27,9 +29,7 @@ useAppSelector((s) => {
 }, shallowEqual);
 ```
 
-代价是字段名写两遍，换掉的是 `s.page.` 逐行重复。只读一片里的一个字段时（`inquiry-fields` 的 `s.page.submittedInquiry`）就直接点出来，不必为一次读改块体。
-
-hotel 走 zustand，state 是扁平的，`s` 本身就是那一片，解构它只会把字段名白写两遍，所以 `useShallow((s) => ({ ... }))` 保持字面量形式。判据没变，变的是路径里有没有第二段可省。
+代价是字段名写两遍，换掉的是 `s.page.` 逐行重复。只读一片里的一个字段时（`inquiry-fields` 的 `s.page.submittedInquiry`）就直接点出来，不必为一次读改块体。路径只有一段时反过来，见下文「三类前缀不拆」。
 
 调用结果是另一回事，它必须落成变量才能用，落就落成解构，取一个字段也一样：
 
@@ -125,7 +125,7 @@ closeDetailDrawer() {
 
 **以字段名为键的表**。`errors.guestName`、`styles.card`、`FetchStatus.Loading`，键本身就是那个域里的名字，裸出来会和同名的值混淆——`guestName` 该是入住人的值还是它的错误，拆开就说不清了。
 
-**投影选择器**。`useShallow` 的函数体只有一个对象字面量：
+**路径只有一段的投影选择器**。hotel 走 zustand，state 是扁平的，`s` 本身就是那一片：
 
 ```ts
 useShallow((s) => ({
@@ -134,7 +134,9 @@ useShallow((s) => ({
 }));
 ```
 
-参数叫 `s` 而不是 `state`，因为它只出现在这张映射表里。解构要把表达式体改成块体再补一行 `return`，换来的只是省掉两个 `s.`；字段还要改名或加工成布尔，连对象简写都用不上。`hotel-list` 取十个字段时更明显：解构后同一批名字要写三遍（解构、字面量、调用处）。`selectTraceCommonTag` 不属此列，它本就是块体且字段原名转发，拍平后能写成 `keyword,`。
+参数叫 `s` 而不是 `state`，因为它只出现在这张映射表里。解构 `s` 要把表达式体改成块体再补一行 `return`，换来的只是省掉两个 `s.`；字段还要改名或加工成布尔，连对象简写都用不上。`hotel-list` 取十个字段时更明显：同一批名字要写三遍（解构、字面量、调用处）。
+
+路径长出第二段，判据就反过来了，那一段是真噪音：homestay 走 RTK，state 下分 `page` 与 `confirmDialog`，所以先解构那一片（见上一节）；hotel 的 `booking-form/effects.ts` 读 `s.contact` 的两个字段，同理。
 
 **只在条件分支里用到的可空对象**。`booking-form` 的 `selectedHotel` 是 `Hotel | null`，`name` 与 `pricePerNight` 只在 `{selectedHotel ? ... : ...}` 内取。`&&` 与三元表达式里没有放 `const` 的位置，函数体顶层又收窄不了类型（会报 `TS2339`）。要解构得先抽子组件或加 early return，那是另一件事，按它自身值不值得单独判断，不要用 `?? {}` 绕过类型。
 
