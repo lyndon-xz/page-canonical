@@ -5,7 +5,7 @@ import { shallowEqual } from "react-redux";
 import type { InquiryForm } from "../../shared/inquiry";
 import { selectListings, useAppSelector, type RootState } from "../../store";
 
-/** 询价对象取列表项：标题价格都在那儿，详情接口只有描述类字段 */
+// 询价对象取列表项：标题价格都在那儿，详情接口只有描述类字段
 const selectInquiryListing = createSelector(
   selectListings,
   (state: RootState) => state.page.selectedListingId,

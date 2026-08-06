@@ -19,7 +19,7 @@ const DEFAULT_CONTACT: BookingContact = {
   phone: "",
 };
 
-/** 改动即改动存储格式，需兼容老数据 */
+// 改动即改动存储格式，需兼容老数据
 interface PersistedPageState {
   appliedParams: SearchParams;
   favoriteIds: string[];
@@ -35,32 +35,32 @@ interface PageStore {
 
   loadedPage: number;
   hasMore: boolean;
-  /** 与 hotelsStatus 分开：首屏要盖住整个列表，加载更多只在列表末尾转圈 */
+  // 与 hotelsStatus 分开：首屏要盖住整个列表，加载更多只在列表末尾转圈
   loadMoreStatus: FetchStatus;
 
   favoriteIds: string[];
 
-  /** 多选集合，批量操作的作用域；与单选的 selectedHotelId 各管一件事 */
+  // 多选集合，批量操作的作用域；与单选的 selectedHotelId 各管一件事
   selectedHotelIds: string[];
   isBatchFavoriting: boolean;
   batchFavoriteFailures: BatchFavoriteFailure[];
 
-  /** 上次预订用的联系人，跨会话带出，免得每单重填 */
+  // 上次预订用的联系人，跨会话带出，免得每单重填
   contact: BookingContact;
   isSubmittingBooking: boolean;
-  /**
+  /*
    * 已提交预订的酒店 id，为 null 表示本次会话还没提交过。
    * 存 id 而非「已提交」布尔：换选酒店与换结果集都不必同步清它，
    * 成功提示由 UI 比对当前选中得出，少两个漏改就会留下错提示的地方。
    */
   bookedHotelId: string | null;
 
-  /**
+  /*
    * 装载首页。列表、总数、分页游标必须整组写入：分开设会留下
    * 「已有 12 条却 loadedPage 仍是 0」这类中间态，哨兵会照着它重复拉第 1 页。
    */
   setFirstPage: (page: HotelPage) => void;
-  /** 追加下一页。页码由此处自增，调用方不再各自记账 */
+  // 追加下一页。页码由此处自增，调用方不再各自记账
   appendPage: (page: HotelPage) => void;
 
   setHotelsStatus: (status: FetchStatus) => void;
@@ -75,7 +75,7 @@ interface PageStore {
   setIsSubmittingBooking: (submitting: boolean) => void;
   setBookedHotelId: (hotelId: string | null) => void;
 
-  /**
+  /*
    * 作废上一轮结果集：列表、分页游标、以及只对这批结果成立的选中与失败项。
    * favoriteIds 与 appliedParams 不在其中，那是跨结果集的用户数据。
    */
@@ -159,13 +159,13 @@ export const usePageStore = create<PageStore>()(
     }),
     {
       name: "hotel-page",
-      /** 白名单：只落盘长期偏好，瞬时态与服务端快照不跨会话 */
+      // 白名单：只落盘长期偏好，瞬时态与服务端快照不跨会话
       partialize: (state) => {
         const { appliedParams, favoriteIds, contact } = state;
 
         return { appliedParams, favoriteIds, contact };
       },
-      /** 与默认值合并，避免老数据缺少后加的字段 */
+      // 与默认值合并，避免老数据缺少后加的字段
       merge: (persisted, current) => {
         const saved = persisted as Partial<PersistedPageState> | undefined;
 

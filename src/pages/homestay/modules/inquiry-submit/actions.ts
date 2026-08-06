@@ -33,7 +33,7 @@ export const inquirySubmitActions = {
     }
   },
 
-  /** 撤回是破坏性的，转交二次确认；撤哪条由页面层按 submittedInquiry 定 */
+  // 撤回是破坏性的，转交二次确认；撤哪条由页面层按 submittedInquiry 定
   requestCancel() {
     pageActions.trackClick("inquiry_cancel_request");
     pageActions.openConfirm({ scene: ConfirmScene.CancelInquiry });

@@ -32,10 +32,10 @@ import {
 } from "./slice";
 import { selectTraceCommonTag, store } from "./store";
 
-/** 连续点开不同房源时先发的请求可能后到，只有最新序号的响应允许落库 */
+// 连续点开不同房源时先发的请求可能后到，只有最新序号的响应允许落库
 let latestDetailRequestId = 0;
 
-/** 调用前须先把 selectedListingId 对齐到该房源，否则响应会被 isCurrent 判为过期丢弃 */
+// 调用前须先把 selectedListingId 对齐到该房源，否则响应会被 isCurrent 判为过期丢弃
 async function loadListingDetail(listingId: string) {
   const requestId = (latestDetailRequestId += 1);
 
@@ -67,7 +67,7 @@ async function loadListingDetail(listingId: string) {
 export const pageActions = {
   // ── 埋点 ──
 
-  /** 须在状态变更之前调用：通用参数表达「点击发生时页面处于什么上下文」 */
+  // 须在状态变更之前调用：通用参数表达「点击发生时页面处于什么上下文」
   trackClick(event: string, extra: Record<string, string> = {}) {
     reportTrace(event, {
       ...selectTraceCommonTag(store.getState()),
@@ -98,7 +98,7 @@ export const pageActions = {
 
   // ── 详情 ──
 
-  /** 选中即切换详情：详情区跟着卡片走，避免用户还要再点一次「看详情」 */
+  // 选中即切换详情：详情区跟着卡片走，避免用户还要再点一次「看详情」
   selectListing(listingId: string) {
     store.dispatch(setSelectedListingId(listingId));
     void loadListingDetail(listingId);
@@ -133,7 +133,7 @@ export const pageActions = {
 
   // ── 收藏 ──
 
-  /** 收藏写入的唯一出口，失败向上抛：两条调用路径对失败的处置不同 */
+  // 收藏写入的唯一出口，失败向上抛：两条调用路径对失败的处置不同
   async commitFavorite(listingId: string) {
     const { favoriteIds } = store.getState().page;
     // 点击那一刻的收藏态决定本次是收还是取消；落库走增删 reducer，不拿这份快照做覆盖
@@ -150,7 +150,7 @@ export const pageActions = {
     }
   },
 
-  /** 在这里接住 commitFavorite 的抛错：失败不改变界面结构，故用 toast 提示 */
+  // 在这里接住 commitFavorite 的抛错：失败不改变界面结构，故用 toast 提示
   async addFavorite(listingId: string) {
     try {
       await pageActions.commitFavorite(listingId);
@@ -159,7 +159,7 @@ export const pageActions = {
     }
   },
 
-  /**
+  /*
    * 收藏是新增操作、即点即改；取消收藏是破坏性的，转交二次确认。
    * 规则收在页面层：列表卡片与详情抽屉都要它，各写一份必然漂移。
    */

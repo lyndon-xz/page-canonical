@@ -18,7 +18,7 @@ export const theme: ThemeConfig = {
     colorWarning: "#d99a4a",
     colorWarningBg: "#faeedb",
 
-    /** 浮层背景：message、Modal、Drawer、下拉面板共用，默认纯白在暖底上偏冷 */
+    // 浮层背景：message、Modal、Drawer、下拉面板共用，默认纯白在暖底上偏冷
     colorBgElevated: "#fffdf9",
 
     borderRadius: 11,

@@ -17,7 +17,7 @@ import {
 } from "./shared/params";
 import { usePageStore } from "./store";
 
-/** storage 若换成异步实现，缺此门禁首屏会先按默认条件多拉一次 */
+// storage 若换成异步实现，缺此门禁首屏会先按默认条件多拉一次
 async function waitForHydration() {
   if (usePageStore.persist.hasHydrated()) {
     return;
@@ -31,7 +31,7 @@ async function waitForHydration() {
   });
 }
 
-/** URL 带参是用户的明示意图，优先于隐式的持久化偏好 */
+// URL 带参是用户的明示意图，优先于隐式的持久化偏好
 function resolveInitialParams(): SearchParams {
   if (window.location.search) {
     return parseSearchParams(window.location.search);
@@ -40,7 +40,7 @@ function resolveInitialParams(): SearchParams {
   return usePageStore.getState().appliedParams;
 }
 
-/**
+/*
  * 结果集的代号，重新取首页即进入新一代。首页与翻页共用同一个：
  * 换条件不会取消已发出的请求，旧一代的响应仍会回来，落库前须先确认自己还是当前一代。
  */
@@ -79,7 +79,7 @@ async function loadHotels(searchParams: SearchParams) {
 export const pageActions = {
   // ── 列表 ──
 
-  /** 哨兵会连续触发，三个前置判断防并发拉同一页 */
+  // 哨兵会连续触发，三个前置判断防并发拉同一页
   async loadMoreHotels() {
     const {
       hasMore,
@@ -124,7 +124,7 @@ export const pageActions = {
     await loadHotels(resolveInitialParams());
   },
 
-  /** 接收 patch：筛选与排序分属两个模块，各改各的那部分 */
+  // 接收 patch：筛选与排序分属两个模块，各改各的那部分
   applySearchParams(patch: Partial<SearchParams>) {
     const searchParams = { ...usePageStore.getState().appliedParams, ...patch };
 
@@ -170,7 +170,7 @@ export const pageActions = {
     );
   },
 
-  /** 全选的作用域是「已加载的」而非「全部匹配的」：后者还没取回 */
+  // 全选的作用域是「已加载的」而非「全部匹配的」：后者还没取回
   selectAllLoaded() {
     const { hotels, setSelectedHotelIds } = usePageStore.getState();
 
@@ -183,7 +183,7 @@ export const pageActions = {
 
   // ── 收藏 ──
 
-  /** 乐观更新；回滚用请求前的快照，取反在并发点击下会推到错的一边 */
+  // 乐观更新；回滚用请求前的快照，取反在并发点击下会推到错的一边
   async toggleFavorite(hotelId: string) {
     const { favoriteIds, setFavoriteIds } = usePageStore.getState();
 
@@ -202,7 +202,7 @@ export const pageActions = {
     }
   },
 
-  /**
+  /*
    * 不做乐观更新：批量结果是部分成功，先全亮起再挑几个回滚会让用户以为全成了。
    * 失败项保留在选中态里供原地重试。
    */

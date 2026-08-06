@@ -10,7 +10,7 @@ import styles from "./index.module.scss";
 
 const { TextArea } = Input;
 
-/**
+/*
  * 提交成功即退出该房源，此时选中态为空但询价并没有「还没开始」，
  * 少了中间这一态就会与下方的报价成功提示互相打脸。
  */

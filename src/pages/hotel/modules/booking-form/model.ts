@@ -40,7 +40,7 @@ export function useBookingFormModel() {
       selectedHotel && nights && rooms
         ? selectedHotel.pricePerNight * nights * rooms
         : null,
-    /** 成功提示只对当前选中的那家成立，换选或换结果集后自然消失 */
+    // 成功提示只对当前选中的那家成立，换选或换结果集后自然消失
     bookingSubmitted:
       selectedHotel !== null && bookedHotelId === selectedHotel.id,
   };

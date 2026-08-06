@@ -13,7 +13,7 @@ import styles from "./index.module.scss";
 const { retry } = hotelListActions;
 
 interface ListBodyProps {
-  /** 由父组件算好传入，与喂给观察器的是同一个值，避免渲染条件和观察条件分叉 */
+  // 由父组件算好传入，与喂给观察器的是同一个值，避免渲染条件和观察条件分叉
   showSentinel: boolean;
   sentinelRef: RefObject<HTMLDivElement | null>;
 }

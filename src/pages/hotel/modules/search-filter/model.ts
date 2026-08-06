@@ -5,7 +5,7 @@ import { FetchStatus } from "@/lib/fetch-status";
 
 import { usePageStore } from "../../store";
 
-/** 用户编辑中、尚未提交的搜索条件 */
+// 用户编辑中、尚未提交的搜索条件
 interface SearchFilterLocalState {
   keyword: string;
   star: number;

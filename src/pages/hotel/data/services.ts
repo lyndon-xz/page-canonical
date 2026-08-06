@@ -34,7 +34,7 @@ const resolveMatchedHotels = (searchParams: SearchParams): Hotel[] => {
   }).sort(comparators[sortBy]);
 };
 
-/** 取值要让首屏填满一屏以上，否则末尾哨兵一开始就在视口内，会连锁翻页直到取完 */
+// 取值要让首屏填满一屏以上，否则末尾哨兵一开始就在视口内，会连锁翻页直到取完
 const HOTEL_PAGE_SIZE = 12;
 
 export async function fetchHotelPage(
@@ -54,7 +54,7 @@ export async function fetchHotelPage(
   };
 }
 
-/** 该酒店的收藏接口固定失败，用于演示乐观更新后的回滚 */
+// 该酒店的收藏接口固定失败，用于演示乐观更新后的回滚
 const FAVORITE_REJECTED_HOTEL_IDS = ["h2"];
 
 export async function toggleHotelFavorite(hotelId: string): Promise<void> {
@@ -85,10 +85,10 @@ export async function batchFavoriteHotels(
   return { succeededIds, failures };
 }
 
-/** 该酒店订不到，用于演示非字段级的提交错误走 toast */
+// 该酒店订不到，用于演示非字段级的提交错误走 toast
 const BOOKING_REJECTED_HOTEL_IDS = ["h5"];
 
-/** 命中的手机号提交预订会被拒，用于演示服务端字段级错误回填 */
+// 命中的手机号提交预订会被拒，用于演示服务端字段级错误回填
 const BLOCKED_PHONES = ["13800000000"];
 
 export class BookingSubmitError extends Error {

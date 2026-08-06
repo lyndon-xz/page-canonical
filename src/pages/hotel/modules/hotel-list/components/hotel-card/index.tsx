@@ -16,7 +16,7 @@ interface HotelCardProps {
   hotel: Hotel;
   selected: boolean;
   favorite: boolean;
-  /** 是否被多选勾中；与 selected（单选高亮）互不相干 */
+  // 是否被多选勾中；与 selected（单选高亮）互不相干
   checked: boolean;
 }
 

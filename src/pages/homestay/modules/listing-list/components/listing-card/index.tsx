@@ -24,7 +24,7 @@ interface ListingCardProps {
   listing: Listing;
   selected: boolean;
   favorite: boolean;
-  /** 收藏请求进行中；悲观更新下心标此时还没变，得靠它给个反馈 */
+  // 收藏请求进行中；悲观更新下心标此时还没变，得靠它给个反馈
   favoriting: boolean;
 }
 

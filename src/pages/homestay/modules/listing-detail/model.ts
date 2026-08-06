@@ -3,7 +3,7 @@ import { shallowEqual } from "react-redux";
 
 import { selectListings, useAppSelector, type RootState } from "../../store";
 
-/** 详情接口只返回描述类字段，标题价格仍取列表项，避免两处各存一份房源基本信息 */
+// 详情接口只返回描述类字段，标题价格仍取列表项，避免两处各存一份房源基本信息
 const selectDetailListing = createSelector(
   selectListings,
   (state: RootState) => state.page.selectedListingId,

@@ -4,7 +4,7 @@ import { store } from "../../store";
 
 import { setConfirmError, setIsConfirming } from "./slice";
 
-/** 分派与编排分开：场景分支收在这里，confirm 只管 loading 与关闭时机 */
+// 分派与编排分开：场景分支收在这里，confirm 只管 loading 与关闭时机
 async function runByScene(request: ConfirmRequest) {
   if (request.scene === ConfirmScene.RemoveFavorite) {
     await pageActions.commitFavorite(request.listingId);

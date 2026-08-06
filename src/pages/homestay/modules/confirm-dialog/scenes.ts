@@ -2,7 +2,7 @@ import { ConfirmScene } from "../../shared/confirm";
 
 interface SceneCopy {
   title: string;
-  /** 无补充说明的场景省略，UI 据此决定是否渲染说明段 */
+  // 无补充说明的场景省略，UI 据此决定是否渲染说明段
   desc?: string;
   okText: string;
 }

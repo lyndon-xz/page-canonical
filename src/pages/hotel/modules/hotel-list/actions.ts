@@ -28,7 +28,7 @@ export const hotelListActions = {
     pageActions.toggleSelect(id);
   },
 
-  /** 勾满了再点即取消全选，符合表头复选框的惯例 */
+  // 勾满了再点即取消全选，符合表头复选框的惯例
   toggleSelectAll(allSelected: boolean) {
     if (allSelected) {
       pageActions.clearSelection();

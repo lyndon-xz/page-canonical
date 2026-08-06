@@ -7,7 +7,7 @@ export interface ListingFilters {
   roomType: RoomType | "";
 }
 
-/** URL 来的值到手是 string，校验须引用同一份取值来源，另抄一份迟早漏同步 */
+// URL 来的值到手是 string，校验须引用同一份取值来源，另抄一份迟早漏同步
 const isRoomType = (value: string): value is RoomType =>
   (ROOM_TYPE_VALUES as readonly string[]).includes(value);
 

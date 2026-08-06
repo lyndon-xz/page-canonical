@@ -45,7 +45,7 @@ export async function fetchListingDetail(
   return MOCK_LISTING_DETAILS[listingId] ?? null;
 }
 
-/** 该房源的收藏接口固定失败，用于演示收藏失败的反馈路径 */
+// 该房源的收藏接口固定失败，用于演示收藏失败的反馈路径
 const FAVORITE_REJECTED_LISTING_IDS = ["l3"];
 
 export async function toggleFavorite(listingId: string): Promise<void> {
@@ -56,11 +56,11 @@ export async function toggleFavorite(listingId: string): Promise<void> {
   }
 }
 
-/** 旺季单价上浮，报价因此与列表起价不同 */
+// 旺季单价上浮，报价因此与列表起价不同
 const PEAK_MONTHS = [7, 8];
 const PEAK_SURCHARGE_RATE = 1.2;
 
-/** 住满这么多晚打折，总价因此不是单价乘晚数 */
+// 住满这么多晚打折，总价因此不是单价乘晚数
 const LONG_STAY_NIGHTS = 7;
 const LONG_STAY_DISCOUNT = 0.9;
 
@@ -88,10 +88,10 @@ function buildQuote(listing: Listing, payload: InquiryPayload): InquiryQuote {
   };
 }
 
-/** 命中的手机号提交询价会被拒，用于演示服务端字段级错误回填 */
+// 命中的手机号提交询价会被拒，用于演示服务端字段级错误回填
 const BLOCKED_PHONES = ["13800000000"];
 
-/** 询价 id 的前缀，撤回时据此判断 id 是否出自本服务 */
+// 询价 id 的前缀，撤回时据此判断 id 是否出自本服务
 const INQUIRY_ID_PREFIX = "iq-";
 
 export class InquirySubmitError extends Error {
