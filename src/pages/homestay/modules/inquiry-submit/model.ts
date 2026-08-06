@@ -16,5 +16,8 @@ export function useInquirySubmitModel() {
     };
   }, shallowEqual);
 
-  return { handleSubmit, ...submitState };
+  return {
+    handleSubmit,
+    ...submitState,
+  };
 }

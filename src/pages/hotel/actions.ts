@@ -69,6 +69,7 @@ async function loadHotels(searchParams: SearchParams) {
 }
 
 export const pageActions = {
+  // ── 列表 ──
 
   async loadMoreHotels() {
     const {
@@ -134,9 +135,13 @@ export const pageActions = {
     void loadHotels(usePageStore.getState().appliedParams);
   },
 
+  // ── 选中 ──
+
   selectHotel(hotelId: string) {
     usePageStore.getState().setSelectedHotelId(hotelId);
   },
+
+  // ── 多选 ──
 
   toggleSelect(hotelId: string) {
     const { selectedHotelIds, setSelectedHotelIds } = usePageStore.getState();
@@ -157,6 +162,8 @@ export const pageActions = {
   clearSelection() {
     usePageStore.getState().setSelectedHotelIds([]);
   },
+
+  // ── 收藏 ──
 
   async toggleFavorite(hotelId: string) {
     const { favoriteIds, setFavoriteIds } = usePageStore.getState();
@@ -213,6 +220,8 @@ export const pageActions = {
   dismissBatchFavoriteFailures() {
     usePageStore.getState().setBatchFavoriteFailures([]);
   },
+
+  // ── 预订 ──
 
   async submitBooking(values: BookingForm) {
     const {

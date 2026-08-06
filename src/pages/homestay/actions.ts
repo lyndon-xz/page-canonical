@@ -58,6 +58,7 @@ async function loadListingDetail(listingId: string) {
 }
 
 export const pageActions = {
+  // ── 埋点 ──
 
   trackClick(event: string, extra: Record<string, string> = {}) {
     reportTrace(event, {
@@ -65,6 +66,8 @@ export const pageActions = {
       ...extra,
     });
   },
+
+  // ── 列表 ──
 
   async loadListings(filters: ListingFilters) {
     store.dispatch(setAppliedFilters(filters));
@@ -83,6 +86,8 @@ export const pageActions = {
   retryListings() {
     void pageActions.loadListings(store.getState().page.appliedFilters);
   },
+
+  // ── 详情 ──
 
   selectListing(listingId: string) {
     store.dispatch(setSelectedListingId(listingId));
@@ -106,6 +111,8 @@ export const pageActions = {
     void loadListingDetail(selectedListingId);
   },
 
+  // ── 确认弹窗 ──
+
   openConfirm(request: ConfirmRequest) {
     store.dispatch(setConfirmRequest(request));
   },
@@ -113,6 +120,8 @@ export const pageActions = {
   closeConfirm() {
     store.dispatch(setConfirmRequest(null));
   },
+
+  // ── 收藏 ──
 
   async commitFavorite(listingId: string) {
     const { favoriteIds } = store.getState().page;
@@ -161,6 +170,8 @@ export const pageActions = {
       listingId,
     });
   },
+
+  // ── 询价 ──
 
   async submitInquiry(values: InquiryForm) {
     const { selectedListingId } = store.getState().page;

@@ -14,5 +14,10 @@ export function useInquiryFieldsModel() {
     shallowEqual,
   );
 
-  return { control, errors: formState.errors, listing, hasSubmittedInquiry };
+  return {
+    control,
+    errors: formState.errors,
+    listing,
+    hasSubmittedInquiry,
+  };
 }

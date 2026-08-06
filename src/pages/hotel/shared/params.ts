@@ -22,7 +22,11 @@ export function parseSearchParams(search: string): SearchParams {
   const rawSortBy = query.get("sortBy") ?? "";
   const sortBy = isSortBy(rawSortBy) ? rawSortBy : DEFAULT_SORT;
 
-  return { keyword, star, sortBy };
+  return {
+    keyword,
+    star,
+    sortBy,
+  };
 }
 
 export function serializeParams(

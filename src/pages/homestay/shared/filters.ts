@@ -14,5 +14,8 @@ export function parseFilters(search: string): ListingFilters {
   const rawRoomType = query.get("roomType") ?? "";
   const roomType = isRoomType(rawRoomType) ? rawRoomType : "";
 
-  return { keyword, roomType };
+  return {
+    keyword,
+    roomType,
+  };
 }
