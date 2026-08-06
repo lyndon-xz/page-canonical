@@ -1,4 +1,3 @@
-/* 同一批色值在 theme.ts 另有一份：antd 走 cssinjs，取不到这里的 CSS 变量，改色需两处同步。 */
 :root {
   --ink: #3b3129;
   --paper: #f7f2ea;
@@ -39,10 +38,6 @@ body {
   font-weight: 600;
 }
 
-/*
- * 浮层背景与页面底色仅差一档，描边才撑得起层次。message 既没有 border token，
- * 静态方法也读不到 config 里的 classNames，只能落到类名上。
- */
 .ant-message-notice {
   border: 1px solid var(--line);
 }

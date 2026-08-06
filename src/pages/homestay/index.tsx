@@ -13,7 +13,6 @@ import { store } from "./store";
 
 import styles from "./index.module.scss";
 
-// 单独成组件并挂在 Provider 内层：effects 要订阅状态时，重渲染只落在这个空组件上
 function EffectsRunner() {
   usePageEffects();
   return null;
@@ -21,7 +20,6 @@ function EffectsRunner() {
 
 export default function HomestayPage() {
   const methods = useForm<InquiryForm>({
-    // useForm 的泛型不要求 defaultValues 写全，satisfies 才校验字段完整
     defaultValues: {
       guestName: "",
       phone: "",
@@ -46,7 +44,6 @@ export default function HomestayPage() {
         <ListingList />
         <ListingDetail />
 
-        {/* 让下面两个模块经 useFormContext 共享同一表单实例，避免两模块互相 import */}
         <FormProvider {...methods}>
           <section className={styles.inquiry}>
             <span className={styles.notch} data-side="left" />
@@ -60,7 +57,6 @@ export default function HomestayPage() {
           </section>
         </FormProvider>
 
-        {/* 挂页面层：列表卡片与详情抽屉都能触发它 */}
         <ConfirmDialog />
       </div>
     </Provider>

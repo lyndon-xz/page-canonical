@@ -19,7 +19,6 @@
   color: var(--ink);
 }
 
-/* 数量动态、会换行，故用 gap 显式控制间距，不依赖 Tag 自带的外边距 */
 .amenities {
   display: flex;
   flex-wrap: wrap;

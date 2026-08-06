@@ -16,7 +16,6 @@ interface HotelCardProps {
   hotel: Hotel;
   selected: boolean;
   favorite: boolean;
-  // 是否被多选勾中；与 selected（单选高亮）互不相干
   checked: boolean;
 }
 
@@ -32,7 +31,6 @@ export default function HotelCard(props: HotelCardProps) {
       onClick={() => selectHotel(id)}
     >
       <div className={styles.head}>
-        {/* 阻止冒泡：勾选不应连带触发卡片的单选高亮 */}
         <Checkbox
           checked={checked}
           className={styles.checkbox}
@@ -52,7 +50,6 @@ export default function HotelCard(props: HotelCardProps) {
       </div>
 
       <div className={styles.foot}>
-        {/* 评分不用星星图标：星星是星级（star）的表达，两者都用星会混淆 */}
         <span className={styles.rating}>{rating} 分</span>
         <span className={styles.price}>
           ¥{pricePerNight}

@@ -10,10 +10,6 @@ import styles from "./index.module.scss";
 
 const { TextArea } = Input;
 
-/*
- * 提交成功即退出该房源，此时选中态为空但询价并没有「还没开始」，
- * 少了中间这一态就会与下方的报价成功提示互相打脸。
- */
 function targetText(listing: Listing | null, hasSubmittedInquiry: boolean) {
   if (listing) {
     return `为「${listing.title}」询价 · ¥${listing.pricePerNight} / 晚`;
@@ -32,7 +28,6 @@ export default function InquiryFields() {
 
   return (
     <>
-      {/* 询价挂在哪套房上必须写在表单里：房源不是可填字段，用户只能从这里确认 */}
       <p className={styles.target} data-selected={!!listing}>
         {targetText(listing, hasSubmittedInquiry)}
       </p>
@@ -106,7 +101,6 @@ export default function InquiryFields() {
                   style={{ width: "100%" }}
                   placeholder="请选择入住日期"
                   inputReadOnly
-                  // 过去的日期无从入住，交给控件挡掉，别等服务端算完报价再报错
                   disabledDate={(current) => current.isBefore(dayjs(), "day")}
                   value={value ? dayjs(value) : null}
                   onChange={(_, dateString) =>
@@ -134,7 +128,6 @@ export default function InquiryFields() {
               required: "请填写入住晚数",
               min: { value: 1, message: "至少 1 晚" },
               max: { value: 30, message: "单次询价最多 30 晚" },
-              // 半晚无从计价，而 number 输入框本身不阻止小数
               validate: (value) =>
                 Number.isInteger(value) || "入住晚数须为整数",
             }}

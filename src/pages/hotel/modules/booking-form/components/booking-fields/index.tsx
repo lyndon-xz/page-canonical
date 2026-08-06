@@ -7,7 +7,6 @@ import type { BookingForm } from "../../../../shared/booking";
 import styles from "./index.module.scss";
 
 export default function BookingFields() {
-  // 用 control 而非 register：antd 控件是受控组件，只能经 Controller 接入
   const { control, formState } = useFormContext<BookingForm>();
   const { errors } = formState;
 

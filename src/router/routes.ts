@@ -4,15 +4,12 @@ import HomestayPage from "@/pages/homestay";
 import HotelPage from "@/pages/hotel";
 
 type Route = {
-  // URL 首段
   path: string;
   name: string;
-  // 该页示范的状态库
   lib: string;
   Component: ComponentType;
 };
 
-/** 页面清单的唯一来源：类型、导航项、渲染组件都从这张表推导 */
 export const routes = [
   {
     path: "hotel",

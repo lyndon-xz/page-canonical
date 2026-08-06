@@ -1,4 +1,3 @@
-/* 六列栅格：联系人两个各占三列，行程三个各占两列，两行都刚好填满 */
 .fields {
   display: grid;
   grid-template-columns: repeat(6, 1fr);

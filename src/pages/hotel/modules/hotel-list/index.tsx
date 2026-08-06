@@ -35,7 +35,6 @@ export default function HotelList() {
   const listRef = useRef<HTMLElement>(null);
   useRegisterLive("hotelListRef", listRef);
 
-  // 哨兵的渲染条件与观察器的挂载条件必须是同一个表达式，各写一遍会出现哨兵在 DOM 里但没人观察
   const showSentinel =
     hotelsStatus === FetchStatus.Ready &&
     loadMoreStatus === FetchStatus.Ready &&
@@ -65,7 +64,6 @@ export default function HotelList() {
         <SortBar />
       </header>
 
-      {/* 点名失败项而不是只说「部分失败」：用户需要知道该重试哪几家 */}
       {batchFailureNames.length > 0 && (
         <Alert
           type="warning"

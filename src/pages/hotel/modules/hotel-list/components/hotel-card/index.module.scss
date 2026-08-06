@@ -21,7 +21,6 @@
     box-shadow: 0 0 0 3px var(--primary-soft);
   }
 
-  /* 勾选态用底色区分，让它与单选高亮的描边能同时看出来 */
   &[data-checked="true"] {
     background: var(--primary-soft);
   }
@@ -46,14 +45,12 @@
   margin-bottom: 14px;
 }
 
-/* 不参与压缩，且与标题首行对齐 */
 .checkbox {
   flex-shrink: 0;
   margin-top: 3px;
 }
 
 .name {
-  /* min-width 中和 flex 子项的 min-width: auto，长酒店名不会把整行撑破 */
   flex: 1;
   min-width: 0;
   margin: 0;
@@ -94,7 +91,6 @@
   }
 }
 
-/* 居中而非 baseline：收藏按钮是 32px 见方的图标按钮，baseline 下会与文字错位 */
 .foot {
   display: flex;
   align-items: center;
@@ -125,7 +121,6 @@
   color: var(--muted);
 }
 
-/* 撑到 32px 见方：图标本身只有 16px，直接当按钮点击区太小 */
 .favorite {
   display: inline-flex;
   flex: none;

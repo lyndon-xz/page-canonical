@@ -17,7 +17,6 @@ import {
 } from "./shared/params";
 import { usePageStore } from "./store";
 
-// storage 若换成异步实现，缺此门禁首屏会先按默认条件多拉一次
 async function waitForHydration() {
   if (usePageStore.persist.hasHydrated()) {
     return;
@@ -31,7 +30,6 @@ async function waitForHydration() {
   });
 }
 
-// URL 带参是用户的明示意图，优先于隐式的持久化偏好
 function resolveInitialParams(): SearchParams {
   if (window.location.search) {
     return parseSearchParams(window.location.search);
@@ -40,10 +38,6 @@ function resolveInitialParams(): SearchParams {
   return usePageStore.getState().appliedParams;
 }
 
-/*
- * 结果集的代号，重新取首页即进入新一代。首页与翻页共用同一个：
- * 换条件不会取消已发出的请求，旧一代的响应仍会回来，落库前须先确认自己还是当前一代。
- */
 let resultSetGeneration = 0;
 
 const isCurrentGeneration = (generation: number) =>
@@ -67,19 +61,15 @@ async function loadHotels(searchParams: SearchParams) {
     setFirstPage(page);
     setHotelsStatus(FetchStatus.Ready);
   } catch {
-    // 过期请求连状态都不该动，否则会把仍进行中的那次取数的 loading 提前收掉
     if (!isCurrentGeneration(generation)) {
       return;
     }
-    // 结果态已在请求前清空，这里只翻状态
     setHotelsStatus(FetchStatus.Error);
   }
 }
 
 export const pageActions = {
-  // ── 列表 ──
 
-  // 哨兵会连续触发，三个前置判断防并发拉同一页
   async loadMoreHotels() {
     const {
       hasMore,
@@ -99,7 +89,6 @@ export const pageActions = {
       return;
     }
 
-    // 只读不递增：翻页是延续当前一代，不像换条件那样另起一代
     const generation = resultSetGeneration;
 
     setLoadMoreStatus(FetchStatus.Loading);
@@ -114,7 +103,6 @@ export const pageActions = {
       if (!isCurrentGeneration(generation)) {
         return;
       }
-      // 保留 hasMore：失败不代表没有下一页，用户可以原地重试
       setLoadMoreStatus(FetchStatus.Error);
     }
   },
@@ -124,17 +112,11 @@ export const pageActions = {
     await loadHotels(resolveInitialParams());
   },
 
-  // 接收 patch：筛选与排序分属两个模块，各改各的那部分
   applySearchParams(patch: Partial<SearchParams>) {
     const searchParams = { ...usePageStore.getState().appliedParams, ...patch };
 
     void loadHotels(searchParams);
 
-    /*
-     * 换条件后列表缩回一页，视口须回顶，否则末尾哨兵立即连锁翻页。
-     * 用 auto 而非 smooth：平滑滚动要几百毫秒，取数比它先回来，
-     * 哨兵会在视口还没归位时重新挂载并立刻触发下一页。
-     */
     getLive("hotelListRef")?.current?.scrollIntoView({
       behavior: "auto",
       block: "start",
@@ -152,13 +134,9 @@ export const pageActions = {
     void loadHotels(usePageStore.getState().appliedParams);
   },
 
-  // ── 选中 ──
-
   selectHotel(hotelId: string) {
     usePageStore.getState().setSelectedHotelId(hotelId);
   },
-
-  // ── 多选 ──
 
   toggleSelect(hotelId: string) {
     const { selectedHotelIds, setSelectedHotelIds } = usePageStore.getState();
@@ -170,7 +148,6 @@ export const pageActions = {
     );
   },
 
-  // 全选的作用域是「已加载的」而非「全部匹配的」：后者还没取回
   selectAllLoaded() {
     const { hotels, setSelectedHotelIds } = usePageStore.getState();
 
@@ -181,9 +158,6 @@ export const pageActions = {
     usePageStore.getState().setSelectedHotelIds([]);
   },
 
-  // ── 收藏 ──
-
-  // 乐观更新；回滚用请求前的快照，取反在并发点击下会推到错的一边
   async toggleFavorite(hotelId: string) {
     const { favoriteIds, setFavoriteIds } = usePageStore.getState();
 
@@ -197,15 +171,10 @@ export const pageActions = {
       await toggleHotelFavorite(hotelId);
     } catch (err) {
       setFavoriteIds(snapshot);
-      // 回滚已经把星标弹回去了，但那只是「没生效」，用户还需要知道为什么
       message.error(err instanceof Error ? err.message : String(err));
     }
   },
 
-  /*
-   * 不做乐观更新：批量结果是部分成功，先全亮起再挑几个回滚会让用户以为全成了。
-   * 失败项保留在选中态里供原地重试。
-   */
   async batchFavorite() {
     const {
       selectedHotelIds,
@@ -227,12 +196,10 @@ export const pageActions = {
       const { succeededIds, failures } =
         await batchFavoriteHotels(selectedHotelIds);
 
-      // 去重：选中项里可能已有收藏过的
       setFavoriteIds([...new Set([...favoriteIds, ...succeededIds])]);
       setBatchFavoriteFailures(failures);
       setSelectedHotelIds(failures.map((failure) => failure.hotelId));
     } catch (err) {
-      // 整个请求没发出去，逐项成败无从得知，故全部按失败处理、选中态整批保留
       const reason = err instanceof Error ? err.message : String(err);
 
       setBatchFavoriteFailures(
@@ -247,9 +214,6 @@ export const pageActions = {
     usePageStore.getState().setBatchFavoriteFailures([]);
   },
 
-  // ── 预订 ──
-
-  // 不接错误，只保证 loading 收尾：字段级错误要回填到表单，得由调用方拿到原错误分流
   async submitBooking(values: BookingForm) {
     const {
       selectedHotelId,
@@ -259,18 +223,15 @@ export const pageActions = {
     } = usePageStore.getState();
 
     if (!selectedHotelId) {
-      // 抛而不是静默返回：调用方会把返回当成提交成功，接着清掉用户填的行程
       throw new Error("请先在列表里选择一家酒店");
     }
 
     setIsSubmittingBooking(true);
-    // 先摘掉上一次的成功标记，否则重复提交同一家时提示会一直挂着
     setBookedHotelId(null);
     try {
       await submitBookingService(selectedHotelId, values);
       setBookedHotelId(selectedHotelId);
 
-      // 提交成功的联系人才存为常用：填了没提交出去的不算用户确认过
       const { guestName, phone } = values;
 
       setContact({ guestName, phone });

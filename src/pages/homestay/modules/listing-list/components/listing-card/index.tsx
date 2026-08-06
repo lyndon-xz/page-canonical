@@ -24,7 +24,6 @@ interface ListingCardProps {
   listing: Listing;
   selected: boolean;
   favorite: boolean;
-  // 收藏请求进行中；悲观更新下心标此时还没变，得靠它给个反馈
   favoriting: boolean;
 }
 
@@ -33,10 +32,6 @@ export default function ListingCard(props: ListingCardProps) {
   const { id, title, roomType, city, rating, pricePerNight } = listing;
 
   return (
-    /*
-     * 整卡可点，所以要自己补齐按钮的可达性：article 不可聚焦，
-     * 少了 tabIndex 与键盘响应，键盘与读屏用户就选不了房源。
-     */
     <article
       className={styles.card}
       data-selected={selected}
@@ -48,7 +43,6 @@ export default function ListingCard(props: ListingCardProps) {
         if (event.key !== "Enter" && event.key !== " ") {
           return;
         }
-        // 空格默认滚动页面，这里它是「按下按钮」
         event.preventDefault();
         selectListing(id);
       }}
@@ -70,7 +64,6 @@ export default function ListingCard(props: ListingCardProps) {
           ¥{pricePerNight}
           <em className={styles.unit}> / 晚</em>
         </span>
-        {/* 阻止冒泡：收藏不应连带触发卡片的选中 */}
         <button
           type="button"
           className={styles.favorite}

@@ -10,7 +10,6 @@ import styles from "./index.module.scss";
 const { openDetailDrawer, retryDetail, toggleFavorite } = listingDetailActions;
 
 interface DetailBodyProps {
-  // 写操作只在抽屉里给，内联区只提供展开入口
   inDrawer?: boolean;
 }
 

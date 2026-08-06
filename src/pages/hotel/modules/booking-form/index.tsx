@@ -38,7 +38,6 @@ export default function BookingForm() {
           : "先在上方列表里选一家酒店"}
       </p>
 
-      {/* 字段区经 useFormContext 取实例，父组件不必把 control 与 errors 逐个中转下去 */}
       <FormProvider {...form}>
         <BookingFields />
       </FormProvider>
@@ -55,7 +54,6 @@ export default function BookingForm() {
         {totalPrice !== null && (
           <span className={styles.total}>合计 ¥{totalPrice}</span>
         )}
-        {/* 成功态留在页面上：它是「这家已订」这件事本身 */}
         {bookingSubmitted && (
           <span className={styles.feedback}>预订已提交，酒店会尽快确认</span>
         )}

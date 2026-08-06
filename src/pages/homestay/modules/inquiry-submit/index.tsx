@@ -35,7 +35,6 @@ export default function InquirySubmit() {
         提交询价
       </Button>
 
-      {/* 报价留在页面上：它是询价的结果本身，撤回才会清掉 */}
       {submittedInquiry && (
         <>
           <span className={styles.feedback} data-status="success">

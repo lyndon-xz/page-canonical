@@ -85,7 +85,6 @@
   color: var(--amber);
 }
 
-/* 价格是主信息、留在左侧，操作靠右；两者之间留出空白，避免误点 */
 .foot {
   display: flex;
   align-items: center;
@@ -110,7 +109,6 @@
   color: var(--muted);
 }
 
-/* 撑到 32px 见方：图标本身只有 16px，直接当按钮点击区太小 */
 .favorite {
   display: inline-flex;
   flex: none;

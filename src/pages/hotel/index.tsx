@@ -5,7 +5,6 @@ import SearchFilter from "./modules/search-filter";
 
 import styles from "./index.module.scss";
 
-// 单独成组件：effects 订阅状态时，重渲染只落在这个空组件上，不牵连整棵页面子树
 function EffectsRunner() {
   usePageEffects();
   return null;

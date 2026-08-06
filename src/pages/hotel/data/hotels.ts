@@ -1,6 +1,5 @@
 import type { Hotel } from "../shared/hotel";
 
-/** 条数略多于一页，用于演示翻页 */
 export const MOCK_HOTELS: Hotel[] = [
   {
     id: "h1",

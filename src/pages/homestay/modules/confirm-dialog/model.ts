@@ -3,7 +3,6 @@ import { shallowEqual } from "react-redux";
 import { ConfirmScene } from "../../shared/confirm";
 import { useAppSelector, type RootState } from "../../store";
 
-// 破坏性操作的确认要指名对象，否则这次确认只是一次多余的点击
 const selectConfirmTarget = (state: RootState) => {
   const { confirmRequest, listings, submittedInquiry } = state.page;
 
