@@ -60,6 +60,8 @@ async function loadHotels(searchParams: SearchParams) {
   }
 }
 
+const favoritingIds = new Set<string>();
+
 export const pageActions = {
   // ── 列表 ──
 
@@ -151,6 +153,10 @@ export const pageActions = {
   // ── 收藏 ──
 
   async toggleFavorite(hotelId: string) {
+    if (favoritingIds.has(hotelId)) {
+      return;
+    }
+
     const { favoriteIds, setFavoriteIds } = usePageStore.getState();
 
     const snapshot = favoriteIds;
@@ -158,12 +164,15 @@ export const pageActions = {
       ? favoriteIds.filter((id) => id !== hotelId)
       : [...favoriteIds, hotelId];
 
+    favoritingIds.add(hotelId);
     setFavoriteIds(nextIds);
     try {
       await toggleHotelFavorite(hotelId);
     } catch (err) {
       setFavoriteIds(snapshot);
       message.error(err instanceof Error ? err.message : String(err));
+    } finally {
+      favoritingIds.delete(hotelId);
     }
   },
 

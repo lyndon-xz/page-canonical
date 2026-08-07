@@ -32,6 +32,11 @@ import {
 } from "./slice";
 import { selectTraceCommonTag, store } from "./store";
 
+let resultSetGeneration = 0;
+
+const isCurrentGeneration = (generation: number) =>
+  generation === resultSetGeneration;
+
 let latestDetailRequestId = 0;
 
 async function loadListingDetail(listingId: string) {
@@ -70,15 +75,23 @@ export const pageActions = {
   // ── 列表 ──
 
   async loadListings(filters: ListingFilters) {
+    const generation = (resultSetGeneration += 1);
+
     store.dispatch(setAppliedFilters(filters));
     store.dispatch(setListingsStatus(FetchStatus.Loading));
     store.dispatch(resetResultSet());
 
     try {
       const listings = await fetchListings(filters);
+      if (!isCurrentGeneration(generation)) {
+        return;
+      }
       store.dispatch(setListings(listings));
       store.dispatch(setListingsStatus(FetchStatus.Ready));
     } catch {
+      if (!isCurrentGeneration(generation)) {
+        return;
+      }
       store.dispatch(setListingsStatus(FetchStatus.Error));
     }
   },
@@ -125,13 +138,13 @@ export const pageActions = {
 
   async commitFavorite(listingId: string) {
     const { favoriteIds } = store.getState().page;
-    const wasFavorite = favoriteIds.includes(listingId);
+    const isFavorited = favoriteIds.includes(listingId);
 
     store.dispatch(startFavoriting(listingId));
     try {
       await toggleFavoriteService(listingId);
       store.dispatch(
-        wasFavorite ? removeFavoriteId(listingId) : addFavoriteId(listingId),
+        isFavorited ? removeFavoriteId(listingId) : addFavoriteId(listingId),
       );
     } finally {
       store.dispatch(finishFavoriting(listingId));
