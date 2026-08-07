@@ -36,7 +36,7 @@
   color: #c0492f;
 }
 
-@media (max-width: 560px) {
+@media (width <= 560px) {
   .fields {
     grid-template-columns: 1fr;
   }

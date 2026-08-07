@@ -3,12 +3,12 @@ import type { ComponentType } from "react";
 import HomestayPage from "@/pages/homestay";
 import HotelPage from "@/pages/hotel";
 
-type Route = {
+interface Route {
   path: string;
   name: string;
   lib: string;
   Component: ComponentType;
-};
+}
 
 export const routes = [
   {

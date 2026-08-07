@@ -32,7 +32,7 @@ export default function ListingDetail() {
         width={420}
         destroyOnHidden
       >
-        <DetailBody inDrawer />
+        <DetailBody isInDrawer />
       </Drawer>
     </>
   );

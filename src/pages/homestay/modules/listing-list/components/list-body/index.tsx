@@ -55,9 +55,9 @@ export default function ListBody() {
           <ListingCard
             key={id}
             listing={listing}
-            selected={id === selectedListingId}
-            favorite={favoriteIds.includes(id)}
-            favoriting={favoritingIds.includes(id)}
+            isSelected={id === selectedListingId}
+            isFavorite={favoriteIds.includes(id)}
+            isFavoriting={favoritingIds.includes(id)}
           />
         );
       })}

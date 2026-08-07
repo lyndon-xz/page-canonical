@@ -6,7 +6,7 @@ export interface ListingFilters {
 }
 
 const isRoomType = (value: string): value is RoomType =>
-  (ROOM_TYPE_VALUES as readonly string[]).includes(value);
+  ROOM_TYPE_VALUES.some((candidate) => candidate === value);
 
 export function parseFilters(search: string): ListingFilters {
   const query = new URLSearchParams(search);

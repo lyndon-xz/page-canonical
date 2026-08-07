@@ -3,7 +3,7 @@ import type { TypedStartListening } from "@reduxjs/toolkit";
 import { exitListing, setSubmittedInquiry } from "./slice";
 import type { AppDispatch, RootState } from "./store";
 
-export type AppStartListening = TypedStartListening<RootState, AppDispatch>;
+type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
 export function registerPageListeners(startListening: AppStartListening) {
   startListening({

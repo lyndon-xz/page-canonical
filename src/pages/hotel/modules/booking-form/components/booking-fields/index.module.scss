@@ -26,7 +26,7 @@
   color: var(--danger);
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .fields {
     grid-template-columns: 1fr;
   }

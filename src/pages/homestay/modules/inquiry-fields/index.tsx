@@ -44,13 +44,13 @@ export default function InquiryFields() {
               required: "请填写入住人",
               maxLength: { value: 20, message: "入住人姓名不超过 20 字" },
             }}
-            render={({ field }) => (
+            render={(renderProps) => (
               <Input
                 id="guestName"
                 placeholder="请输入入住人姓名"
                 maxLength={20}
                 status={errors.guestName ? "error" : undefined}
-                {...field}
+                {...renderProps.field}
               />
             )}
           />
@@ -70,12 +70,12 @@ export default function InquiryFields() {
               required: "请填写手机号",
               pattern: { value: /^1\d{10}$/, message: "手机号格式不正确" },
             }}
-            render={({ field }) => (
+            render={(renderProps) => (
               <Input
                 id="phone"
                 placeholder="请输入手机号"
                 status={errors.phone ? "error" : undefined}
-                {...field}
+                {...renderProps.field}
               />
             )}
           />
@@ -92,8 +92,8 @@ export default function InquiryFields() {
             name="checkInDate"
             control={control}
             rules={{ required: "请选择入住日期" }}
-            render={({ field }) => {
-              const { value, onBlur, onChange } = field;
+            render={(renderProps) => {
+              const { value, onBlur, onChange } = renderProps.field;
 
               return (
                 <DatePicker
@@ -102,7 +102,7 @@ export default function InquiryFields() {
                   placeholder="请选择入住日期"
                   inputReadOnly
                   disabledDate={(current) => current.isBefore(dayjs(), "day")}
-                  value={value ? dayjs(value) : null}
+                  value={value === "" ? null : dayjs(value)}
                   onChange={(_, dateString) =>
                     onChange(typeof dateString === "string" ? dateString : "")
                   }
@@ -131,8 +131,8 @@ export default function InquiryFields() {
               validate: (value) =>
                 Number.isInteger(value) || "入住晚数须为整数",
             }}
-            render={({ field }) => {
-              const { name, ref, value, onBlur, onChange } = field;
+            render={(renderProps) => {
+              const { name, ref, value, onBlur, onChange } = renderProps.field;
 
               return (
                 <Input
@@ -170,7 +170,7 @@ export default function InquiryFields() {
             name="message"
             control={control}
             rules={{ maxLength: { value: 200, message: "备注不超过 200 字" } }}
-            render={({ field }) => (
+            render={(renderProps) => (
               <TextArea
                 id="message"
                 rows={3}
@@ -178,7 +178,7 @@ export default function InquiryFields() {
                 maxLength={200}
                 showCount
                 status={errors.message ? "error" : undefined}
-                {...field}
+                {...renderProps.field}
               />
             )}
           />

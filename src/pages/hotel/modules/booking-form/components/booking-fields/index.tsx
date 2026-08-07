@@ -20,12 +20,12 @@ export default function BookingFields() {
           name="guestName"
           control={control}
           rules={{ required: "请填写入住人" }}
-          render={({ field }) => (
+          render={(renderProps) => (
             <Input
               id="guestName"
               placeholder="请输入入住人姓名"
               status={errors.guestName ? "error" : undefined}
-              {...field}
+              {...renderProps.field}
             />
           )}
         />
@@ -45,12 +45,12 @@ export default function BookingFields() {
             required: "请填写手机号",
             pattern: { value: /^1\d{10}$/, message: "手机号格式不正确" },
           }}
-          render={({ field }) => (
+          render={(renderProps) => (
             <Input
               id="phone"
               placeholder="请输入手机号"
               status={errors.phone ? "error" : undefined}
-              {...field}
+              {...renderProps.field}
             />
           )}
         />
@@ -67,8 +67,8 @@ export default function BookingFields() {
           name="checkInDate"
           control={control}
           rules={{ required: "请选择入住日期" }}
-          render={({ field }) => {
-            const { value, onBlur, onChange } = field;
+          render={(renderProps) => {
+            const { value, onBlur, onChange } = renderProps.field;
 
             return (
               <DatePicker
@@ -76,7 +76,7 @@ export default function BookingFields() {
                 style={{ width: "100%" }}
                 placeholder="请选择入住日期"
                 inputReadOnly
-                value={value ? dayjs(value) : null}
+                value={value === "" ? null : dayjs(value)}
                 onChange={(_, dateString) =>
                   onChange(typeof dateString === "string" ? dateString : "")
                 }
@@ -102,14 +102,14 @@ export default function BookingFields() {
             required: "请填写入住晚数",
             min: { value: 1, message: "至少 1 晚" },
           }}
-          render={({ field }) => (
+          render={(renderProps) => (
             <InputNumber
               id="nights"
               style={{ width: "100%" }}
               min={1}
               max={30}
               status={errors.nights ? "error" : undefined}
-              {...field}
+              {...renderProps.field}
             />
           )}
         />
@@ -129,14 +129,14 @@ export default function BookingFields() {
             required: "请填写房间数",
             min: { value: 1, message: "至少 1 间" },
           }}
-          render={({ field }) => (
+          render={(renderProps) => (
             <InputNumber
               id="rooms"
               style={{ width: "100%" }}
               min={1}
               max={9}
               status={errors.rooms ? "error" : undefined}
-              {...field}
+              {...renderProps.field}
             />
           )}
         />

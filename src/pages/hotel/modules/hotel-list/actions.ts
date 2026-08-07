@@ -28,8 +28,8 @@ export const hotelListActions = {
     pageActions.toggleSelect(id);
   },
 
-  toggleSelectAll(allSelected: boolean) {
-    if (allSelected) {
+  toggleSelectAll(isAllSelected: boolean) {
+    if (isAllSelected) {
       pageActions.clearSelection();
       return;
     }

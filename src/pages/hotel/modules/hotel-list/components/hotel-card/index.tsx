@@ -14,25 +14,25 @@ const { selectHotel, toggleSelect, toggleFavorite } = hotelListActions;
 
 interface HotelCardProps {
   hotel: Hotel;
-  selected: boolean;
-  favorite: boolean;
-  checked: boolean;
+  isSelected: boolean;
+  isFavorite: boolean;
+  isChecked: boolean;
 }
 
 export default function HotelCard(props: HotelCardProps) {
-  const { hotel, selected, favorite, checked } = props;
+  const { hotel, isSelected, isFavorite, isChecked } = props;
   const { id, name, star, city, distanceKm, rating, pricePerNight } = hotel;
 
   return (
     <article
       className={styles.card}
-      data-selected={selected}
-      data-checked={checked}
+      data-selected={isSelected}
+      data-checked={isChecked}
       onClick={() => selectHotel(id)}
     >
       <div className={styles.head}>
         <Checkbox
-          checked={checked}
+          checked={isChecked}
           className={styles.checkbox}
           aria-label={`勾选 ${name}`}
           onClick={(event) => event.stopPropagation()}
@@ -42,7 +42,7 @@ export default function HotelCard(props: HotelCardProps) {
           <button
             type="button"
             className={styles.nameButton}
-            aria-pressed={selected}
+            aria-pressed={isSelected}
             onClick={() => selectHotel(id)}
           >
             {name}
@@ -67,14 +67,14 @@ export default function HotelCard(props: HotelCardProps) {
         <button
           type="button"
           className={styles.favorite}
-          data-active={favorite}
-          aria-label={favorite ? "取消收藏" : "收藏酒店"}
+          data-active={isFavorite}
+          aria-label={isFavorite ? "取消收藏" : "收藏酒店"}
           onClick={(event) => {
             event.stopPropagation();
             toggleFavorite(id);
           }}
         >
-          {favorite ? <HeartFilled /> : <HeartOutlined />}
+          {isFavorite ? <HeartFilled /> : <HeartOutlined />}
         </button>
       </div>
     </article>

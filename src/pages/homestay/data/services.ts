@@ -26,12 +26,12 @@ export async function fetchListings(
   return MOCK_LISTINGS.filter((listing) => {
     const { title, city, roomType: listingRoomType } = listing;
 
-    const matchesKeyword =
+    const isKeywordMatched =
       normalizedKeyword === "" ||
       title.toLowerCase().includes(normalizedKeyword) ||
       city.toLowerCase().includes(normalizedKeyword);
-    const matchesRoomType = roomType === "" || listingRoomType === roomType;
-    return matchesKeyword && matchesRoomType;
+    const isRoomTypeMatched = roomType === "" || listingRoomType === roomType;
+    return isKeywordMatched && isRoomTypeMatched;
   });
 }
 

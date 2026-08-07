@@ -10,11 +10,11 @@ import styles from "./index.module.scss";
 const { openDetailDrawer, retryDetail, toggleFavorite } = listingDetailActions;
 
 interface DetailBodyProps {
-  inDrawer?: boolean;
+  isInDrawer?: boolean;
 }
 
 export default function DetailBody(props: DetailBodyProps) {
-  const { inDrawer = false } = props;
+  const { isInDrawer = false } = props;
   const { listing, detail, detailStatus, isFavorite, isFavoriting } =
     useListingDetailModel();
 
@@ -67,7 +67,7 @@ export default function DetailBody(props: DetailBodyProps) {
       <p className={styles.policyLabel}>退订政策</p>
       <p className={styles.policy}>{cancellationPolicy}</p>
 
-      {inDrawer ? (
+      {isInDrawer ? (
         <div className={styles.actions}>
           <Button loading={isFavoriting} onClick={toggleFavorite}>
             {isFavorite ? "取消收藏" : "收藏房源"}

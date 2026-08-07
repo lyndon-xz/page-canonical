@@ -32,7 +32,7 @@ export function useBookingFormModel() {
     form,
     ...rest,
     totalPrice:
-      selectedHotel && nights && rooms
+      selectedHotel !== null && nights > 0 && rooms > 0
         ? selectedHotel.pricePerNight * nights * rooms
         : null,
     bookingSubmitted:

@@ -23,12 +23,12 @@ const resolveMatchedHotels = (searchParams: SearchParams): Hotel[] => {
   return MOCK_HOTELS.filter((hotel) => {
     const { name, city, star: hotelStar } = hotel;
 
-    const matchesKeyword =
+    const isKeywordMatched =
       normalizedKeyword === "" ||
       name.toLowerCase().includes(normalizedKeyword) ||
       city.toLowerCase().includes(normalizedKeyword);
-    const matchesStar = star === 0 || hotelStar === star;
-    return matchesKeyword && matchesStar;
+    const isStarMatched = star === 0 || hotelStar === star;
+    return isKeywordMatched && isStarMatched;
   }).sort(comparators[sortBy]);
 };
 

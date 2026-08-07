@@ -12,32 +12,32 @@ import styles from "./index.module.scss";
 
 const { selectListing, toggleFavorite } = listingListActions;
 
-function favoriteIcon(favorite: boolean, favoriting: boolean) {
-  if (favoriting) {
+function favoriteIcon(isFavorite: boolean, isFavoriting: boolean) {
+  if (isFavoriting) {
     return <LoadingOutlined />;
   }
 
-  return favorite ? <HeartFilled /> : <HeartOutlined />;
+  return isFavorite ? <HeartFilled /> : <HeartOutlined />;
 }
 
 interface ListingCardProps {
   listing: Listing;
-  selected: boolean;
-  favorite: boolean;
-  favoriting: boolean;
+  isSelected: boolean;
+  isFavorite: boolean;
+  isFavoriting: boolean;
 }
 
 export default function ListingCard(props: ListingCardProps) {
-  const { listing, selected, favorite, favoriting } = props;
+  const { listing, isSelected, isFavorite, isFavoriting } = props;
   const { id, title, roomType, city, rating, pricePerNight } = listing;
 
   return (
     <article
       className={styles.card}
-      data-selected={selected}
+      data-selected={isSelected}
       role="button"
       tabIndex={0}
-      aria-pressed={selected}
+      aria-pressed={isSelected}
       onClick={() => selectListing(id)}
       onKeyDown={(event) => {
         if (event.key !== "Enter" && event.key !== " ") {
@@ -67,15 +67,15 @@ export default function ListingCard(props: ListingCardProps) {
         <button
           type="button"
           className={styles.favorite}
-          data-active={favorite}
-          disabled={favoriting}
-          aria-label={favorite ? "取消收藏" : "收藏房源"}
+          data-active={isFavorite}
+          disabled={isFavoriting}
+          aria-label={isFavorite ? "取消收藏" : "收藏房源"}
           onClick={(event) => {
             event.stopPropagation();
             toggleFavorite(id);
           }}
         >
-          {favoriteIcon(favorite, favoriting)}
+          {favoriteIcon(isFavorite, isFavoriting)}
         </button>
       </div>
     </article>

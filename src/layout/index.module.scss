@@ -6,7 +6,7 @@
 .rail {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: var(--z-rail);
   background: rgb(255 253 249 / 88%);
   border-bottom: 1px solid var(--line);
   backdrop-filter: saturate(1.4) blur(8px);

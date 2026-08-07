@@ -63,9 +63,9 @@ export default function ListBody(props: ListBodyProps) {
             <HotelCard
               key={id}
               hotel={hotel}
-              selected={id === selectedHotelId}
-              favorite={favoriteIds.includes(id)}
-              checked={selectedHotelIds.includes(id)}
+              isSelected={id === selectedHotelId}
+              isFavorite={favoriteIds.includes(id)}
+              isChecked={selectedHotelIds.includes(id)}
             />
           );
         })}

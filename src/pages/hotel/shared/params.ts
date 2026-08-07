@@ -14,8 +14,14 @@ export const DEFAULT_SEARCH_PARAMS: SearchParams = {
   sortBy: "price",
 };
 
+const {
+  keyword: defaultKeyword,
+  star: defaultStar,
+  sortBy: defaultSortBy,
+} = DEFAULT_SEARCH_PARAMS;
+
 const isSortBy = (value: string): value is SortBy =>
-  (SORT_BY_VALUES as readonly string[]).includes(value);
+  SORT_BY_VALUES.some((candidate) => candidate === value);
 
 export function parseSearchParams(search: string): SearchParams | null {
   const query = new URLSearchParams(search);
@@ -27,11 +33,6 @@ export function parseSearchParams(search: string): SearchParams | null {
     return null;
   }
 
-  const {
-    keyword: defaultKeyword,
-    star: defaultStar,
-    sortBy: defaultSortBy,
-  } = DEFAULT_SEARCH_PARAMS;
   const star = Number(rawStar);
 
   return {
@@ -44,11 +45,6 @@ export function parseSearchParams(search: string): SearchParams | null {
 
 function serializeParams(searchParams: SearchParams): Record<string, string> {
   const { keyword, star, sortBy } = searchParams;
-  const {
-    keyword: defaultKeyword,
-    star: defaultStar,
-    sortBy: defaultSortBy,
-  } = DEFAULT_SEARCH_PARAMS;
   const trimmedKeyword = keyword.trim();
   const result: Record<string, string> = {};
 
@@ -71,6 +67,6 @@ export function writeParamsToUrl(searchParams: SearchParams) {
   history.replaceState(
     null,
     "",
-    query ? `?${query}` : window.location.pathname,
+    query === "" ? window.location.pathname : `?${query}`,
   );
 }
