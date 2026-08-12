@@ -7,7 +7,7 @@
   position: sticky;
   top: 0;
   z-index: var(--z-rail);
-  background: rgb(255 253 249 / 88%);
+  background: rgb(var(--card-rgb) / 88%);
   border-bottom: 1px solid var(--line);
   backdrop-filter: saturate(1.4) blur(8px);
 }
@@ -34,7 +34,7 @@
   place-items: center;
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, var(--primary), #d99a6b);
+  background: linear-gradient(135deg, var(--primary), var(--primary-warm));
   border-radius: var(--radius-sm);
   box-shadow: 0 4px 10px -5px rgb(var(--ink-rgb) / 35%);
 
