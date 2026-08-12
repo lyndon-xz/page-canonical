@@ -3,82 +3,24 @@ import { persist } from "zustand/middleware";
 
 import { FetchStatus } from "@/lib/fetch-status";
 
-import type { BookingContact } from "./shared/booking";
+import {
+  DEFAULT_CONTACT,
+  readPersistedContact,
+  type BookingContact,
+} from "./shared/booking";
 import type { BatchFavoriteFailure } from "./shared/favorite";
 import type { Hotel, HotelPageResult } from "./shared/hotel";
 import {
   DEFAULT_SEARCH_PARAMS,
-  isSortBy,
-  isStar,
+  readPersistedSearchParams,
   type SearchParams,
 } from "./shared/params";
-
-const DEFAULT_CONTACT: BookingContact = {
-  guestName: "",
-  phone: "",
-};
 
 interface PersistedPageState {
   appliedParams: SearchParams;
   favoriteIds: string[];
   contact: BookingContact;
 }
-
-const {
-  keyword: defaultKeyword,
-  star: defaultStar,
-  sortBy: defaultSortBy,
-} = DEFAULT_SEARCH_PARAMS;
-
-/** storage 里的值不可信：逐字段收窄，任一不合法就回落到默认值 */
-const readPersistedSearchParams = (value: unknown): SearchParams => {
-  if (typeof value !== "object" || value === null) {
-    return DEFAULT_SEARCH_PARAMS;
-  }
-
-  const keyword =
-    "keyword" in value && typeof value.keyword === "string"
-      ? value.keyword
-      : defaultKeyword;
-  const star =
-    "star" in value && typeof value.star === "number" && isStar(value.star)
-      ? value.star
-      : defaultStar;
-  const sortBy =
-    "sortBy" in value &&
-    typeof value.sortBy === "string" &&
-    isSortBy(value.sortBy)
-      ? value.sortBy
-      : defaultSortBy;
-
-  return {
-    keyword,
-    star,
-    sortBy,
-  };
-};
-
-const { guestName: defaultGuestName, phone: defaultPhone } = DEFAULT_CONTACT;
-
-const readPersistedContact = (value: unknown): BookingContact => {
-  if (typeof value !== "object" || value === null) {
-    return DEFAULT_CONTACT;
-  }
-
-  const guestName =
-    "guestName" in value && typeof value.guestName === "string"
-      ? value.guestName
-      : defaultGuestName;
-  const phone =
-    "phone" in value && typeof value.phone === "string"
-      ? value.phone
-      : defaultPhone;
-
-  return {
-    guestName,
-    phone,
-  };
-};
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === "string");

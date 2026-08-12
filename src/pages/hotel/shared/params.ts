@@ -25,10 +25,10 @@ const {
   sortBy: defaultSortBy,
 } = DEFAULT_SEARCH_PARAMS;
 
-export const isStar = (value: number): value is Star =>
+const isStar = (value: number): value is Star =>
   STAR_VALUES.some((candidate) => candidate === value);
 
-export const isSortBy = (value: string): value is SortBy =>
+const isSortBy = (value: string): value is SortBy =>
   SORT_BY_VALUES.some((candidate) => candidate === value);
 
 export function parseSearchParams(search: string): SearchParams | null {
@@ -48,6 +48,34 @@ export function parseSearchParams(search: string): SearchParams | null {
     star: isStar(star) ? star : defaultStar,
     sortBy:
       rawSortBy !== null && isSortBy(rawSortBy) ? rawSortBy : defaultSortBy,
+  };
+}
+
+/** storage 里的值不可信：逐字段收窄，任一不合法就回落到默认值 */
+export function readPersistedSearchParams(value: unknown): SearchParams {
+  if (typeof value !== "object" || value === null) {
+    return DEFAULT_SEARCH_PARAMS;
+  }
+
+  const keyword =
+    "keyword" in value && typeof value.keyword === "string"
+      ? value.keyword
+      : defaultKeyword;
+  const star =
+    "star" in value && typeof value.star === "number" && isStar(value.star)
+      ? value.star
+      : defaultStar;
+  const sortBy =
+    "sortBy" in value &&
+    typeof value.sortBy === "string" &&
+    isSortBy(value.sortBy)
+      ? value.sortBy
+      : defaultSortBy;
+
+  return {
+    keyword,
+    star,
+    sortBy,
   };
 }
 
