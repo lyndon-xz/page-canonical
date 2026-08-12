@@ -21,7 +21,7 @@ interface HotelCardProps {
 
 export default function HotelCard(props: HotelCardProps) {
   const { hotel, isSelected, isFavorite, isChecked } = props;
-  const { id, name, star, city, distanceKm, rating, pricePerNight } = hotel;
+  const { id, name, city, pricePerNight, rating, star, distanceKm } = hotel;
 
   return (
     <article

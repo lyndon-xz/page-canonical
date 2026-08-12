@@ -20,9 +20,8 @@ export function useHotelListModel() {
       batchFavoriteFailures: s.batchFavoriteFailures,
     })),
   );
-  const { batchFavoriteFailures, ...rest } = state;
-  const { hotels, hotelsStatus, hasMore, loadMoreStatus, selectedHotelIds } =
-    rest;
+  const { batchFavoriteFailures, hasMore, ...rest } = state;
+  const { hotels, hotelsStatus, loadMoreStatus, selectedHotelIds } = rest;
 
   const batchFailureNames = useMemo(
     () =>

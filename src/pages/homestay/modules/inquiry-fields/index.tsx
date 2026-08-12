@@ -2,6 +2,13 @@ import { DatePicker, Input } from "antd";
 import dayjs from "dayjs";
 import { Controller } from "react-hook-form";
 
+import FormField from "@/components/form-field";
+import {
+  PHONE_INVALID_MESSAGE,
+  PHONE_PATTERN,
+  PHONE_REQUIRED_MESSAGE,
+} from "@/lib/phone";
+
 import type { Listing } from "../../shared/listing";
 
 import { useInquiryFieldsModel } from "./model";
@@ -10,7 +17,14 @@ import styles from "./index.module.scss";
 
 const { TextArea } = Input;
 
-function targetText(listing: Listing | null, hasSubmittedInquiry: boolean) {
+const GUEST_NAME_MAX_LENGTH = 20;
+const MAX_NIGHTS = 30;
+const MESSAGE_MAX_LENGTH = 200;
+
+function buildTargetText(
+  listing: Listing | null,
+  hasSubmittedInquiry: boolean,
+) {
   if (listing) {
     return `为「${listing.title}」询价 · ¥${listing.pricePerNight} / 晚`;
   }
@@ -29,46 +43,44 @@ export default function InquiryFields() {
   return (
     <>
       <p className={styles.target} data-selected={!!listing}>
-        {targetText(listing, hasSubmittedInquiry)}
+        {buildTargetText(listing, hasSubmittedInquiry)}
       </p>
 
       <div className={styles.fields}>
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="guestName">
-            入住人
-          </label>
+        <FormField
+          label="入住人"
+          htmlFor="guestName"
+          error={errors.guestName?.message}
+        >
           <Controller
             name="guestName"
             control={control}
             rules={{
               required: "请填写入住人",
-              maxLength: { value: 20, message: "入住人姓名不超过 20 字" },
+              maxLength: {
+                value: GUEST_NAME_MAX_LENGTH,
+                message: `入住人姓名不超过 ${GUEST_NAME_MAX_LENGTH} 字`,
+              },
             }}
             render={(renderProps) => (
               <Input
                 id="guestName"
                 placeholder="请输入入住人姓名"
-                maxLength={20}
+                maxLength={GUEST_NAME_MAX_LENGTH}
                 status={errors.guestName ? "error" : undefined}
                 {...renderProps.field}
               />
             )}
           />
-          {errors.guestName && (
-            <span className={styles.error}>{errors.guestName.message}</span>
-          )}
-        </div>
+        </FormField>
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="phone">
-            手机号
-          </label>
+        <FormField label="手机号" htmlFor="phone" error={errors.phone?.message}>
           <Controller
             name="phone"
             control={control}
             rules={{
-              required: "请填写手机号",
-              pattern: { value: /^1\d{10}$/, message: "手机号格式不正确" },
+              required: PHONE_REQUIRED_MESSAGE,
+              pattern: { value: PHONE_PATTERN, message: PHONE_INVALID_MESSAGE },
             }}
             render={(renderProps) => (
               <Input
@@ -79,15 +91,13 @@ export default function InquiryFields() {
               />
             )}
           />
-          {errors.phone && (
-            <span className={styles.error}>{errors.phone.message}</span>
-          )}
-        </div>
+        </FormField>
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="checkInDate">
-            入住日期
-          </label>
+        <FormField
+          label="入住日期"
+          htmlFor="checkInDate"
+          error={errors.checkInDate?.message}
+        >
           <Controller
             name="checkInDate"
             control={control}
@@ -98,7 +108,6 @@ export default function InquiryFields() {
               return (
                 <DatePicker
                   id="checkInDate"
-                  style={{ width: "100%" }}
                   placeholder="请选择入住日期"
                   inputReadOnly
                   disabledDate={(current) => current.isBefore(dayjs(), "day")}
@@ -112,22 +121,23 @@ export default function InquiryFields() {
               );
             }}
           />
-          {errors.checkInDate && (
-            <span className={styles.error}>{errors.checkInDate.message}</span>
-          )}
-        </div>
+        </FormField>
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="nights">
-            入住晚数
-          </label>
+        <FormField
+          label="入住晚数"
+          htmlFor="nights"
+          error={errors.nights?.message}
+        >
           <Controller
             name="nights"
             control={control}
             rules={{
               required: "请填写入住晚数",
               min: { value: 1, message: "至少 1 晚" },
-              max: { value: 30, message: "单次询价最多 30 晚" },
+              max: {
+                value: MAX_NIGHTS,
+                message: `单次询价最多 ${MAX_NIGHTS} 晚`,
+              },
               validate: (value) =>
                 Number.isInteger(value) || "入住晚数须为整数",
             }}
@@ -139,7 +149,7 @@ export default function InquiryFields() {
                   id="nights"
                   type="number"
                   min={1}
-                  max={30}
+                  max={MAX_NIGHTS}
                   step={1}
                   status={errors.nights ? "error" : undefined}
                   name={name}
@@ -157,35 +167,36 @@ export default function InquiryFields() {
               );
             }}
           />
-          {errors.nights && (
-            <span className={styles.error}>{errors.nights.message}</span>
-          )}
-        </div>
+        </FormField>
 
-        <div className={`${styles.field} ${styles.fieldWide}`}>
-          <label className={styles.label} htmlFor="message">
-            备注
-          </label>
+        <FormField
+          label="备注"
+          htmlFor="message"
+          error={errors.message?.message}
+          className={styles.fieldWide}
+        >
           <Controller
             name="message"
             control={control}
-            rules={{ maxLength: { value: 200, message: "备注不超过 200 字" } }}
+            rules={{
+              maxLength: {
+                value: MESSAGE_MAX_LENGTH,
+                message: `备注不超过 ${MESSAGE_MAX_LENGTH} 字`,
+              },
+            }}
             render={(renderProps) => (
               <TextArea
                 id="message"
                 rows={3}
                 placeholder="补充你的入住需求（选填）"
-                maxLength={200}
+                maxLength={MESSAGE_MAX_LENGTH}
                 showCount
                 status={errors.message ? "error" : undefined}
                 {...renderProps.field}
               />
             )}
           />
-          {errors.message && (
-            <span className={styles.error}>{errors.message.message}</span>
-          )}
-        </div>
+        </FormField>
       </div>
     </>
   );

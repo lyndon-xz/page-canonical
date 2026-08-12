@@ -13,7 +13,7 @@ interface HomestayPageState {
   selectedListingId: string | null;
   appliedFilters: ListingFilters;
 
-  listingDetail: ListingDetail | null;
+  detail: ListingDetail | null;
   detailStatus: FetchStatus;
   isDetailDrawerOpen: boolean;
 
@@ -32,7 +32,7 @@ const initialState: HomestayPageState = {
   selectedListingId: null,
   appliedFilters: { keyword: "", roomType: "" },
 
-  listingDetail: null,
+  detail: null,
   detailStatus: FetchStatus.Ready,
   isDetailDrawerOpen: false,
 
@@ -47,7 +47,7 @@ const initialState: HomestayPageState = {
 
 function exitListingState(state: HomestayPageState) {
   state.selectedListingId = null;
-  state.listingDetail = null;
+  state.detail = null;
   state.detailStatus = FetchStatus.Ready;
   state.isDetailDrawerOpen = false;
 }
@@ -68,8 +68,9 @@ const homestayPageSlice = createSlice({
     setAppliedFilters(state, action: PayloadAction<ListingFilters>) {
       state.appliedFilters = action.payload;
     },
-    setListingDetail(state, action: PayloadAction<ListingDetail | null>) {
-      state.listingDetail = action.payload;
+
+    setDetail(state, action: PayloadAction<ListingDetail | null>) {
+      state.detail = action.payload;
     },
     setDetailStatus(state, action: PayloadAction<FetchStatus>) {
       state.detailStatus = action.payload;
@@ -105,6 +106,7 @@ const homestayPageSlice = createSlice({
     setConfirmRequest(state, action: PayloadAction<ConfirmRequest | null>) {
       state.confirmRequest = action.payload;
     },
+
     setIsSubmittingInquiry(state, action: PayloadAction<boolean>) {
       state.isSubmittingInquiry = action.payload;
     },
@@ -125,17 +127,22 @@ export const {
   setListingsStatus,
   setSelectedListingId,
   setAppliedFilters,
-  setListingDetail,
+
+  setDetail,
   setDetailStatus,
   setIsDetailDrawerOpen,
   exitListing,
+
   addFavoriteId,
   removeFavoriteId,
   startFavoriting,
   finishFavoriting,
+
   setConfirmRequest,
+
   setIsSubmittingInquiry,
   setSubmittedInquiry,
+
   resetResultSet,
 } = homestayPageSlice.actions;
 

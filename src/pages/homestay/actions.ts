@@ -1,5 +1,6 @@
 import { message } from "antd";
 
+import { toErrorMessage } from "@/lib/error";
 import { FetchStatus } from "@/lib/fetch-status";
 
 import {
@@ -20,10 +21,10 @@ import {
   resetResultSet,
   setAppliedFilters,
   setConfirmRequest,
+  setDetail,
   setDetailStatus,
   setIsDetailDrawerOpen,
   setIsSubmittingInquiry,
-  setListingDetail,
   setListings,
   setListingsStatus,
   setSelectedListingId,
@@ -52,13 +53,21 @@ async function loadListingDetail(listingId: string) {
     if (!isCurrent()) {
       return;
     }
-    store.dispatch(setListingDetail(detail));
+    store.dispatch(setDetail(detail));
     store.dispatch(setDetailStatus(FetchStatus.Ready));
   } catch {
     if (!isCurrent()) {
       return;
     }
     store.dispatch(setDetailStatus(FetchStatus.Error));
+  }
+}
+
+async function addFavorite(listingId: string) {
+  try {
+    await pageActions.commitFavorite(listingId);
+  } catch (err) {
+    message.error(toErrorMessage(err));
   }
 }
 
@@ -151,14 +160,6 @@ export const pageActions = {
     }
   },
 
-  async addFavorite(listingId: string) {
-    try {
-      await pageActions.commitFavorite(listingId);
-    } catch (err) {
-      message.error(err instanceof Error ? err.message : String(err));
-    }
-  },
-
   toggleFavorite(listingId: string) {
     const { favoriteIds, favoritingIds } = store.getState().page;
 
@@ -174,7 +175,7 @@ export const pageActions = {
     });
 
     if (willFavorite) {
-      void pageActions.addFavorite(listingId);
+      void addFavorite(listingId);
       return;
     }
 

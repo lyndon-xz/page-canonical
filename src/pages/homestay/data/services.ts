@@ -1,5 +1,7 @@
 import dayjs from "dayjs";
 
+import { mockDelay } from "@/lib/mock-delay";
+
 import type { ListingFilters } from "../shared/filters";
 import type {
   InquiryFieldError,
@@ -12,14 +14,12 @@ import type { Listing, ListingDetail } from "../shared/listing";
 import { MOCK_LISTING_DETAILS } from "./listing-details";
 import { MOCK_LISTINGS } from "./listings";
 
-const MOCK_DELAY_MS = 300;
-
 export async function fetchListings(
   filters: ListingFilters,
 ): Promise<Listing[]> {
   const { keyword, roomType } = filters;
 
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+  await mockDelay();
 
   const normalizedKeyword = keyword.trim().toLowerCase();
 
@@ -38,7 +38,7 @@ export async function fetchListings(
 export async function fetchListingDetail(
   listingId: string,
 ): Promise<ListingDetail | null> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+  await mockDelay();
 
   return MOCK_LISTING_DETAILS[listingId] ?? null;
 }
@@ -46,7 +46,7 @@ export async function fetchListingDetail(
 const FAVORITE_REJECTED_LISTING_IDS = ["l3"];
 
 export async function toggleFavorite(listingId: string): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+  await mockDelay();
 
   if (FAVORITE_REJECTED_LISTING_IDS.includes(listingId)) {
     throw new Error("收藏服务暂不可用");
@@ -63,21 +63,25 @@ function buildQuote(listing: Listing, payload: InquiryPayload): InquiryQuote {
   const { checkInDate, nights } = payload;
   const { pricePerNight: basePrice } = listing;
 
-  let gross = 0;
+  let grossPrice = 0;
   for (let night = 0; night < nights; night += 1) {
     const month = dayjs(checkInDate).add(night, "day").month() + 1;
     const rate = PEAK_MONTHS.includes(month) ? PEAK_SURCHARGE_RATE : 1;
 
-    gross += Math.round(basePrice * rate);
+    grossPrice += Math.round(basePrice * rate);
   }
 
+  const discountAmount =
+    nights >= LONG_STAY_NIGHTS
+      ? grossPrice - Math.round(grossPrice * LONG_STAY_DISCOUNT)
+      : 0;
+
   return {
-    pricePerNight: Math.round(gross / nights),
     nights,
-    totalPrice:
-      nights >= LONG_STAY_NIGHTS
-        ? Math.round(gross * LONG_STAY_DISCOUNT)
-        : gross,
+    nightlyAverage: Math.round(grossPrice / nights),
+    grossPrice,
+    discountAmount,
+    totalPrice: grossPrice - discountAmount,
   };
 }
 
@@ -98,15 +102,17 @@ export class InquirySubmitError extends Error {
 export async function submitInquiry(
   payload: InquiryPayload,
 ): Promise<SubmittedInquiry> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+  const { phone, listingId } = payload;
 
-  if (BLOCKED_PHONES.includes(payload.phone.trim())) {
+  await mockDelay();
+
+  if (BLOCKED_PHONES.includes(phone.trim())) {
     throw new InquirySubmitError([
       { field: "phone", message: "该手机号暂不可用，请更换后重试" },
     ]);
   }
 
-  const listing = MOCK_LISTINGS.find((item) => item.id === payload.listingId);
+  const listing = MOCK_LISTINGS.find((item) => item.id === listingId);
 
   if (!listing) {
     throw new Error("该房源已下架，请重新选择");
@@ -120,7 +126,7 @@ export async function submitInquiry(
 }
 
 export async function cancelInquiry(inquiryId: string): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+  await mockDelay();
 
   if (!inquiryId.startsWith(INQUIRY_ID_PREFIX)) {
     throw new Error("询价不存在或已撤回");

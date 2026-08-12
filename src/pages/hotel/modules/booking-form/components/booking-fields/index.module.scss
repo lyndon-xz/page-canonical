@@ -5,25 +5,11 @@
 }
 
 .field {
-  display: flex;
-  flex-direction: column;
   grid-column: span 2;
-  gap: 7px;
 }
 
 .fieldWide {
   grid-column: span 3;
-}
-
-.label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ink);
-}
-
-.error {
-  font-size: 12px;
-  color: var(--danger);
 }
 
 @media (width <= 640px) {

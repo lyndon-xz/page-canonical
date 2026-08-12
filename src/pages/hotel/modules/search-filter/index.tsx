@@ -1,6 +1,8 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { Button, Input } from "antd";
 
+import { STAR_VALUES, type Star } from "../../shared/params";
+
 import { searchFilterActions } from "./actions";
 import { useSearchFilterEffects } from "./effects";
 import { useSearchFilterModel } from "./model";
@@ -9,12 +11,12 @@ import styles from "./index.module.scss";
 
 const { updateKeyword, submit, updateStar } = searchFilterActions;
 
-const STAR_OPTIONS: { label: string; value: number }[] = [
-  { label: "不限", value: 0 },
-  { label: "三星", value: 3 },
-  { label: "四星", value: 4 },
-  { label: "五星", value: 5 },
-];
+const STAR_LABELS: Record<Star, string> = {
+  0: "不限",
+  3: "三星",
+  4: "四星",
+  5: "五星",
+};
 
 export default function SearchFilter() {
   const { keyword, star, resultCount, isLoading } = useSearchFilterModel();
@@ -38,21 +40,17 @@ export default function SearchFilter() {
       </div>
 
       <div className={styles.chips} role="group" aria-label="星级筛选">
-        {STAR_OPTIONS.map((option) => {
-          const { value, label } = option;
-
-          return (
-            <button
-              key={value}
-              type="button"
-              className={styles.chip}
-              data-active={star === value}
-              onClick={() => updateStar(value)}
-            >
-              {label}
-            </button>
-          );
-        })}
+        {STAR_VALUES.map((value) => (
+          <button
+            key={value}
+            type="button"
+            className={styles.chip}
+            data-active={star === value}
+            onClick={() => updateStar(value)}
+          >
+            {STAR_LABELS[value]}
+          </button>
+        ))}
       </div>
 
       <p className={styles.resultCount}>

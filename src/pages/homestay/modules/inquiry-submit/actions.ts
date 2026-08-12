@@ -1,5 +1,7 @@
 import { message } from "antd";
 
+import { toErrorMessage } from "@/lib/error";
+
 import { pageActions } from "../../actions";
 import { InquirySubmitError } from "../../data/services";
 import { getLive } from "../../live";
@@ -25,7 +27,7 @@ export const inquirySubmitActions = {
         return;
       }
 
-      message.error(error instanceof Error ? error.message : String(error));
+      message.error(toErrorMessage(error));
     }
   },
 

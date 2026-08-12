@@ -12,7 +12,7 @@ import styles from "./index.module.scss";
 
 const { selectListing, toggleFavorite } = listingListActions;
 
-function favoriteIcon(isFavorite: boolean, isFavoriting: boolean) {
+function renderFavoriteIcon(isFavorite: boolean, isFavoriting: boolean) {
   if (isFavoriting) {
     return <LoadingOutlined />;
   }
@@ -29,7 +29,7 @@ interface ListingCardProps {
 
 export default function ListingCard(props: ListingCardProps) {
   const { listing, isSelected, isFavorite, isFavoriting } = props;
-  const { id, title, roomType, city, rating, pricePerNight } = listing;
+  const { id, title, city, pricePerNight, rating, roomType } = listing;
 
   return (
     <article
@@ -40,7 +40,9 @@ export default function ListingCard(props: ListingCardProps) {
       aria-pressed={isSelected}
       onClick={() => selectListing(id)}
       onKeyDown={(event) => {
-        if (event.key !== "Enter" && event.key !== " ") {
+        const { key } = event;
+
+        if (key !== "Enter" && key !== " ") {
           return;
         }
         event.preventDefault();
@@ -75,7 +77,7 @@ export default function ListingCard(props: ListingCardProps) {
             toggleFavorite(id);
           }}
         >
-          {favoriteIcon(isFavorite, isFavoriting)}
+          {renderFavoriteIcon(isFavorite, isFavoriting)}
         </button>
       </div>
     </article>

@@ -3,14 +3,14 @@ import type {
   BatchFavoriteFailure,
   BatchFavoriteResult,
 } from "../shared/favorite";
-import type { Hotel, HotelPage } from "../shared/hotel";
+import { mockDelay } from "@/lib/mock-delay";
+
+import type { Hotel, HotelPageResult } from "../shared/hotel";
 import type { SearchParams, SortBy } from "../shared/params";
 
 import { MOCK_HOTELS } from "./hotels";
 
-const MOCK_DELAY_MS = 300;
-
-const comparators: Record<SortBy, (a: Hotel, b: Hotel) => number> = {
+const SORT_COMPARATORS: Record<SortBy, (a: Hotel, b: Hotel) => number> = {
   price: (a, b) => a.pricePerNight - b.pricePerNight,
   rating: (a, b) => b.rating - a.rating,
   distance: (a, b) => a.distanceKm - b.distanceKm,
@@ -29,7 +29,7 @@ const resolveMatchedHotels = (searchParams: SearchParams): Hotel[] => {
       city.toLowerCase().includes(normalizedKeyword);
     const isStarMatched = star === 0 || hotelStar === star;
     return isKeywordMatched && isStarMatched;
-  }).sort(comparators[sortBy]);
+  }).sort(SORT_COMPARATORS[sortBy]);
 };
 
 const HOTEL_PAGE_SIZE = 12;
@@ -39,8 +39,8 @@ const SEARCH_REJECTED_KEYWORD = "error";
 export async function fetchHotelPage(
   searchParams: SearchParams,
   page: number,
-): Promise<HotelPage> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+): Promise<HotelPageResult> {
+  await mockDelay();
 
   if (searchParams.keyword.trim().toLowerCase() === SEARCH_REJECTED_KEYWORD) {
     throw new Error("酒店列表服务暂不可用");
@@ -61,7 +61,7 @@ export async function fetchHotelPage(
 const FAVORITE_REJECTED_HOTEL_IDS = ["h2"];
 
 export async function toggleHotelFavorite(hotelId: string): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+  await mockDelay();
 
   if (FAVORITE_REJECTED_HOTEL_IDS.includes(hotelId)) {
     throw new Error("收藏服务暂不可用，请稍后再试");
@@ -71,7 +71,7 @@ export async function toggleHotelFavorite(hotelId: string): Promise<void> {
 export async function batchFavoriteHotels(
   hotelIds: string[],
 ): Promise<BatchFavoriteResult> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+  await mockDelay();
 
   const succeededIds: string[] = [];
   const failures: BatchFavoriteFailure[] = [];
@@ -105,7 +105,7 @@ export async function submitBooking(
   hotelId: string,
   values: BookingForm,
 ): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+  await mockDelay();
 
   if (BOOKING_REJECTED_HOTEL_IDS.includes(hotelId)) {
     throw new Error("该酒店已订满，换一家试试");

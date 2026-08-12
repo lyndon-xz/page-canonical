@@ -1,6 +1,8 @@
 import { FormProvider, useForm } from "react-hook-form";
 import { Provider } from "react-redux";
 
+import PageHero from "@/components/page-hero";
+
 import { usePageEffects } from "./effects";
 import { useRegisterLive } from "./live";
 import ConfirmDialog from "./modules/confirm-dialog";
@@ -13,6 +15,7 @@ import { store } from "./store";
 
 import styles from "./index.module.scss";
 
+/** 挂在 Provider 内部，effects 将来要读 store 时不必改页面结构 */
 function EffectsRunner() {
   usePageEffects();
   return null;
@@ -36,10 +39,7 @@ export default function HomestayPage() {
     <Provider store={store}>
       <div className={styles.page}>
         <EffectsRunner />
-        <header className={styles.hero}>
-          <p className={styles.eyebrow}>民宿 · HOMESTAY</p>
-          <h1 className={styles.heroTitle}>住进当地人的家</h1>
-        </header>
+        <PageHero eyebrow="民宿 · HOMESTAY" title="住进当地人的家" />
 
         <ListingList />
         <ListingDetail />

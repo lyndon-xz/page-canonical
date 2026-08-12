@@ -1,5 +1,6 @@
 import { message } from "antd";
 
+import { toErrorMessage } from "@/lib/error";
 import { FetchStatus } from "@/lib/fetch-status";
 
 import {
@@ -158,19 +159,26 @@ export const pageActions = {
     }
 
     const { favoriteIds, setFavoriteIds } = usePageStore.getState();
-
-    const snapshot = favoriteIds;
-    const nextIds = favoriteIds.includes(hotelId)
-      ? favoriteIds.filter((id) => id !== hotelId)
-      : [...favoriteIds, hotelId];
+    const wasFavorited = favoriteIds.includes(hotelId);
 
     favoritingIds.add(hotelId);
-    setFavoriteIds(nextIds);
+    setFavoriteIds(
+      wasFavorited
+        ? favoriteIds.filter((id) => id !== hotelId)
+        : [...favoriteIds, hotelId],
+    );
     try {
       await toggleHotelFavorite(hotelId);
     } catch (err) {
-      setFavoriteIds(snapshot);
-      message.error(err instanceof Error ? err.message : String(err));
+      // 回滚只反转本次这一项：别的酒店可以同时在飞，整份快照会把它们的结果一起擦掉
+      const { favoriteIds: latestIds } = usePageStore.getState();
+
+      setFavoriteIds(
+        wasFavorited
+          ? [...new Set([...latestIds, hotelId])]
+          : latestIds.filter((id) => id !== hotelId),
+      );
+      message.error(toErrorMessage(err));
     } finally {
       favoritingIds.delete(hotelId);
     }
@@ -211,7 +219,7 @@ export const pageActions = {
         return;
       }
 
-      const reason = err instanceof Error ? err.message : String(err);
+      const reason = toErrorMessage(err);
 
       setBatchFavoriteFailures(
         selectedHotelIds.map((hotelId) => ({ hotelId, reason })),

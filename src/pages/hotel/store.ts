@@ -5,8 +5,13 @@ import { FetchStatus } from "@/lib/fetch-status";
 
 import type { BookingContact } from "./shared/booking";
 import type { BatchFavoriteFailure } from "./shared/favorite";
-import type { Hotel, HotelPage } from "./shared/hotel";
-import { DEFAULT_SEARCH_PARAMS, type SearchParams } from "./shared/params";
+import type { Hotel, HotelPageResult } from "./shared/hotel";
+import {
+  DEFAULT_SEARCH_PARAMS,
+  isSortBy,
+  isStar,
+  type SearchParams,
+} from "./shared/params";
 
 const DEFAULT_CONTACT: BookingContact = {
   guestName: "",
@@ -18,6 +23,65 @@ interface PersistedPageState {
   favoriteIds: string[];
   contact: BookingContact;
 }
+
+const {
+  keyword: defaultKeyword,
+  star: defaultStar,
+  sortBy: defaultSortBy,
+} = DEFAULT_SEARCH_PARAMS;
+
+/** storage 里的值不可信：逐字段收窄，任一不合法就回落到默认值 */
+const readPersistedSearchParams = (value: unknown): SearchParams => {
+  if (typeof value !== "object" || value === null) {
+    return DEFAULT_SEARCH_PARAMS;
+  }
+
+  const keyword =
+    "keyword" in value && typeof value.keyword === "string"
+      ? value.keyword
+      : defaultKeyword;
+  const star =
+    "star" in value && typeof value.star === "number" && isStar(value.star)
+      ? value.star
+      : defaultStar;
+  const sortBy =
+    "sortBy" in value &&
+    typeof value.sortBy === "string" &&
+    isSortBy(value.sortBy)
+      ? value.sortBy
+      : defaultSortBy;
+
+  return {
+    keyword,
+    star,
+    sortBy,
+  };
+};
+
+const { guestName: defaultGuestName, phone: defaultPhone } = DEFAULT_CONTACT;
+
+const readPersistedContact = (value: unknown): BookingContact => {
+  if (typeof value !== "object" || value === null) {
+    return DEFAULT_CONTACT;
+  }
+
+  const guestName =
+    "guestName" in value && typeof value.guestName === "string"
+      ? value.guestName
+      : defaultGuestName;
+  const phone =
+    "phone" in value && typeof value.phone === "string"
+      ? value.phone
+      : defaultPhone;
+
+  return {
+    guestName,
+    phone,
+  };
+};
+
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === "string");
 
 interface PageStore {
   hotels: Hotel[];
@@ -40,8 +104,8 @@ interface PageStore {
   isSubmittingBooking: boolean;
   bookedHotelId: string | null;
 
-  setFirstPage: (page: HotelPage) => void;
-  appendPage: (page: HotelPage) => void;
+  setFirstPage: (page: HotelPageResult) => void;
+  appendPage: (page: HotelPageResult) => void;
 
   setHotelsStatus: (status: FetchStatus) => void;
   setSelectedHotelId: (id: string | null) => void;
@@ -49,10 +113,10 @@ interface PageStore {
   setLoadMoreStatus: (status: FetchStatus) => void;
   setFavoriteIds: (ids: string[]) => void;
   setSelectedHotelIds: (ids: string[]) => void;
-  setIsBatchFavoriting: (batchFavoriting: boolean) => void;
+  setIsBatchFavoriting: (isBatchFavoriting: boolean) => void;
   setBatchFavoriteFailures: (failures: BatchFavoriteFailure[]) => void;
   setContact: (contact: BookingContact) => void;
-  setIsSubmittingBooking: (submitting: boolean) => void;
+  setIsSubmittingBooking: (isSubmittingBooking: boolean) => void;
   setBookedHotelId: (hotelId: string | null) => void;
 
   resetResultSet: () => void;
@@ -110,13 +174,12 @@ export const usePageStore = create<PageStore>()(
       setLoadMoreStatus: (status) => set({ loadMoreStatus: status }),
       setFavoriteIds: (ids) => set({ favoriteIds: ids }),
       setSelectedHotelIds: (ids) => set({ selectedHotelIds: ids }),
-      setIsBatchFavoriting: (batchFavoriting) =>
-        set({ isBatchFavoriting: batchFavoriting }),
+      setIsBatchFavoriting: (isBatchFavoriting) => set({ isBatchFavoriting }),
       setBatchFavoriteFailures: (failures) =>
         set({ batchFavoriteFailures: failures }),
       setContact: (contact) => set({ contact }),
-      setIsSubmittingBooking: (submitting) =>
-        set({ isSubmittingBooking: submitting }),
+      setIsSubmittingBooking: (isSubmittingBooking) =>
+        set({ isSubmittingBooking }),
       setBookedHotelId: (hotelId) => set({ bookedHotelId: hotelId }),
 
       resetResultSet: () =>
@@ -134,21 +197,39 @@ export const usePageStore = create<PageStore>()(
     }),
     {
       name: "hotel-page",
+      version: 1,
       partialize: (state) => {
         const { appliedParams, favoriteIds, contact } = state;
 
         return { appliedParams, favoriteIds, contact };
       },
       merge: (persisted, current) => {
-        const saved = persisted as Partial<PersistedPageState> | undefined;
+        if (typeof persisted !== "object" || persisted === null) {
+          return current;
+        }
+
+        const savedParams =
+          "appliedParams" in persisted ? persisted.appliedParams : undefined;
+        const savedFavoriteIds =
+          "favoriteIds" in persisted ? persisted.favoriteIds : undefined;
+        const savedContact =
+          "contact" in persisted ? persisted.contact : undefined;
 
         return {
           ...current,
-          ...saved,
-          appliedParams: { ...DEFAULT_SEARCH_PARAMS, ...saved?.appliedParams },
-          contact: { ...DEFAULT_CONTACT, ...saved?.contact },
+          appliedParams: readPersistedSearchParams(savedParams),
+          favoriteIds: isStringArray(savedFavoriteIds)
+            ? savedFavoriteIds
+            : current.favoriteIds,
+          contact: readPersistedContact(savedContact),
         };
       },
+      // 落盘形状变更时提升 version；旧数据不做兼容，直接回落默认值
+      migrate: (): PersistedPageState => ({
+        appliedParams: DEFAULT_SEARCH_PARAMS,
+        favoriteIds: [],
+        contact: DEFAULT_CONTACT,
+      }),
     },
   ),
 );

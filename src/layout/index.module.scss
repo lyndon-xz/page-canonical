@@ -35,8 +35,8 @@
   width: 32px;
   height: 32px;
   background: linear-gradient(135deg, var(--primary), #d99a6b);
-  border-radius: 9px;
-  box-shadow: 0 4px 10px -5px rgb(59 49 41 / 35%);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 10px -5px rgb(var(--ink-rgb) / 35%);
 
   svg {
     width: 18px;
@@ -83,7 +83,7 @@
   cursor: pointer;
   background: transparent;
   border: 0;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   transition:
     background 0.18s ease,
     color 0.18s ease,
@@ -106,7 +106,7 @@
 .stubActive {
   color: var(--primary-strong);
   background: var(--card);
-  box-shadow: 0 2px 8px -3px rgb(59 49 41 / 22%);
+  box-shadow: 0 2px 8px -3px rgb(var(--ink-rgb) / 22%);
 
   &:hover {
     color: var(--primary-strong);

@@ -15,25 +15,8 @@
   gap: 16px 18px;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
 .fieldWide {
   grid-column: 1 / -1;
-}
-
-.label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ink);
-}
-
-.error {
-  font-size: 12px;
-  color: #c0492f;
 }
 
 @media (width <= 560px) {

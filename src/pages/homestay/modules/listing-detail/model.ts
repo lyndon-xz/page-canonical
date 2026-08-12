@@ -6,7 +6,7 @@ export function useListingDetailModel() {
   return useAppSelector((s) => {
     const {
       selectedListingId,
-      listingDetail,
+      detail,
       detailStatus,
       isDetailDrawerOpen,
       favoriteIds,
@@ -16,7 +16,7 @@ export function useListingDetailModel() {
     return {
       isVisible: !!selectedListingId,
       listing: selectSelectedListing(s),
-      detail: listingDetail,
+      detail,
       detailStatus,
       isDrawerOpen: isDetailDrawerOpen,
       isFavorite:

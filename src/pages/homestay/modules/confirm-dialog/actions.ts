@@ -1,3 +1,5 @@
+import { toErrorMessage } from "@/lib/error";
+
 import { pageActions } from "../../actions";
 import { ConfirmScene, type ConfirmRequest } from "../../shared/confirm";
 import { store } from "../../store";
@@ -29,9 +31,7 @@ export const confirmDialogActions = {
       await runByScene(confirmRequest);
       pageActions.closeConfirm();
     } catch (err) {
-      store.dispatch(
-        setConfirmError(err instanceof Error ? err.message : String(err)),
-      );
+      store.dispatch(setConfirmError(toErrorMessage(err)));
     } finally {
       store.dispatch(setIsConfirming(false));
     }

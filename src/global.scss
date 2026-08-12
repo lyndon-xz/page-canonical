@@ -1,34 +1,11 @@
 :root {
-  --ink: #3b3129;
-  --paper: #f7f2ea;
-  --card: #fffdf9;
-  --primary: #c17a4f;
-  --primary-strong: #a9603a;
-  --primary-soft: #f3e6d9;
-  --amber: #d99a4a;
-  --amber-soft: #faeedb;
-  --ok: #6f8f5e;
-  --ok-soft: #eaf0e4;
-  --danger: #b04a3a;
-  --danger-soft: #f7e4de;
-  --line: #ece2d4;
-  --line-soft: #f1e9dd;
-  --muted: #8a7c6d;
-
-  --display: "Fraunces", "Noto Serif SC", Georgia, serif;
-  --body: "Inter", "Noto Sans SC", system-ui, -apple-system, sans-serif;
-  --mono: "IBM Plex Mono", "Noto Sans Mono", ui-monospace, monospace;
-
-  --radius: 16px;
   --z-rail: 10;
-  --shadow-card: 0 8px 24px -18px rgb(59 49 41 / 28%);
-  --shadow-lift: 0 16px 30px -20px rgb(59 49 41 / 30%);
 }
 
 body {
   margin: 0;
   font-family: var(--body);
-  font-size: 15px;
+  font-size: var(--font-size-base);
   line-height: 1.5;
   color: var(--ink);
   background: var(--paper);

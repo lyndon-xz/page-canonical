@@ -46,7 +46,7 @@ export default function DetailBody(props: DetailBodyProps) {
   }
 
   const { title, city, roomType } = listing;
-  const { hostName, description, amenities, cancellationPolicy } = detail;
+  const { description, amenities, hostName, cancellationPolicy } = detail;
 
   return (
     <div>

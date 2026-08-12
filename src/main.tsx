@@ -2,9 +2,11 @@ import { ConfigProvider, message } from "antd";
 import { createRoot } from "react-dom/client";
 
 import Layout from "@/layout";
-import { theme } from "@/theme";
+import { applyTokensToRoot, theme } from "@/theme";
 
 import "./global.scss";
+
+applyTokensToRoot();
 
 ConfigProvider.config({
   holderRender: (children) => (

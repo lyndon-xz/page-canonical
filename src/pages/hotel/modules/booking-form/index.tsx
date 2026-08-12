@@ -18,7 +18,7 @@ export default function BookingForm() {
     selectedHotel,
     isSubmittingBooking,
     totalPrice,
-    bookingSubmitted,
+    hasSubmittedBooking,
   } = useBookingFormModel();
   const { handleSubmit } = form;
 
@@ -47,14 +47,14 @@ export default function BookingForm() {
           type="primary"
           disabled={!selectedHotel}
           loading={isSubmittingBooking}
-          onClick={handleSubmit((values) => submit(values))}
+          onClick={handleSubmit(submit)}
         >
           提交预订
         </Button>
         {totalPrice !== null && (
           <span className={styles.total}>合计 ¥{totalPrice}</span>
         )}
-        {bookingSubmitted && (
+        {hasSubmittedBooking && (
           <span className={styles.feedback}>预订已提交，酒店会尽快确认</span>
         )}
       </div>

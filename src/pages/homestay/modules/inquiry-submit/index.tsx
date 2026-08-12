@@ -9,11 +9,15 @@ import styles from "./index.module.scss";
 
 const { submit, requestCancel } = inquirySubmitActions;
 
-function quoteText(inquiry: SubmittedInquiry) {
+function formatQuoteText(inquiry: SubmittedInquiry) {
   const { listingTitle, quote } = inquiry;
-  const { pricePerNight, nights, totalPrice } = quote;
+  const { nights, nightlyAverage, grossPrice, discountAmount, totalPrice } =
+    quote;
 
-  return `「${listingTitle}」房东报价 ¥${pricePerNight} / 晚 × ${nights} 晚，合计 ¥${totalPrice}`;
+  const discountText =
+    discountAmount > 0 ? `，长住立减 ¥${discountAmount}` : "";
+
+  return `「${listingTitle}」房东报价：${nights} 晚共 ¥${grossPrice}（均价 ¥${nightlyAverage} / 晚）${discountText}，合计 ¥${totalPrice}`;
 }
 
 export default function InquirySubmit() {
@@ -30,15 +34,15 @@ export default function InquirySubmit() {
         type="primary"
         loading={isSubmittingInquiry}
         disabled={!hasInquiryListing}
-        onClick={handleSubmit((values) => submit(values))}
+        onClick={handleSubmit(submit)}
       >
         提交询价
       </Button>
 
       {submittedInquiry && (
         <>
-          <span className={styles.feedback} data-status="success">
-            {quoteText(submittedInquiry)}
+          <span className={styles.feedback}>
+            {formatQuoteText(submittedInquiry)}
           </span>
           <Button danger size="small" onClick={requestCancel}>
             撤回询价

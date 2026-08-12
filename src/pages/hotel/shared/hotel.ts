@@ -8,7 +8,7 @@ export interface Hotel {
   distanceKm: number;
 }
 
-export interface HotelPage {
+export interface HotelPageResult {
   items: Hotel[];
   hasMore: boolean;
   total: number;

@@ -1,4 +1,5 @@
 import { pageActions } from "../../actions";
+import type { Star } from "../../shared/params";
 
 import { useSearchFilterLocal } from "./model";
 
@@ -13,7 +14,7 @@ export const searchFilterActions = {
     pageActions.applySearchParams({ keyword });
   },
 
-  updateStar(star: number) {
+  updateStar(star: Star) {
     const { keyword } = useSearchFilterLocal.getState();
 
     pageActions.applySearchParams({ keyword, star });

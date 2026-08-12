@@ -35,7 +35,7 @@ export function useBookingFormModel() {
       selectedHotel !== null && nights > 0 && rooms > 0
         ? selectedHotel.pricePerNight * nights * rooms
         : null,
-    bookingSubmitted:
+    hasSubmittedBooking:
       selectedHotel !== null && bookedHotelId === selectedHotel.id,
   };
 }

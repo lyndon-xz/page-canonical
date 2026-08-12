@@ -2,9 +2,14 @@ export const SORT_BY_VALUES = ["price", "rating", "distance"] as const;
 
 export type SortBy = (typeof SORT_BY_VALUES)[number];
 
+/** 0 表示不限星级 */
+export const STAR_VALUES = [0, 3, 4, 5] as const;
+
+export type Star = (typeof STAR_VALUES)[number];
+
 export interface SearchParams {
   keyword: string;
-  star: number;
+  star: Star;
   sortBy: SortBy;
 }
 
@@ -20,7 +25,10 @@ const {
   sortBy: defaultSortBy,
 } = DEFAULT_SEARCH_PARAMS;
 
-const isSortBy = (value: string): value is SortBy =>
+export const isStar = (value: number): value is Star =>
+  STAR_VALUES.some((candidate) => candidate === value);
+
+export const isSortBy = (value: string): value is SortBy =>
   SORT_BY_VALUES.some((candidate) => candidate === value);
 
 export function parseSearchParams(search: string): SearchParams | null {
@@ -37,7 +45,7 @@ export function parseSearchParams(search: string): SearchParams | null {
 
   return {
     keyword: rawKeyword ?? defaultKeyword,
-    star: Number.isInteger(star) && star >= 1 && star <= 5 ? star : defaultStar,
+    star: isStar(star) ? star : defaultStar,
     sortBy:
       rawSortBy !== null && isSortBy(rawSortBy) ? rawSortBy : defaultSortBy,
   };

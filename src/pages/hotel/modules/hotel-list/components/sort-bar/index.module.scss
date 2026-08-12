@@ -11,7 +11,7 @@
   cursor: pointer;
   background: transparent;
   border: 1px solid var(--line);
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   transition: all 0.15s ease;
 
   &:hover {

@@ -2,9 +2,19 @@ import { DatePicker, Input, InputNumber } from "antd";
 import dayjs from "dayjs";
 import { Controller, useFormContext } from "react-hook-form";
 
+import FormField from "@/components/form-field";
+import {
+  PHONE_INVALID_MESSAGE,
+  PHONE_PATTERN,
+  PHONE_REQUIRED_MESSAGE,
+} from "@/lib/phone";
+
 import type { BookingForm } from "../../../../shared/booking";
 
 import styles from "./index.module.scss";
+
+const MAX_NIGHTS = 30;
+const MAX_ROOMS = 9;
 
 export default function BookingFields() {
   const { control, formState } = useFormContext<BookingForm>();
@@ -12,10 +22,12 @@ export default function BookingFields() {
 
   return (
     <div className={styles.fields}>
-      <div className={`${styles.field} ${styles.fieldWide}`}>
-        <label className={styles.label} htmlFor="guestName">
-          入住人
-        </label>
+      <FormField
+        label="入住人"
+        htmlFor="guestName"
+        error={errors.guestName?.message}
+        className={styles.fieldWide}
+      >
         <Controller
           name="guestName"
           control={control}
@@ -29,21 +41,20 @@ export default function BookingFields() {
             />
           )}
         />
-        {errors.guestName && (
-          <span className={styles.error}>{errors.guestName.message}</span>
-        )}
-      </div>
+      </FormField>
 
-      <div className={`${styles.field} ${styles.fieldWide}`}>
-        <label className={styles.label} htmlFor="phone">
-          手机号
-        </label>
+      <FormField
+        label="手机号"
+        htmlFor="phone"
+        error={errors.phone?.message}
+        className={styles.fieldWide}
+      >
         <Controller
           name="phone"
           control={control}
           rules={{
-            required: "请填写手机号",
-            pattern: { value: /^1\d{10}$/, message: "手机号格式不正确" },
+            required: PHONE_REQUIRED_MESSAGE,
+            pattern: { value: PHONE_PATTERN, message: PHONE_INVALID_MESSAGE },
           }}
           render={(renderProps) => (
             <Input
@@ -54,15 +65,14 @@ export default function BookingFields() {
             />
           )}
         />
-        {errors.phone && (
-          <span className={styles.error}>{errors.phone.message}</span>
-        )}
-      </div>
+      </FormField>
 
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="checkInDate">
-          入住日期
-        </label>
+      <FormField
+        label="入住日期"
+        htmlFor="checkInDate"
+        error={errors.checkInDate?.message}
+        className={styles.field}
+      >
         <Controller
           name="checkInDate"
           control={control}
@@ -73,7 +83,6 @@ export default function BookingFields() {
             return (
               <DatePicker
                 id="checkInDate"
-                style={{ width: "100%" }}
                 placeholder="请选择入住日期"
                 inputReadOnly
                 value={value === "" ? null : dayjs(value)}
@@ -86,64 +95,62 @@ export default function BookingFields() {
             );
           }}
         />
-        {errors.checkInDate && (
-          <span className={styles.error}>{errors.checkInDate.message}</span>
-        )}
-      </div>
+      </FormField>
 
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="nights">
-          入住晚数
-        </label>
+      <FormField
+        label="入住晚数"
+        htmlFor="nights"
+        error={errors.nights?.message}
+        className={styles.field}
+      >
         <Controller
           name="nights"
           control={control}
           rules={{
             required: "请填写入住晚数",
             min: { value: 1, message: "至少 1 晚" },
+            max: {
+              value: MAX_NIGHTS,
+              message: `单次预订最多 ${MAX_NIGHTS} 晚`,
+            },
           }}
           render={(renderProps) => (
             <InputNumber
               id="nights"
-              style={{ width: "100%" }}
               min={1}
-              max={30}
+              max={MAX_NIGHTS}
               status={errors.nights ? "error" : undefined}
               {...renderProps.field}
             />
           )}
         />
-        {errors.nights && (
-          <span className={styles.error}>{errors.nights.message}</span>
-        )}
-      </div>
+      </FormField>
 
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="rooms">
-          房间数
-        </label>
+      <FormField
+        label="房间数"
+        htmlFor="rooms"
+        error={errors.rooms?.message}
+        className={styles.field}
+      >
         <Controller
           name="rooms"
           control={control}
           rules={{
             required: "请填写房间数",
             min: { value: 1, message: "至少 1 间" },
+            max: { value: MAX_ROOMS, message: `单次预订最多 ${MAX_ROOMS} 间` },
           }}
           render={(renderProps) => (
             <InputNumber
               id="rooms"
-              style={{ width: "100%" }}
               min={1}
-              max={9}
+              max={MAX_ROOMS}
               status={errors.rooms ? "error" : undefined}
               {...renderProps.field}
             />
           )}
         />
-        {errors.rooms && (
-          <span className={styles.error}>{errors.rooms.message}</span>
-        )}
-      </div>
+      </FormField>
     </div>
   );
 }

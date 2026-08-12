@@ -11,7 +11,7 @@
     border-color 0.18s ease;
 
   &:hover {
-    border-color: #e2d5c4;
+    border-color: var(--line-hover);
     box-shadow: var(--shadow-lift);
     transform: translateY(-3px);
   }
@@ -58,7 +58,7 @@
   color: var(--primary-strong);
   white-space: nowrap;
   background: var(--primary-soft);
-  border-radius: 7px;
+  border-radius: var(--radius-xs);
 }
 
 .meta {
