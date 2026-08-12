@@ -1,10 +1,10 @@
+import { mockDelay } from "@/lib/mock-delay";
+
 import type { BookingFieldError, BookingForm } from "../shared/booking";
 import type {
   BatchFavoriteFailure,
   BatchFavoriteResult,
 } from "../shared/favorite";
-import { mockDelay } from "@/lib/mock-delay";
-
 import type { Hotel, HotelPageResult } from "../shared/hotel";
 import type { SearchParams, SortBy } from "../shared/params";
 
