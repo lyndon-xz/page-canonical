@@ -7,11 +7,15 @@ import SearchFilter from "./modules/search-filter";
 
 import styles from "./index.module.scss";
 
-export default function HotelPage() {
+function EffectsRunner() {
   usePageEffects();
+  return null;
+}
 
+export default function HotelPage() {
   return (
     <div className={styles.page}>
+      <EffectsRunner />
       <PageHero eyebrow="住宿 · STAY" title="挑一处落脚地" />
       <SearchFilter />
       <HotelList />
