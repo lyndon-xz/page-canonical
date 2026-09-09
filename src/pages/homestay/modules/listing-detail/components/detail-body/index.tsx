@@ -2,6 +2,7 @@ import { Button, Empty, Spin, Tag } from "antd";
 
 import { FetchStatus } from "@/lib/fetch-status";
 
+import { FAVORITE_LABEL, UNFAVORITE_LABEL } from "../../../../shared/favorite";
 import { listingDetailActions } from "../../actions";
 import { useListingDetailModel } from "../../model";
 
@@ -70,7 +71,7 @@ export default function DetailBody(props: DetailBodyProps) {
       {isInDrawer ? (
         <div className={styles.actions}>
           <Button loading={isFavoriting} onClick={toggleFavorite}>
-            {isFavorite ? "取消收藏" : "收藏房源"}
+            {isFavorite ? UNFAVORITE_LABEL : FAVORITE_LABEL}
           </Button>
         </div>
       ) : (

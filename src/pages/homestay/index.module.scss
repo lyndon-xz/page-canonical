@@ -4,6 +4,8 @@
 }
 
 .inquiry {
+  --inquiry-perforation-top: 74px;
+
   position: relative;
   padding: 34px 28px 28px;
   margin-top: 44px;
@@ -14,7 +16,7 @@
 
   &::before {
     position: absolute;
-    top: 74px;
+    top: var(--inquiry-perforation-top);
     right: 0;
     left: 0;
     content: "";
@@ -24,7 +26,7 @@
 
 .notch {
   position: absolute;
-  top: 74px;
+  top: var(--inquiry-perforation-top);
   width: 22px;
   height: 22px;
   background: var(--paper);

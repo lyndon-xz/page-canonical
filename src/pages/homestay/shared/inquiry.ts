@@ -15,7 +15,7 @@ export interface InquiryQuote {
   /** 旺季加价摊平后的每晚均价，仅用于展示，不参与合计的算术 */
   nightlyAverage: number;
   grossPrice: number;
-  discountAmount: number;
+  discountAmountYuan: number;
   totalPrice: number;
 }
 

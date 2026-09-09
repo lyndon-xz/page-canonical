@@ -16,7 +16,7 @@ interface LoadMoreFooterProps {
 
 export default function LoadMoreFooter(props: LoadMoreFooterProps) {
   const { sentinelRef } = props;
-  const { loadMoreStatus, showSentinel } = useHotelListModel();
+  const { loadMoreStatus, shouldShowSentinel } = useHotelListModel();
 
   if (loadMoreStatus === FetchStatus.Error) {
     return (
@@ -37,7 +37,7 @@ export default function LoadMoreFooter(props: LoadMoreFooterProps) {
     );
   }
 
-  if (showSentinel) {
+  if (shouldShowSentinel) {
     return <div ref={sentinelRef} className={styles.sentinel} />;
   }
 

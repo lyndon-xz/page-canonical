@@ -1,11 +1,18 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
+
+import { FetchStatus } from "@/lib/fetch-status";
 
 import { pageActions } from "./actions";
+import { usePageStore } from "./store";
 
 const { initPage } = pageActions;
 
 export function usePageEffects() {
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const { resetResultSet, setHotelsStatus } = usePageStore.getState();
+
+    resetResultSet();
+    setHotelsStatus(FetchStatus.Loading);
     void initPage();
   }, []);
 }

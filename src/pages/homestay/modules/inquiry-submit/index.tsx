@@ -11,11 +11,11 @@ const { submit, requestCancel } = inquirySubmitActions;
 
 function formatQuoteText(inquiry: SubmittedInquiry) {
   const { listingTitle, quote } = inquiry;
-  const { nights, nightlyAverage, grossPrice, discountAmount, totalPrice } =
+  const { nights, nightlyAverage, grossPrice, discountAmountYuan, totalPrice } =
     quote;
 
   const discountText =
-    discountAmount > 0 ? `，长住立减 ¥${discountAmount}` : "";
+    discountAmountYuan > 0 ? `，长住立减 ¥${discountAmountYuan}` : "";
 
   return `「${listingTitle}」房东报价：${nights} 晚共 ¥${grossPrice}（均价 ¥${nightlyAverage} / 晚）${discountText}，合计 ¥${totalPrice}`;
 }

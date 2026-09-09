@@ -1,6 +1,6 @@
 # @lyndon/page-canonical
 
-> **页面分层架构**的示范工程：同一套 `store / model / actions / effects / UI` 分层，用 **zustand** 和 **Redux Toolkit** 各落地一个完整页面，正面处理请求竞态、乐观更新、批量部分失败、落盘脏数据等页面级难题。
+> **页面分层架构**的示范工程：同一套 `store / model / actions / effects / UI` 分层，用 **zustand** 和 **Redux Toolkit** 各落地一个完整页面，正面处理单例 store 重进页、请求竞态、乐观更新、批量部分失败、落盘脏数据等页面级难题。
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white) ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white) ![Ant Design](https://img.shields.io/badge/Ant%20Design-6-0170FE?logo=antdesign&logoColor=white) ![zustand](https://img.shields.io/badge/zustand-5-2D3748) ![Redux Toolkit](https://img.shields.io/badge/Redux%20Toolkit-2-764ABC?logo=redux&logoColor=white) ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -23,12 +23,13 @@
 
 - 🧩 **严格单向的分层**：UI 只读 `model`、只调本模块 `actions`，从不直接 `set` / `dispatch`，也不直接引用 `services`；模块之间零 import，跨模块影响一律经状态层中转。
 - 🔀 **请求竞态防护**：列表用世代号（`resultSetGeneration`）丢弃过期响应；详情再叠一层 `requestId` + 「当前选中项是否仍是它」双重校验，成功与失败两条路径都判。
-- 🧹 **取数前先作废旧结果**：整组归零收在状态层一个 `resetResultSet` 里，跨结果集的用户数据（收藏）不受牵连；「退出当前房源」那四个字段另有一个 `exitListing`，两者是复用而非并列。
+- 🖼️ **重进页不闪旧数据**：页面 store 是模块单例，切走再回来不会自动清空。`effects.ts` 用 `useLayoutEffect` 在首帧绘制前同步 `resetResultSet` 并置 Loading，避免先画出上一轮的 Ready 列表。
+- 🧹 **取数前先作废旧结果**：整组归零收在状态层一个 `resetResultSet` 里，跨结果集的用户数据（收藏）不受牵连；详情取数在发出请求前清空 `detail`，失败也清，不用 Loading 盖住脏数据。
 - ↩️ **乐观更新与精确回滚**：收藏失败时重读当前集合、只反转本次这一项，不用请求前的整份快照覆盖——别的项可以同时在飞。
 - ⚠️ **部分失败可重试**：批量收藏返回 `succeededIds` + `failures`，失败项自动留在勾选集合里配 `Alert` 提示；属于当前结果集的那部分写入过世代号守卫。
 - 🔗 **URL 与状态互通**：酒店页筛选条件写回 query（等于默认值就不写），刷新和分享都能还原；进页面时 URL 优先于持久化偏好，且「有没有带参」由解析函数按本页参数判断，而不是看 query 串是否非空。
 - 💾 **落盘的值一概不信**：`localStorage` 读出的值逐字段过类型守卫，任一非法就回落该字段默认值；收窄函数与解析 URL 的函数并列在同一个概念文件里，共用同一批守卫与默认值；配 `version` + `migrate`，落盘形状变更时不做旧数据兼容。
-- 📮 **表单错误分层归位**：`react-hook-form` 负责本地校验，服务端返回的字段级错误由模块 `actions` 经活对象句柄回填到对应字段，其余错误走 toast。
+- 📮 **表单错误分层归位**：`react-hook-form` 负责本地校验，服务端返回的字段级错误由模块 `actions` 经活对象句柄回填到对应字段，其余错误走 toast；询价失败不会抹掉上一笔已成功提交的报价。
 - 🫙 **非结构化活对象独立成层**：不适合进 store 的 `UseFormReturn` 实例存在 `live.ts` 的登记表里，让 React 外部的 `actions` 也能拿到表单句柄。
 - 🎨 **设计令牌单一来源**：`theme.ts` 一份令牌同时喂给 antd `ThemeConfig` 和 `:root` 上的 CSS 变量，scss 侧只用 `var(--xxx)` 消费，不出现字面色值。
 
@@ -37,7 +38,7 @@
 | 领域 | 选型                                                                      |
 | ---- | ------------------------------------------------------------------------- |
 | 框架 | React 19 + TypeScript 5.9（`strict` 全开，含 `noUncheckedIndexedAccess`） |
-| 构建 | Vite 8 + `@vitejs/plugin-react`                                           |
+| 构建 | Vite 8 + `@vitejs/plugin-react`（需 Node 22+）                            |
 | 状态 | zustand 5（酒店页）、Redux Toolkit 2 + react-redux 9（民宿页）            |
 | 表单 | react-hook-form 7                                                         |
 | UI   | antd 6 + `@ant-design/icons`，样式用 sass CSS Modules                     |
@@ -53,7 +54,7 @@ pnpm install
 pnpm dev
 ```
 
-dev server 固定跑在 `3000` 端口且开启 `host`，浏览器打开 <http://localhost:3000> 即可，默认进入酒店页。
+Vite 8 需要 **Node 22+**（例如 `nvm use 22`）。dev server 固定跑在 `3000` 端口且开启 `host`，浏览器打开 <http://localhost:3000> 即可，默认进入酒店页。
 
 ## ⌨️ 脚本
 
@@ -76,12 +77,12 @@ src/
 ├── components/           跨页面纯展示件：page-hero、form-field（不认识任何状态层）
 ├── lib/                  跨页面原语：live（活对象登记表工厂）、fetch-status（取数三态）、
 │                         error（错误文案）、mock-delay（模拟耗时）、phone（校验常量）
-├── types/                scss.d.ts：*.module.scss 模块声明
+├── types/                scss.d.ts：*.scss 与 *.module.scss 模块声明
 └── pages/
     ├── hotel/            zustand 侧
     │   ├── store.ts      状态 + 细粒度 setter + persist（partialize / merge / version / migrate）
     │   ├── actions.ts    页面级唯一写入口：等待 hydration、世代号、乐观更新
-    │   ├── effects.ts    生命周期副作用：挂载即 initPage
+    │   ├── effects.ts    生命周期副作用：useLayoutEffect 作废旧结果后 initPage
     │   ├── live.ts       bookingForm 的 UseFormReturn
     │   ├── shared/       hotel / params / booking / favorite：类型、取值表、默认值、解析与收窄
     │   ├── data/         mock 数据与 mock 服务
@@ -91,8 +92,9 @@ src/
         ├── slice.ts      页面 slice（状态形状 / 初值 / reducers / 导出四处同序）
         ├── listeners.ts  跨模块副作用：询价成功后自动退出选中态
         ├── actions.ts    页面级唯一写入口（dispatch 版，同构于酒店页）
-        ├── effects.ts / live.ts / data/
-        ├── shared/       listing / filters / inquiry / confirm / trace
+        ├── effects.ts    useLayoutEffect 作废旧结果后 loadListings
+        ├── live.ts / data/
+        ├── shared/       listing / filters / inquiry / confirm / trace / favorite / overlay
         └── modules/      listing-list、listing-detail、inquiry-fields、
                           inquiry-submit、confirm-dialog
 ```
@@ -144,13 +146,16 @@ shared/*.ts（类型 / 取值表 / 纯函数，不依赖任何层）
 
 **mock 的失败触发点**（用来看错误态、回滚与字段级报错）
 
-| 操作                                     | 触发条件            | 结果                       |
-| ---------------------------------------- | ------------------- | -------------------------- |
-| 酒店搜索                                 | 关键词填 `error`    | 列表整体报错，可重试       |
-| 收藏「西湖景澜酒店」（`h2`）             | 单项收藏 / 批量收藏 | 失败并回滚；批量时保留勾选 |
-| 预订「北京王府井大饭店」（`h5`）         | 提交预订            | 提示已订满                 |
-| 收藏「厦门曾厝垵・文艺合住青旅」（`l3`） | 单项收藏            | 失败并提示                 |
-| 预订 / 询价手机号填 `13800000000`        | 提交表单            | 手机号字段级报错回填       |
+| 操作                                     | 触发条件                                      | 结果                       |
+| ---------------------------------------- | --------------------------------------------- | -------------------------- |
+| 酒店搜索                                 | 关键词填 `error`                                | 列表整体报错，可重试       |
+| 酒店加载更多                             | 关键词填 `more-error`，滚到第 2 页             | 下一页报错，可重试         |
+| 收藏「西湖景澜酒店」（`h2`）             | 单项收藏 / 批量收藏                           | 失败并回滚；批量时保留勾选 |
+| 预订「北京王府井大饭店」（`h5`）         | 提交预订                                      | 提示已订满                 |
+| 民宿列表                                 | 访问 `/homestay?keyword=error`                | 列表报错，可重试           |
+| 民宿详情                                 | 选中「成都宽窄巷子・川西庭院整套」（`l4`）    | 详情报错，可重试           |
+| 收藏「厦门曾厝垵・文艺合住青旅」（`l3`） | 单项收藏                                      | 失败并提示                 |
+| 预订 / 询价手机号填 `13800000000`        | 提交表单                                      | 手机号字段级报错回填       |
 
 ## ⚙️ 配置
 

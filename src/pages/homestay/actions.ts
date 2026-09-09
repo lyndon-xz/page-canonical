@@ -35,30 +35,32 @@ import { selectTraceCommonTag, store } from "./store";
 
 let resultSetGeneration = 0;
 
-const isCurrentGeneration = (generation: number) =>
-  generation === resultSetGeneration;
+const isStaleGeneration = (generation: number) =>
+  generation !== resultSetGeneration;
 
 let latestDetailRequestId = 0;
 
 async function loadListingDetail(listingId: string) {
   const requestId = (latestDetailRequestId += 1);
 
-  const isCurrent = () =>
-    requestId === latestDetailRequestId &&
-    store.getState().page.selectedListingId === listingId;
+  const isStale = () =>
+    requestId !== latestDetailRequestId ||
+    store.getState().page.selectedListingId !== listingId;
 
+  store.dispatch(setDetail(null));
   store.dispatch(setDetailStatus(FetchStatus.Loading));
   try {
     const detail = await fetchListingDetail(listingId);
-    if (!isCurrent()) {
+    if (isStale()) {
       return;
     }
     store.dispatch(setDetail(detail));
     store.dispatch(setDetailStatus(FetchStatus.Ready));
   } catch {
-    if (!isCurrent()) {
+    if (isStale()) {
       return;
     }
+    store.dispatch(setDetail(null));
     store.dispatch(setDetailStatus(FetchStatus.Error));
   }
 }
@@ -92,13 +94,13 @@ export const pageActions = {
 
     try {
       const listings = await fetchListings(filters);
-      if (!isCurrentGeneration(generation)) {
+      if (isStaleGeneration(generation)) {
         return;
       }
       store.dispatch(setListings(listings));
       store.dispatch(setListingsStatus(FetchStatus.Ready));
     } catch {
-      if (!isCurrentGeneration(generation)) {
+      if (isStaleGeneration(generation)) {
         return;
       }
       store.dispatch(setListingsStatus(FetchStatus.Error));
@@ -195,7 +197,6 @@ export const pageActions = {
     }
 
     store.dispatch(setIsSubmittingInquiry(true));
-    store.dispatch(setSubmittedInquiry(null));
     try {
       const submitted = await submitInquiryService({
         ...values,

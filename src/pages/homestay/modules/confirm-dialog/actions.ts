@@ -33,7 +33,9 @@ export const confirmDialogActions = {
     } catch (err) {
       store.dispatch(setConfirmError(toErrorMessage(err)));
     } finally {
-      store.dispatch(setIsConfirming(false));
+      if (store.getState().page.confirmRequest === confirmRequest) {
+        store.dispatch(setIsConfirming(false));
+      }
     }
   },
 

@@ -39,6 +39,7 @@ const TAG_RADIUS_PX = 7;
 const CONTROL_RADIUS_PX = 11;
 const CONTROL_HEIGHT_PX = 46;
 const BASE_FONT_SIZE_PX = 15;
+const SMALL_FONT_SIZE_PX = 13;
 
 const cssTokens = {
   ...palette,
@@ -48,6 +49,7 @@ const cssTokens = {
   radiusSm: `${CHIP_RADIUS_PX}px`,
   radiusXs: `${TAG_RADIUS_PX}px`,
   fontSizeBase: `${BASE_FONT_SIZE_PX}px`,
+  fontSizeSm: `${SMALL_FONT_SIZE_PX}px`,
 };
 
 const toCssVariableName = (token: string) =>
@@ -57,7 +59,9 @@ const toCssVariableName = (token: string) =>
 export function applyTokensToRoot() {
   const { style } = document.documentElement;
 
-  Object.entries(cssTokens).forEach(([token, value]) => {
+  Object.entries(cssTokens).forEach((entry) => {
+    const [token, value] = entry;
+
     style.setProperty(toCssVariableName(token), value);
   });
 }

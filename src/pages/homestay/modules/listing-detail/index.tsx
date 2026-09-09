@@ -1,5 +1,7 @@
 import { Drawer } from "antd";
 
+import { OVERLAY_WIDTH_PX } from "../../shared/overlay";
+
 import { listingDetailActions } from "./actions";
 import DetailBody from "./components/detail-body";
 import { useListingDetailModel } from "./model";
@@ -29,7 +31,7 @@ export default function ListingDetail() {
         open={isDrawerOpen}
         onClose={closeDetailDrawer}
         title={listing?.title ?? "房源详情"}
-        width={420}
+        width={OVERLAY_WIDTH_PX}
         destroyOnHidden
       >
         <DetailBody isInDrawer />

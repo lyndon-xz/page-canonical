@@ -17,16 +17,14 @@ import styles from "./index.module.scss";
 
 const { TextArea } = Input;
 
-const GUEST_NAME_MAX_LENGTH = 20;
-const MAX_NIGHTS = 30;
-const MESSAGE_MAX_LENGTH = 200;
-
 function buildTargetText(
   listing: Listing | null,
   hasSubmittedInquiry: boolean,
 ) {
   if (listing) {
-    return `为「${listing.title}」询价 · ¥${listing.pricePerNight} / 晚`;
+    const { title, pricePerNight } = listing;
+
+    return `为「${title}」询价 · ¥${pricePerNight} / 晚`;
   }
 
   if (hasSubmittedInquiry) {
@@ -35,6 +33,10 @@ function buildTargetText(
 
   return "请先在上方选择要询价的房源";
 }
+
+const GUEST_NAME_MAX_LENGTH = 20;
+const INQUIRY_MAX_NIGHTS = 30;
+const MESSAGE_MAX_LENGTH = 200;
 
 export default function InquiryFields() {
   const { control, errors, listing, hasSubmittedInquiry } =
@@ -135,8 +137,8 @@ export default function InquiryFields() {
               required: "请填写入住晚数",
               min: { value: 1, message: "至少 1 晚" },
               max: {
-                value: MAX_NIGHTS,
-                message: `单次询价最多 ${MAX_NIGHTS} 晚`,
+                value: INQUIRY_MAX_NIGHTS,
+                message: `单次询价最多 ${INQUIRY_MAX_NIGHTS} 晚`,
               },
               validate: (value) =>
                 Number.isInteger(value) || "入住晚数须为整数",
@@ -149,20 +151,18 @@ export default function InquiryFields() {
                   id="nights"
                   type="number"
                   min={1}
-                  max={MAX_NIGHTS}
+                  max={INQUIRY_MAX_NIGHTS}
                   step={1}
                   status={errors.nights ? "error" : undefined}
                   name={name}
                   ref={ref}
                   value={value}
                   onBlur={onBlur}
-                  onChange={(e) =>
-                    onChange(
-                      e.target.value === ""
-                        ? undefined
-                        : Number(e.target.value),
-                    )
-                  }
+                  onChange={(e) => {
+                    const { value: rawValue } = e.target;
+
+                    onChange(rawValue === "" ? undefined : Number(rawValue));
+                  }}
                 />
               );
             }}

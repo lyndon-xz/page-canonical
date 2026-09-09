@@ -11,9 +11,9 @@ import styles from "./index.module.scss";
 
 const {
   toggleSelectAll,
-  dismissBatchFavoriteFailures,
-  batchFavorite,
   clearSelection,
+  batchFavorite,
+  dismissBatchFavoriteFailures,
 } = hotelListActions;
 
 export default function HotelList() {
@@ -23,13 +23,16 @@ export default function HotelList() {
     isBatchFavoriting,
     batchFailureNames,
     isAllLoadedSelected,
-    showSentinel,
+    isPartiallySelected,
+    shouldShowSentinel,
   } = useHotelListModel();
+  const selectedCount = selectedHotelIds.length;
+  const batchFailureCount = batchFailureNames.length;
 
   const listRef = useRef<HTMLElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   useScrollBackOnResultSet(listRef);
-  useLoadMoreOnSentinel(sentinelRef, showSentinel);
+  useLoadMoreOnSentinel(sentinelRef, shouldShowSentinel);
 
   return (
     <section ref={listRef} className={styles.hotelList}>
@@ -39,9 +42,7 @@ export default function HotelList() {
           {hotels.length > 0 && (
             <Checkbox
               checked={isAllLoadedSelected}
-              indeterminate={
-                selectedHotelIds.length > 0 && !isAllLoadedSelected
-              }
+              indeterminate={isPartiallySelected}
               onChange={() => toggleSelectAll(isAllLoadedSelected)}
             >
               全选本页
@@ -51,23 +52,21 @@ export default function HotelList() {
         <SortBar />
       </header>
 
-      {batchFailureNames.length > 0 && (
+      {batchFailureCount > 0 && (
         <Alert
           type="warning"
           showIcon
           closable
           className={styles.batchAlert}
-          message={`${batchFailureNames.length} 家收藏失败，已保留勾选可重试`}
+          message={`${batchFailureCount} 家收藏失败，已保留勾选可重试`}
           description={batchFailureNames.join("；")}
           onClose={dismissBatchFavoriteFailures}
         />
       )}
 
-      {selectedHotelIds.length > 0 && (
+      {selectedCount > 0 && (
         <div className={styles.batchBar}>
-          <span className={styles.batchCount}>
-            已选 {selectedHotelIds.length} 家
-          </span>
+          <span className={styles.batchCount}>已选 {selectedCount} 家</span>
           <Button
             size="small"
             type="primary"

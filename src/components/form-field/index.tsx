@@ -6,7 +6,7 @@ interface FormFieldProps {
   label: string;
   htmlFor: string;
   error?: string;
-  /** 由使用方补充网格定位一类的布局类 */
+  // 由使用方补充网格定位一类的布局类
   className?: string;
   children: ReactNode;
 }

@@ -14,6 +14,7 @@ ConfigProvider.config({
   ),
 });
 
+// 避开顶栏，antd 默认是 8
 message.config({ top: 96 });
 
 const container = document.getElementById("root");

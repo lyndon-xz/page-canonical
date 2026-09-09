@@ -14,7 +14,13 @@ export function useScrollBackOnResultSet(
   useEffect(() => {
     const list = listRef.current;
 
-    if (!list || list.getBoundingClientRect().top >= 0) {
+    if (!list) {
+      return;
+    }
+
+    const shouldSkipScroll = list.getBoundingClientRect().top >= 0;
+
+    if (shouldSkipScroll) {
       return;
     }
 
@@ -24,11 +30,11 @@ export function useScrollBackOnResultSet(
 
 export function useLoadMoreOnSentinel(
   sentinelRef: RefObject<HTMLElement | null>,
-  showSentinel: boolean,
+  shouldShowSentinel: boolean,
 ) {
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!showSentinel || !sentinel) {
+    if (!shouldShowSentinel || !sentinel) {
       return;
     }
 
@@ -40,5 +46,5 @@ export function useLoadMoreOnSentinel(
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [sentinelRef, showSentinel]);
+  }, [sentinelRef, shouldShowSentinel]);
 }

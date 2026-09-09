@@ -16,15 +16,6 @@ import {
   type SearchParams,
 } from "./shared/params";
 
-interface PersistedPageState {
-  appliedParams: SearchParams;
-  favoriteIds: string[];
-  contact: BookingContact;
-}
-
-const isStringArray = (value: unknown): value is string[] =>
-  Array.isArray(value) && value.every((item) => typeof item === "string");
-
 interface PageStore {
   hotels: Hotel[];
   hotelsTotal: number;
@@ -64,6 +55,14 @@ interface PageStore {
   resetResultSet: () => void;
 }
 
+type PersistedPageState = Pick<
+  PageStore,
+  "appliedParams" | "favoriteIds" | "contact"
+>;
+
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === "string");
+
 export const usePageStore = create<PageStore>()(
   persist<PageStore, [], [], PersistedPageState>(
     (set) => ({
@@ -88,25 +87,25 @@ export const usePageStore = create<PageStore>()(
       bookedHotelId: null,
 
       setFirstPage: (page) => {
-        const { items, total, hasMore } = page;
+        const { items, hasMore, total } = page;
 
         set({
           hotels: items,
           hotelsTotal: total,
-          hasMore,
           loadedPage: 1,
+          hasMore,
         });
       },
       appendPage: (page) =>
         set((state) => {
-          const { items, total, hasMore } = page;
+          const { items, hasMore, total } = page;
           const { hotels, loadedPage } = state;
 
           return {
             hotels: [...hotels, ...items],
             hotelsTotal: total,
-            hasMore,
             loadedPage: loadedPage + 1,
+            hasMore,
           };
         }),
 
@@ -128,10 +127,10 @@ export const usePageStore = create<PageStore>()(
         set({
           hotels: [],
           hotelsTotal: 0,
+          selectedHotelId: null,
           loadedPage: 0,
           hasMore: false,
           loadMoreStatus: FetchStatus.Ready,
-          selectedHotelId: null,
           selectedHotelIds: [],
           batchFavoriteFailures: [],
           bookedHotelId: null,

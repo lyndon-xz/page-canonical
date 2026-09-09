@@ -15,7 +15,7 @@ import { store } from "./store";
 
 import styles from "./index.module.scss";
 
-/** 挂在 Provider 内部，effects 将来要读 store 时不必改页面结构 */
+// 挂在 Provider 内部，effects 将来要读 store 时不必改页面结构
 function EffectsRunner() {
   usePageEffects();
   return null;

@@ -5,6 +5,7 @@ import {
   LoadingOutlined,
 } from "@ant-design/icons";
 
+import { FAVORITE_LABEL, UNFAVORITE_LABEL } from "../../../../shared/favorite";
 import type { Listing } from "../../../../shared/listing";
 import { listingListActions } from "../../actions";
 
@@ -42,7 +43,9 @@ export default function ListingCard(props: ListingCardProps) {
       onKeyDown={(event) => {
         const { key } = event;
 
-        if (key !== "Enter" && key !== " ") {
+        const isActivationKey = key === "Enter" || key === " ";
+
+        if (!isActivationKey) {
           return;
         }
         event.preventDefault();
@@ -71,7 +74,7 @@ export default function ListingCard(props: ListingCardProps) {
           className={styles.favorite}
           data-active={isFavorite}
           disabled={isFavoriting}
-          aria-label={isFavorite ? "取消收藏" : "收藏房源"}
+          aria-label={isFavorite ? UNFAVORITE_LABEL : FAVORITE_LABEL}
           onClick={(event) => {
             event.stopPropagation();
             toggleFavorite(id);

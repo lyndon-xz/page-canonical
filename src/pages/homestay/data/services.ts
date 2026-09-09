@@ -14,6 +14,8 @@ import type { Listing, ListingDetail } from "../shared/listing";
 import { MOCK_LISTING_DETAILS } from "./listing-details";
 import { MOCK_LISTINGS } from "./listings";
 
+const LIST_REJECTED_KEYWORD = "error";
+
 export async function fetchListings(
   filters: ListingFilters,
 ): Promise<Listing[]> {
@@ -22,6 +24,10 @@ export async function fetchListings(
   await mockDelay();
 
   const normalizedKeyword = keyword.trim().toLowerCase();
+
+  if (normalizedKeyword === LIST_REJECTED_KEYWORD) {
+    throw new Error("房源列表服务暂不可用");
+  }
 
   return MOCK_LISTINGS.filter((listing) => {
     const { title, city, roomType: listingRoomType } = listing;
@@ -35,10 +41,16 @@ export async function fetchListings(
   });
 }
 
+const DETAIL_REJECTED_LISTING_IDS = ["l4"];
+
 export async function fetchListingDetail(
   listingId: string,
 ): Promise<ListingDetail | null> {
   await mockDelay();
+
+  if (DETAIL_REJECTED_LISTING_IDS.includes(listingId)) {
+    throw new Error("房源详情服务暂不可用");
+  }
 
   return MOCK_LISTING_DETAILS[listingId] ?? null;
 }
@@ -56,32 +68,33 @@ export async function toggleFavorite(listingId: string): Promise<void> {
 const PEAK_MONTHS = [7, 8];
 const PEAK_SURCHARGE_RATE = 1.2;
 
-const LONG_STAY_NIGHTS = 7;
-const LONG_STAY_DISCOUNT = 0.9;
+const LONG_STAY_MIN_NIGHTS = 7;
+const LONG_STAY_PRICE_RATE = 0.9;
 
-function buildQuote(listing: Listing, payload: InquiryPayload): InquiryQuote {
-  const { checkInDate, nights } = payload;
-  const { pricePerNight: basePrice } = listing;
-
+function buildQuote(
+  pricePerNight: number,
+  checkInDate: string,
+  nights: number,
+): InquiryQuote {
   let grossPrice = 0;
   for (let night = 0; night < nights; night += 1) {
     const month = dayjs(checkInDate).add(night, "day").month() + 1;
     const rate = PEAK_MONTHS.includes(month) ? PEAK_SURCHARGE_RATE : 1;
 
-    grossPrice += Math.round(basePrice * rate);
+    grossPrice += Math.round(pricePerNight * rate);
   }
 
-  const discountAmount =
-    nights >= LONG_STAY_NIGHTS
-      ? grossPrice - Math.round(grossPrice * LONG_STAY_DISCOUNT)
+  const discountAmountYuan =
+    nights >= LONG_STAY_MIN_NIGHTS
+      ? grossPrice - Math.round(grossPrice * LONG_STAY_PRICE_RATE)
       : 0;
 
   return {
     nights,
     nightlyAverage: Math.round(grossPrice / nights),
     grossPrice,
-    discountAmount,
-    totalPrice: grossPrice - discountAmount,
+    discountAmountYuan,
+    totalPrice: grossPrice - discountAmountYuan,
   };
 }
 
@@ -102,7 +115,7 @@ export class InquirySubmitError extends Error {
 export async function submitInquiry(
   payload: InquiryPayload,
 ): Promise<SubmittedInquiry> {
-  const { phone, listingId } = payload;
+  const { phone, listingId, checkInDate, nights } = payload;
 
   await mockDelay();
 
@@ -118,10 +131,12 @@ export async function submitInquiry(
     throw new Error("该房源已下架，请重新选择");
   }
 
+  const { id, title, pricePerNight } = listing;
+
   return {
-    inquiryId: `${INQUIRY_ID_PREFIX}${listing.id}-${Date.now()}`,
-    listingTitle: listing.title,
-    quote: buildQuote(listing, payload),
+    inquiryId: `${INQUIRY_ID_PREFIX}${id}-${Date.now()}`,
+    listingTitle: title,
+    quote: buildQuote(pricePerNight, checkInDate, nights),
   };
 }
 

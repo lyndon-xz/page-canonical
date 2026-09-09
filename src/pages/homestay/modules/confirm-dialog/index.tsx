@@ -1,5 +1,7 @@
 import { Alert, Modal } from "antd";
 
+import { OVERLAY_WIDTH_PX } from "../../shared/overlay";
+
 import { confirmDialogActions } from "./actions";
 import { useConfirmDialogModel } from "./model";
 import { SCENE_COPY } from "./scenes";
@@ -26,7 +28,7 @@ export default function ConfirmDialog() {
       confirmLoading={isConfirming}
       onOk={confirm}
       onCancel={cancel}
-      width={420}
+      width={OVERLAY_WIDTH_PX}
     >
       {target && <p className={styles.target}>{target}</p>}
       {desc && <p className={styles.desc}>{desc}</p>}

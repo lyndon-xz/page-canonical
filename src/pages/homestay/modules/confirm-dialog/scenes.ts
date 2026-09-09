@@ -1,4 +1,5 @@
 import { ConfirmScene } from "../../shared/confirm";
+import { UNFAVORITE_LABEL } from "../../shared/favorite";
 
 interface SceneCopy {
   title: string;
@@ -9,7 +10,7 @@ interface SceneCopy {
 export const SCENE_COPY: Record<ConfirmScene, SceneCopy> = {
   [ConfirmScene.RemoveFavorite]: {
     title: "确认取消收藏？",
-    okText: "取消收藏",
+    okText: UNFAVORITE_LABEL,
   },
   [ConfirmScene.CancelInquiry]: {
     title: "确认撤回询价？",

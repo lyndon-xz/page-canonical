@@ -20,8 +20,8 @@ export function useHotelListModel() {
       batchFavoriteFailures: s.batchFavoriteFailures,
     })),
   );
-  const { batchFavoriteFailures, hasMore, ...rest } = state;
-  const { hotels, hotelsStatus, loadMoreStatus, selectedHotelIds } = rest;
+  const { hotels, ...rest } = state;
+  const { batchFavoriteFailures } = rest;
 
   const batchFailureNames = useMemo(
     () =>
@@ -34,15 +34,22 @@ export function useHotelListModel() {
     [batchFavoriteFailures, hotels],
   );
 
+  const { hotelsStatus, loadMoreStatus, selectedHotelIds, hasMore } = rest;
+  const hotelsLength = hotels.length;
+  const selectedCount = selectedHotelIds.length;
+  const isAllLoadedSelected =
+    hotelsLength > 0 && selectedCount === hotelsLength;
+
   return {
+    hotels,
     ...rest,
     batchFailureNames,
-    isAllLoadedSelected:
-      hotels.length > 0 && selectedHotelIds.length === hotels.length,
-    showSentinel:
+    isAllLoadedSelected,
+    isPartiallySelected: selectedCount > 0 && !isAllLoadedSelected,
+    shouldShowSentinel:
       hotelsStatus === FetchStatus.Ready &&
       loadMoreStatus === FetchStatus.Ready &&
-      hotels.length > 0 &&
+      hotelsLength > 0 &&
       hasMore,
   };
 }

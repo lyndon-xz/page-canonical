@@ -10,7 +10,7 @@
   display: inline-flex;
   gap: 6px;
   align-items: center;
-  font-size: 13.5px;
+  font-size: var(--font-size-sm);
   color: var(--primary-strong);
 
   &::before {

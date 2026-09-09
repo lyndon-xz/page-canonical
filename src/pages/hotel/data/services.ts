@@ -6,7 +6,11 @@ import type {
   BatchFavoriteResult,
 } from "../shared/favorite";
 import type { Hotel, HotelPageResult } from "../shared/hotel";
-import type { SearchParams, SortBy } from "../shared/params";
+import {
+  UNLIMITED_STAR,
+  type SearchParams,
+  type SortBy,
+} from "../shared/params";
 
 import { MOCK_HOTELS } from "./hotels";
 
@@ -27,7 +31,7 @@ const resolveMatchedHotels = (searchParams: SearchParams): Hotel[] => {
       normalizedKeyword === "" ||
       name.toLowerCase().includes(normalizedKeyword) ||
       city.toLowerCase().includes(normalizedKeyword);
-    const isStarMatched = star === 0 || hotelStar === star;
+    const isStarMatched = star === UNLIMITED_STAR || hotelStar === star;
     return isKeywordMatched && isStarMatched;
   }).sort(SORT_COMPARATORS[sortBy]);
 };
@@ -35,19 +39,30 @@ const resolveMatchedHotels = (searchParams: SearchParams): Hotel[] => {
 const HOTEL_PAGE_SIZE = 12;
 
 const SEARCH_REJECTED_KEYWORD = "error";
+const LOAD_MORE_REJECTED_KEYWORD = "more-error";
 
 export async function fetchHotelPage(
   searchParams: SearchParams,
-  page: number,
+  pageNumber: number,
 ): Promise<HotelPageResult> {
   await mockDelay();
 
-  if (searchParams.keyword.trim().toLowerCase() === SEARCH_REJECTED_KEYWORD) {
+  const normalizedKeyword = searchParams.keyword.trim().toLowerCase();
+
+  if (normalizedKeyword === SEARCH_REJECTED_KEYWORD) {
     throw new Error("酒店列表服务暂不可用");
   }
 
-  const matched = resolveMatchedHotels(searchParams);
-  const start = (page - 1) * HOTEL_PAGE_SIZE;
+  if (pageNumber >= 2 && normalizedKeyword === LOAD_MORE_REJECTED_KEYWORD) {
+    throw new Error("酒店列表下一页暂不可用");
+  }
+
+  const matched = resolveMatchedHotels(
+    normalizedKeyword === LOAD_MORE_REJECTED_KEYWORD
+      ? { ...searchParams, keyword: "" }
+      : searchParams,
+  );
+  const start = (pageNumber - 1) * HOTEL_PAGE_SIZE;
   const items = matched.slice(start, start + HOTEL_PAGE_SIZE);
   const total = matched.length;
 
@@ -89,7 +104,7 @@ export async function batchFavoriteHotels(
 
 const BOOKING_REJECTED_HOTEL_IDS = ["h5"];
 
-const BLOCKED_PHONES = ["13800000000"];
+const BOOKING_BLOCKED_PHONES = ["13800000000"];
 
 export class BookingSubmitError extends Error {
   readonly fieldErrors: BookingFieldError[];
@@ -111,7 +126,7 @@ export async function submitBooking(
     throw new Error("该酒店已订满，换一家试试");
   }
 
-  if (BLOCKED_PHONES.includes(values.phone.trim())) {
+  if (BOOKING_BLOCKED_PHONES.includes(values.phone.trim())) {
     throw new BookingSubmitError([
       { field: "phone", message: "该手机号暂不可用，请更换后重试" },
     ]);

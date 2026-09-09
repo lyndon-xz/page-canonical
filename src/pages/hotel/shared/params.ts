@@ -2,8 +2,10 @@ export const SORT_BY_VALUES = ["price", "rating", "distance"] as const;
 
 export type SortBy = (typeof SORT_BY_VALUES)[number];
 
-/** 0 表示不限星级 */
-export const STAR_VALUES = [0, 3, 4, 5] as const;
+/** 不限星级 */
+export const UNLIMITED_STAR = 0;
+
+export const STAR_VALUES = [UNLIMITED_STAR, 3, 4, 5] as const;
 
 export type Star = (typeof STAR_VALUES)[number];
 
@@ -15,7 +17,7 @@ export interface SearchParams {
 
 export const DEFAULT_SEARCH_PARAMS: SearchParams = {
   keyword: "",
-  star: 0,
+  star: UNLIMITED_STAR,
   sortBy: "price",
 };
 
@@ -25,6 +27,13 @@ const {
   sortBy: defaultSortBy,
 } = DEFAULT_SEARCH_PARAMS;
 
+// 与地址栏查询串共享的查询键
+const SEARCH_QUERY_KEYS = {
+  keyword: "keyword",
+  star: "star",
+  sortBy: "sortBy",
+} as const;
+
 const isStar = (value: number): value is Star =>
   STAR_VALUES.some((candidate) => candidate === value);
 
@@ -33,11 +42,13 @@ const isSortBy = (value: string): value is SortBy =>
 
 export function parseSearchParams(search: string): SearchParams | null {
   const query = new URLSearchParams(search);
-  const rawKeyword = query.get("keyword");
-  const rawStar = query.get("star");
-  const rawSortBy = query.get("sortBy");
+  const rawKeyword = query.get(SEARCH_QUERY_KEYS.keyword);
+  const rawStar = query.get(SEARCH_QUERY_KEYS.star);
+  const rawSortBy = query.get(SEARCH_QUERY_KEYS.sortBy);
+  const hasNoSearchQuery =
+    rawKeyword === null && rawStar === null && rawSortBy === null;
 
-  if (rawKeyword === null && rawStar === null && rawSortBy === null) {
+  if (hasNoSearchQuery) {
     return null;
   }
 
@@ -85,13 +96,13 @@ function serializeParams(searchParams: SearchParams): Record<string, string> {
   const result: Record<string, string> = {};
 
   if (trimmedKeyword !== defaultKeyword) {
-    result.keyword = trimmedKeyword;
+    result[SEARCH_QUERY_KEYS.keyword] = trimmedKeyword;
   }
   if (star !== defaultStar) {
-    result.star = String(star);
+    result[SEARCH_QUERY_KEYS.star] = String(star);
   }
   if (sortBy !== defaultSortBy) {
-    result.sortBy = sortBy;
+    result[SEARCH_QUERY_KEYS.sortBy] = sortBy;
   }
 
   return result;

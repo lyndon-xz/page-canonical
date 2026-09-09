@@ -32,8 +32,8 @@ async function waitForHydration() {
 
 let resultSetGeneration = 0;
 
-const isCurrentGeneration = (generation: number) =>
-  generation === resultSetGeneration;
+const isStaleGeneration = (generation: number) =>
+  generation !== resultSetGeneration;
 
 async function loadHotels(searchParams: SearchParams) {
   const { setAppliedParams, resetResultSet, setHotelsStatus, setFirstPage } =
@@ -47,14 +47,14 @@ async function loadHotels(searchParams: SearchParams) {
   setHotelsStatus(FetchStatus.Loading);
 
   try {
-    const page = await fetchHotelPage(searchParams, 1);
-    if (!isCurrentGeneration(generation)) {
+    const hotelPage = await fetchHotelPage(searchParams, 1);
+    if (isStaleGeneration(generation)) {
       return;
     }
-    setFirstPage(page);
+    setFirstPage(hotelPage);
     setHotelsStatus(FetchStatus.Ready);
   } catch {
-    if (!isCurrentGeneration(generation)) {
+    if (isStaleGeneration(generation)) {
       return;
     }
     setHotelsStatus(FetchStatus.Error);
@@ -92,12 +92,12 @@ export const pageActions = {
       setLoadMoreStatus,
       appendPage,
     } = usePageStore.getState();
-
-    if (
+    const shouldSkipLoadMore =
       !hasMore ||
       loadMoreStatus === FetchStatus.Loading ||
-      hotelsStatus === FetchStatus.Loading
-    ) {
+      hotelsStatus === FetchStatus.Loading;
+
+    if (shouldSkipLoadMore) {
       return;
     }
 
@@ -105,14 +105,14 @@ export const pageActions = {
 
     setLoadMoreStatus(FetchStatus.Loading);
     try {
-      const page = await fetchHotelPage(appliedParams, loadedPage + 1);
-      if (!isCurrentGeneration(generation)) {
+      const hotelPage = await fetchHotelPage(appliedParams, loadedPage + 1);
+      if (isStaleGeneration(generation)) {
         return;
       }
-      appendPage(page);
+      appendPage(hotelPage);
       setLoadMoreStatus(FetchStatus.Ready);
     } catch {
-      if (!isCurrentGeneration(generation)) {
+      if (isStaleGeneration(generation)) {
         return;
       }
       setLoadMoreStatus(FetchStatus.Error);
@@ -159,11 +159,11 @@ export const pageActions = {
     }
 
     const { favoriteIds, setFavoriteIds } = usePageStore.getState();
-    const wasFavorited = favoriteIds.includes(hotelId);
+    const isAlreadyFavorited = favoriteIds.includes(hotelId);
 
     favoritingIds.add(hotelId);
     setFavoriteIds(
-      wasFavorited
+      isAlreadyFavorited
         ? favoriteIds.filter((id) => id !== hotelId)
         : [...favoriteIds, hotelId],
     );
@@ -174,7 +174,7 @@ export const pageActions = {
       const { favoriteIds: latestIds } = usePageStore.getState();
 
       setFavoriteIds(
-        wasFavorited
+        isAlreadyFavorited
           ? [...new Set([...latestIds, hotelId])]
           : latestIds.filter((id) => id !== hotelId),
       );
@@ -209,13 +209,13 @@ export const pageActions = {
 
       setFavoriteIds([...new Set([...favoriteIds, ...succeededIds])]);
 
-      if (!isCurrentGeneration(generation)) {
+      if (isStaleGeneration(generation)) {
         return;
       }
       setBatchFavoriteFailures(failures);
       setSelectedHotelIds(failures.map((failure) => failure.hotelId));
     } catch (err) {
-      if (!isCurrentGeneration(generation)) {
+      if (isStaleGeneration(generation)) {
         return;
       }
 

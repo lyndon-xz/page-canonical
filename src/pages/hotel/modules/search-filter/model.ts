@@ -11,7 +11,7 @@ interface SearchFilterLocalState {
 }
 
 export const useSearchFilterLocal = create<SearchFilterLocalState>((set) => ({
-  keyword: "",
+  keyword: usePageStore.getState().appliedParams.keyword,
   setKeyword: (keyword) => set({ keyword }),
 }));
 
@@ -21,7 +21,7 @@ export function useSearchFilterModel() {
     useShallow((s) => ({
       star: s.appliedParams.star,
       resultCount: s.hotelsTotal,
-      isLoading: s.hotelsStatus === FetchStatus.Loading,
+      isLoadingHotels: s.hotelsStatus === FetchStatus.Loading,
     })),
   );
 

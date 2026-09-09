@@ -1,7 +1,7 @@
 import { SearchOutlined } from "@ant-design/icons";
 import { Button, Input } from "antd";
 
-import { STAR_VALUES, type Star } from "../../shared/params";
+import { STAR_VALUES, UNLIMITED_STAR, type Star } from "../../shared/params";
 
 import { searchFilterActions } from "./actions";
 import { useSearchFilterEffects } from "./effects";
@@ -12,14 +12,15 @@ import styles from "./index.module.scss";
 const { updateKeyword, submit, updateStar } = searchFilterActions;
 
 const STAR_LABELS: Record<Star, string> = {
-  0: "不限",
+  [UNLIMITED_STAR]: "不限",
   3: "三星",
   4: "四星",
   5: "五星",
 };
 
 export default function SearchFilter() {
-  const { keyword, star, resultCount, isLoading } = useSearchFilterModel();
+  const { keyword, star, resultCount, isLoadingHotels } =
+    useSearchFilterModel();
   useSearchFilterEffects();
 
   return (
@@ -34,7 +35,7 @@ export default function SearchFilter() {
           onChange={(e) => updateKeyword(e.target.value)}
           onPressEnter={submit}
         />
-        <Button type="primary" loading={isLoading} onClick={submit}>
+        <Button type="primary" loading={isLoadingHotels} onClick={submit}>
           搜索
         </Button>
       </div>
@@ -54,7 +55,7 @@ export default function SearchFilter() {
       </div>
 
       <p className={styles.resultCount}>
-        {isLoading ? "搜索中…" : `找到 ${resultCount} 家`}
+        {isLoadingHotels ? "搜索中…" : `找到 ${resultCount} 家`}
       </p>
     </section>
   );

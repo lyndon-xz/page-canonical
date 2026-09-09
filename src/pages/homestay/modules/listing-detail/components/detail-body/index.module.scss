@@ -8,7 +8,7 @@
 
 .meta {
   margin: 0 0 12px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--muted);
 }
 
@@ -35,14 +35,14 @@
 
 .policyLabel {
   margin: 0 0 4px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--ink);
 }
 
 .policy {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   color: var(--muted);
 }
@@ -70,6 +70,6 @@
 
 .errorText {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--muted);
 }
