@@ -1,12 +1,12 @@
-import { Alert, Modal } from "antd";
+import { Alert, Modal } from 'antd';
 
-import { OVERLAY_WIDTH_PX } from "../../shared/overlay";
+import { OVERLAY_WIDTH_PX } from '../../shared/overlay';
 
-import { confirmDialogActions } from "./actions";
-import { useConfirmDialogModel } from "./model";
-import { SCENE_COPY } from "./scenes";
+import { confirmDialogActions } from './actions';
+import { useConfirmDialogModel } from './model';
+import { SCENE_COPY } from './scenes';
 
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 const { confirm, cancel } = confirmDialogActions;
 
@@ -33,12 +33,7 @@ export default function ConfirmDialog() {
       {target && <p className={styles.target}>{target}</p>}
       {desc && <p className={styles.desc}>{desc}</p>}
       {confirmError && (
-        <Alert
-          type="error"
-          showIcon
-          message={confirmError}
-          className={styles.error}
-        />
+        <Alert type="error" showIcon title={confirmError} className={styles.error} />
       )}
     </Modal>
   );

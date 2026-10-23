@@ -1,7 +1,7 @@
 .fields {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 16px 18px;
+  gap: var(--space-16) var(--space-18);
 }
 
 .fieldWide {

@@ -1,20 +1,20 @@
 .submitBar {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: var(--space-16);
   align-items: center;
-  margin-top: 24px;
+  margin-top: var(--space-24);
 }
 
 .feedback {
   display: inline-flex;
-  gap: 6px;
+  gap: var(--space-6);
   align-items: center;
   font-size: var(--font-size-sm);
   color: var(--primary-strong);
 
   &::before {
     color: var(--primary);
-    content: "●";
+    content: '●';
   }
 }

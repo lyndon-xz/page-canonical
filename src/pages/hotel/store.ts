@@ -1,20 +1,16 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-import { FetchStatus } from "@/lib/fetch-status";
+import { FetchStatus } from '@/constants/fetch-status';
 
-import {
-  DEFAULT_CONTACT,
-  readPersistedContact,
-  type BookingContact,
-} from "./shared/booking";
-import type { BatchFavoriteFailure } from "./shared/favorite";
-import type { Hotel, HotelPageResult } from "./shared/hotel";
+import { DEFAULT_CONTACT, readPersistedContact, type BookingContact } from './shared/booking';
+import type { BatchFavoriteFailure } from './shared/favorite';
+import type { Hotel, HotelPageResult } from './shared/hotel';
 import {
   DEFAULT_SEARCH_PARAMS,
   readPersistedSearchParams,
   type SearchParams,
-} from "./shared/params";
+} from './shared/params';
 
 interface PageStore {
   hotels: Hotel[];
@@ -55,13 +51,10 @@ interface PageStore {
   resetResultSet: () => void;
 }
 
-type PersistedPageState = Pick<
-  PageStore,
-  "appliedParams" | "favoriteIds" | "contact"
->;
+type PersistedPageState = Pick<PageStore, 'appliedParams' | 'favoriteIds' | 'contact'>;
 
 const isStringArray = (value: unknown): value is string[] =>
-  Array.isArray(value) && value.every((item) => typeof item === "string");
+  Array.isArray(value) && value.every((item) => typeof item === 'string');
 
 export const usePageStore = create<PageStore>()(
   persist<PageStore, [], [], PersistedPageState>(
@@ -116,11 +109,9 @@ export const usePageStore = create<PageStore>()(
       setFavoriteIds: (ids) => set({ favoriteIds: ids }),
       setSelectedHotelIds: (ids) => set({ selectedHotelIds: ids }),
       setIsBatchFavoriting: (isBatchFavoriting) => set({ isBatchFavoriting }),
-      setBatchFavoriteFailures: (failures) =>
-        set({ batchFavoriteFailures: failures }),
+      setBatchFavoriteFailures: (failures) => set({ batchFavoriteFailures: failures }),
       setContact: (contact) => set({ contact }),
-      setIsSubmittingBooking: (isSubmittingBooking) =>
-        set({ isSubmittingBooking }),
+      setIsSubmittingBooking: (isSubmittingBooking) => set({ isSubmittingBooking }),
       setBookedHotelId: (hotelId) => set({ bookedHotelId: hotelId }),
 
       resetResultSet: () =>
@@ -137,7 +128,7 @@ export const usePageStore = create<PageStore>()(
         }),
     }),
     {
-      name: "hotel-page",
+      name: 'hotel-page',
       version: 1,
       partialize: (state) => {
         const { appliedParams, favoriteIds, contact } = state;
@@ -145,23 +136,18 @@ export const usePageStore = create<PageStore>()(
         return { appliedParams, favoriteIds, contact };
       },
       merge: (persisted, current) => {
-        if (typeof persisted !== "object" || persisted === null) {
+        if (typeof persisted !== 'object' || persisted === null) {
           return current;
         }
 
-        const savedParams =
-          "appliedParams" in persisted ? persisted.appliedParams : undefined;
-        const savedFavoriteIds =
-          "favoriteIds" in persisted ? persisted.favoriteIds : undefined;
-        const savedContact =
-          "contact" in persisted ? persisted.contact : undefined;
+        const savedParams = 'appliedParams' in persisted ? persisted.appliedParams : undefined;
+        const savedFavoriteIds = 'favoriteIds' in persisted ? persisted.favoriteIds : undefined;
+        const savedContact = 'contact' in persisted ? persisted.contact : undefined;
 
         return {
           ...current,
           appliedParams: readPersistedSearchParams(savedParams),
-          favoriteIds: isStringArray(savedFavoriteIds)
-            ? savedFavoriteIds
-            : current.favoriteIds,
+          favoriteIds: isStringArray(savedFavoriteIds) ? savedFavoriteIds : current.favoriteIds,
           contact: readPersistedContact(savedContact),
         };
       },

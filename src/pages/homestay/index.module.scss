@@ -7,8 +7,8 @@
   --inquiry-perforation-top: 74px;
 
   position: relative;
-  padding: 34px 28px 28px;
-  margin-top: 44px;
+  padding: var(--space-34) var(--space-28) var(--space-28);
+  margin-top: var(--space-44);
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -19,7 +19,7 @@
     top: var(--inquiry-perforation-top);
     right: 0;
     left: 0;
-    content: "";
+    content: '';
     border-top: 2px dashed var(--line);
   }
 }
@@ -34,11 +34,11 @@
   border-radius: 50%;
   transform: translateY(-50%);
 
-  &[data-side="left"] {
+  &[data-side='left'] {
     left: -12px;
   }
 
-  &[data-side="right"] {
+  &[data-side='right'] {
     right: -12px;
   }
 }
@@ -47,7 +47,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding-bottom: 26px;
+  padding-bottom: var(--space-26);
 }
 
 .inquiryTitle {

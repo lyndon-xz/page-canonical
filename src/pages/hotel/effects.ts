@@ -1,9 +1,9 @@
-import { useLayoutEffect } from "react";
+import { useLayoutEffect } from 'react';
 
-import { FetchStatus } from "@/lib/fetch-status";
+import { FetchStatus } from '@/constants/fetch-status';
 
-import { pageActions } from "./actions";
-import { usePageStore } from "./store";
+import { pageActions } from './actions';
+import { usePageStore } from './store';
 
 const { initPage } = pageActions;
 

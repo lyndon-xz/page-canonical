@@ -1,23 +1,21 @@
-import { ConfigProvider, message } from "antd";
-import { createRoot } from "react-dom/client";
+import { ConfigProvider, message } from 'antd';
+import { createRoot } from 'react-dom/client';
 
-import Layout from "@/layout";
-import { applyTokensToRoot, theme } from "@/theme";
+import Layout from '@/layout';
+import { applyTokensToRoot, theme } from '@/theme';
 
-import "./global.scss";
+import './global.scss';
 
 applyTokensToRoot();
 
 ConfigProvider.config({
-  holderRender: (children) => (
-    <ConfigProvider theme={theme}>{children}</ConfigProvider>
-  ),
+  holderRender: (children) => <ConfigProvider theme={theme}>{children}</ConfigProvider>,
 });
 
 // 避开顶栏，antd 默认是 8
 message.config({ top: 96 });
 
-const container = document.getElementById("root");
+const container = document.getElementById('root');
 if (container) {
   createRoot(container).render(
     <ConfigProvider theme={theme}>

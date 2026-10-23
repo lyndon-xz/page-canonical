@@ -1,7 +1,7 @@
-import { resolveRoute, routes } from "@/router/routes";
-import { useRoute } from "@/router/useRoute";
+import { resolveRoute, routes } from '@/router/routes';
+import { useRoute } from '@/router/useRoute';
 
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 function BrandMark() {
   return (
@@ -43,12 +43,10 @@ export default function Layout() {
                 <button
                   key={path}
                   type="button"
-                  className={
-                    path === active
-                      ? `${styles.stub} ${styles.stubActive}`
-                      : styles.stub
-                  }
-                  onClick={() => navigate(path)}
+                  className={path === active ? `${styles.stub} ${styles.stubActive}` : styles.stub}
+                  onClick={() => {
+                    navigate(path);
+                  }}
                 >
                   {name}
                   <span className={styles.stubSub}>{lib}</span>

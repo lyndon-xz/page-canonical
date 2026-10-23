@@ -1,26 +1,25 @@
-import { SearchOutlined } from "@ant-design/icons";
-import { Button, Input } from "antd";
+import { SearchOutlined } from '@ant-design/icons';
+import { Button, Input } from 'antd';
 
-import { STAR_VALUES, UNLIMITED_STAR, type Star } from "../../shared/params";
+import { STAR_VALUES, UNLIMITED_STAR, type Star } from '../../shared/params';
 
-import { searchFilterActions } from "./actions";
-import { useSearchFilterEffects } from "./effects";
-import { useSearchFilterModel } from "./model";
+import { searchFilterActions } from './actions';
+import { useSearchFilterEffects } from './effects';
+import { useSearchFilterModel } from './model';
 
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 const { updateKeyword, submit, updateStar } = searchFilterActions;
 
 const STAR_LABELS: Record<Star, string> = {
-  [UNLIMITED_STAR]: "不限",
-  3: "三星",
-  4: "四星",
-  5: "五星",
+  [UNLIMITED_STAR]: '不限',
+  3: '三星',
+  4: '四星',
+  5: '五星',
 };
 
 export default function SearchFilter() {
-  const { keyword, star, resultCount, isLoadingHotels } =
-    useSearchFilterModel();
+  const { keyword, star, resultCount, isLoadingHotels } = useSearchFilterModel();
   useSearchFilterEffects();
 
   return (
@@ -32,7 +31,9 @@ export default function SearchFilter() {
           allowClear
           value={keyword}
           prefix={<SearchOutlined />}
-          onChange={(e) => updateKeyword(e.target.value)}
+          onChange={(event) => {
+            updateKeyword(event.target.value);
+          }}
           onPressEnter={submit}
         />
         <Button type="primary" loading={isLoadingHotels} onClick={submit}>
@@ -47,16 +48,16 @@ export default function SearchFilter() {
             type="button"
             className={styles.chip}
             data-active={star === value}
-            onClick={() => updateStar(value)}
+            onClick={() => {
+              updateStar(value);
+            }}
           >
             {STAR_LABELS[value]}
           </button>
         ))}
       </div>
 
-      <p className={styles.resultCount}>
-        {isLoadingHotels ? "搜索中…" : `找到 ${resultCount} 家`}
-      </p>
+      <p className={styles.resultCount}>{isLoadingHotels ? '搜索中…' : `找到 ${resultCount} 家`}</p>
     </section>
   );
 }

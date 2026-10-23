@@ -1,11 +1,11 @@
-import PageHero from "@/components/page-hero";
+import PageHero from '@/components/page-hero';
 
-import { usePageEffects } from "./effects";
-import BookingForm from "./modules/booking-form";
-import HotelList from "./modules/hotel-list";
-import SearchFilter from "./modules/search-filter";
+import { usePageEffects } from './effects';
+import BookingForm from './modules/booking-form';
+import HotelList from './modules/hotel-list';
+import SearchFilter from './modules/search-filter';
 
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 function EffectsRunner() {
   usePageEffects();

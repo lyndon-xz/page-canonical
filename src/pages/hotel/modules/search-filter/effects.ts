@@ -1,8 +1,8 @@
-import { useLayoutEffect } from "react";
+import { useLayoutEffect } from 'react';
 
-import { usePageStore } from "../../store";
+import { usePageStore } from '../../store';
 
-import { useSearchFilterLocal } from "./model";
+import { useSearchFilterLocal } from './model';
 
 export function useSearchFilterEffects() {
   const keyword = usePageStore((s) => s.appliedParams.keyword);

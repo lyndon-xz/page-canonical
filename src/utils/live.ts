@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 export function createPageLive<M extends object>() {
   const store: Partial<M> = {};
@@ -8,13 +8,12 @@ export function createPageLive<M extends object>() {
       store[key] = value;
 
       return () => {
-        delete store[key];
+        store[key] = undefined;
       };
     }, [key, value]);
   };
 
-  const getLive = <K extends keyof M & string>(key: K): M[K] | undefined =>
-    store[key];
+  const getLive = <K extends keyof M & string>(key: K): M[K] | undefined => store[key];
 
   return {
     useRegisterLive,

@@ -1,10 +1,10 @@
-import { configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
-import { useSelector } from "react-redux";
+import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit';
+import { useSelector } from 'react-redux';
 
-import { registerPageListeners } from "./listeners";
-import { confirmDialogReducer } from "./modules/confirm-dialog/slice";
-import type { TraceCommonTag } from "./shared/trace";
-import { homestayPageReducer } from "./slice";
+import { registerPageListeners } from './listeners';
+import { confirmDialogReducer } from './modules/confirm-dialog/slice';
+import type { TraceCommonTag } from './shared/trace';
+import { homestayPageReducer } from './slice';
 
 const listenerMiddleware = createListenerMiddleware();
 
@@ -21,9 +21,7 @@ export type RootState = ReturnType<typeof store.getState>;
 
 export type AppDispatch = typeof store.dispatch;
 
-registerPageListeners(
-  listenerMiddleware.startListening.withTypes<RootState, AppDispatch>(),
-);
+registerPageListeners(listenerMiddleware.startListening.withTypes<RootState, AppDispatch>());
 
 export const useAppSelector = useSelector.withTypes<RootState>();
 
@@ -38,9 +36,9 @@ export const selectTraceCommonTag = (state: RootState): TraceCommonTag => {
   const { keyword, roomType } = appliedFilters;
 
   return {
-    page: "homestay",
+    page: 'homestay',
     keyword,
     roomType,
-    selectedListingId: selectedListingId ?? "",
+    selectedListingId: selectedListingId ?? '',
   };
 };

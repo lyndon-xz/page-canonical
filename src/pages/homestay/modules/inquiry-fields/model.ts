@@ -1,8 +1,8 @@
-import { useFormContext } from "react-hook-form";
-import { shallowEqual } from "react-redux";
+import { useFormContext } from 'react-hook-form';
+import { shallowEqual } from 'react-redux';
 
-import type { InquiryForm } from "../../shared/inquiry";
-import { selectSelectedListing, useAppSelector } from "../../store";
+import type { InquiryForm } from '../../shared/inquiry';
+import { selectSelectedListing, useAppSelector } from '../../store';
 
 export function useInquiryFieldsModel() {
   const { control, formState } = useFormContext<InquiryForm>();

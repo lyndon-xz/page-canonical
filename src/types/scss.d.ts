@@ -1,8 +1,4 @@
-declare module "*.scss";
-
-declare module "*.module.scss" {
-  const classes: {
-    readonly [key: string]: string;
-  };
+declare module '*.scss' {
+  const classes: Record<string, string>;
   export default classes;
 }

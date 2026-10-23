@@ -1,9 +1,9 @@
-import { create } from "zustand";
-import { useShallow } from "zustand/react/shallow";
+import { create } from 'zustand';
+import { useShallow } from 'zustand/react/shallow';
 
-import { FetchStatus } from "@/lib/fetch-status";
+import { FetchStatus } from '@/constants/fetch-status';
 
-import { usePageStore } from "../../store";
+import { usePageStore } from '../../store';
 
 interface SearchFilterLocalState {
   keyword: string;
@@ -12,7 +12,9 @@ interface SearchFilterLocalState {
 
 export const useSearchFilterLocal = create<SearchFilterLocalState>((set) => ({
   keyword: usePageStore.getState().appliedParams.keyword,
-  setKeyword: (keyword) => set({ keyword }),
+  setKeyword: (keyword) => {
+    set({ keyword });
+  },
 }));
 
 export function useSearchFilterModel() {

@@ -1,11 +1,11 @@
-import { useLayoutEffect } from "react";
+import { useLayoutEffect } from 'react';
 
-import { FetchStatus } from "@/lib/fetch-status";
+import { FetchStatus } from '@/constants/fetch-status';
 
-import { pageActions } from "./actions";
-import { parseFilters } from "./shared/filters";
-import { resetResultSet, setListingsStatus } from "./slice";
-import { store } from "./store";
+import { pageActions } from './actions';
+import { parseFilters } from './shared/filters';
+import { resetResultSet, setListingsStatus } from './slice';
+import { store } from './store';
 
 const { loadListings } = pageActions;
 

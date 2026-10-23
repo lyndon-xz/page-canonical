@@ -1,6 +1,6 @@
 .inlineDetail {
-  padding: 20px;
-  margin-top: 24px;
+  padding: var(--space-20);
+  margin-top: var(--space-24);
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -8,9 +8,9 @@
 
 .header {
   display: flex;
-  gap: 10px;
+  gap: var(--space-10);
   align-items: baseline;
-  margin-bottom: 14px;
+  margin-bottom: var(--space-14);
 }
 
 .sectionTitle {

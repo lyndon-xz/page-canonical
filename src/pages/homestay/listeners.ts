@@ -1,7 +1,7 @@
-import type { TypedStartListening } from "@reduxjs/toolkit";
+import type { TypedStartListening } from '@reduxjs/toolkit';
 
-import { exitListing, setSubmittedInquiry } from "./slice";
-import type { AppDispatch, RootState } from "./store";
+import { exitListing, setSubmittedInquiry } from './slice';
+import type { AppDispatch, RootState } from './store';
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 

@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 interface FormFieldProps {
   label: string;
@@ -15,7 +15,7 @@ export default function FormField(props: FormFieldProps) {
   const { label, htmlFor, error, className, children } = props;
 
   return (
-    <div className={`${styles.field} ${className ?? ""}`.trim()}>
+    <div className={`${styles.field} ${className ?? ''}`.trim()}>
       <label className={styles.label} htmlFor={htmlFor}>
         {label}
       </label>

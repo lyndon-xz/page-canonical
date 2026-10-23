@@ -1,8 +1,7 @@
 export enum ConfirmScene {
-  RemoveFavorite = "removeFavorite",
-  CancelInquiry = "cancelInquiry",
+  RemoveFavorite = 'removeFavorite',
+  CancelInquiry = 'cancelInquiry',
 }
 
 export type ConfirmRequest =
-  | { scene: ConfirmScene.RemoveFavorite; listingId: string }
-  | { scene: ConfirmScene.CancelInquiry };
+  { scene: ConfirmScene.RemoveFavorite; listingId: string } | { scene: ConfirmScene.CancelInquiry };

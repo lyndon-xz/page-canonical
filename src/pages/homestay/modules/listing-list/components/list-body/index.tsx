@@ -1,23 +1,18 @@
-import { Button, Empty, Spin } from "antd";
+import { Button, Empty, Spin } from 'antd';
 
-import { FetchStatus } from "@/lib/fetch-status";
+import { FetchStatus } from '@/constants/fetch-status';
 
-import { listingListActions } from "../../actions";
-import { useListingListModel } from "../../model";
-import ListingCard from "../listing-card";
+import { listingListActions } from '../../actions';
+import { useListingListModel } from '../../model';
+import ListingCard from '../listing-card';
 
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 const { retry } = listingListActions;
 
 export default function ListBody() {
-  const {
-    listings,
-    listingsStatus,
-    selectedListingId,
-    favoriteIds,
-    favoritingIds,
-  } = useListingListModel();
+  const { listings, listingsStatus, selectedListingId, favoriteIds, favoritingIds } =
+    useListingListModel();
 
   if (listingsStatus === FetchStatus.Loading) {
     return (

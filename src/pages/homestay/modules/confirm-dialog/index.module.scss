@@ -1,5 +1,5 @@
 .target {
-  margin: 0 0 8px;
+  margin: 0 0 var(--space-8);
   font-size: 14px;
   font-weight: 600;
   line-height: 1.6;
@@ -13,5 +13,5 @@
 }
 
 .error {
-  margin-top: 12px;
+  margin-top: var(--space-12);
 }

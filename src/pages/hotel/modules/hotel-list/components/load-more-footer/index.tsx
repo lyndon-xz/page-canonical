@@ -1,12 +1,12 @@
-import { Button, Spin } from "antd";
-import type { RefObject } from "react";
+import { Button, Spin } from 'antd';
+import type { RefObject } from 'react';
 
-import { FetchStatus } from "@/lib/fetch-status";
+import { FetchStatus } from '@/constants/fetch-status';
 
-import { hotelListActions } from "../../actions";
-import { useHotelListModel } from "../../model";
+import { hotelListActions } from '../../actions';
+import { useHotelListModel } from '../../model';
 
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 const { loadMore } = hotelListActions;
 

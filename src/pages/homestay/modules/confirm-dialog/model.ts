@@ -1,7 +1,7 @@
-import { shallowEqual } from "react-redux";
+import { shallowEqual } from 'react-redux';
 
-import { ConfirmScene } from "../../shared/confirm";
-import { useAppSelector, type RootState } from "../../store";
+import { ConfirmScene } from '../../shared/confirm';
+import { useAppSelector, type RootState } from '../../store';
 
 const selectConfirmTarget = (state: RootState) => {
   const { confirmRequest, listings, submittedInquiry } = state.page;

@@ -1,10 +1,12 @@
 .field {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: var(--space-7);
 
   // antd 的日期与数字输入默认不撑满，宽度统一由字段容器约束
+  /* stylelint-disable-next-line selector-class-pattern -- 类名是 antd 的，必须照抄 */
   :global(.ant-picker),
+  /* stylelint-disable-next-line selector-class-pattern -- 类名是 antd 的，必须照抄 */
   :global(.ant-input-number) {
     width: 100%;
   }

@@ -1,7 +1,7 @@
-import { message } from "antd";
+import { message } from 'antd';
 
-import { toErrorMessage } from "@/lib/error";
-import { FetchStatus } from "@/lib/fetch-status";
+import { FetchStatus } from '@/constants/fetch-status';
+import { toErrorMessage } from '@/utils/error';
 
 import {
   cancelInquiry as cancelInquiryService,
@@ -9,11 +9,11 @@ import {
   fetchListings,
   submitInquiry as submitInquiryService,
   toggleFavorite as toggleFavoriteService,
-} from "./data/services";
-import { ConfirmScene, type ConfirmRequest } from "./shared/confirm";
-import type { ListingFilters } from "./shared/filters";
-import type { InquiryForm } from "./shared/inquiry";
-import { reportTrace } from "./shared/trace";
+} from './data/services';
+import { ConfirmScene, type ConfirmRequest } from './shared/confirm';
+import type { ListingFilters } from './shared/filters';
+import type { InquiryForm } from './shared/inquiry';
+import { reportTrace } from './shared/trace';
 import {
   addFavoriteId,
   finishFavoriting,
@@ -30,13 +30,12 @@ import {
   setSelectedListingId,
   setSubmittedInquiry,
   startFavoriting,
-} from "./slice";
-import { selectTraceCommonTag, store } from "./store";
+} from './slice';
+import { selectTraceCommonTag, store } from './store';
 
 let resultSetGeneration = 0;
 
-const isStaleGeneration = (generation: number) =>
-  generation !== resultSetGeneration;
+const isStaleGeneration = (generation: number) => generation !== resultSetGeneration;
 
 let latestDetailRequestId = 0;
 
@@ -44,8 +43,7 @@ async function loadListingDetail(listingId: string) {
   const requestId = (latestDetailRequestId += 1);
 
   const isStale = () =>
-    requestId !== latestDetailRequestId ||
-    store.getState().page.selectedListingId !== listingId;
+    requestId !== latestDetailRequestId || store.getState().page.selectedListingId !== listingId;
 
   store.dispatch(setDetail(null));
   store.dispatch(setDetailStatus(FetchStatus.Loading));
@@ -74,18 +72,14 @@ async function addFavorite(listingId: string) {
 }
 
 export const pageActions = {
-  // ── 埋点 ──
-
-  trackClick(event: string, extra: Record<string, string> = {}) {
+  trackClick: (event: string, extra: Record<string, string> = {}) => {
     reportTrace(event, {
       ...selectTraceCommonTag(store.getState()),
       ...extra,
     });
   },
 
-  // ── 列表 ──
-
-  async loadListings(filters: ListingFilters) {
+  loadListings: async (filters: ListingFilters) => {
     const generation = (resultSetGeneration += 1);
 
     store.dispatch(setAppliedFilters(filters));
@@ -107,26 +101,24 @@ export const pageActions = {
     }
   },
 
-  retryListings() {
+  retryListings: () => {
     void pageActions.loadListings(store.getState().page.appliedFilters);
   },
 
-  // ── 详情 ──
-
-  selectListing(listingId: string) {
+  selectListing: (listingId: string) => {
     store.dispatch(setSelectedListingId(listingId));
     void loadListingDetail(listingId);
   },
 
-  openDetailDrawer() {
+  openDetailDrawer: () => {
     store.dispatch(setIsDetailDrawerOpen(true));
   },
 
-  closeDetailDrawer() {
+  closeDetailDrawer: () => {
     store.dispatch(setIsDetailDrawerOpen(false));
   },
 
-  retryDetail() {
+  retryDetail: () => {
     const { selectedListingId } = store.getState().page;
 
     if (!selectedListingId) {
@@ -135,34 +127,28 @@ export const pageActions = {
     void loadListingDetail(selectedListingId);
   },
 
-  // ── 确认弹窗 ──
-
-  openConfirm(request: ConfirmRequest) {
+  openConfirm: (request: ConfirmRequest) => {
     store.dispatch(setConfirmRequest(request));
   },
 
-  closeConfirm() {
+  closeConfirm: () => {
     store.dispatch(setConfirmRequest(null));
   },
 
-  // ── 收藏 ──
-
-  async commitFavorite(listingId: string) {
+  commitFavorite: async (listingId: string) => {
     const { favoriteIds } = store.getState().page;
     const isFavorited = favoriteIds.includes(listingId);
 
     store.dispatch(startFavoriting(listingId));
     try {
       await toggleFavoriteService(listingId);
-      store.dispatch(
-        isFavorited ? removeFavoriteId(listingId) : addFavoriteId(listingId),
-      );
+      store.dispatch(isFavorited ? removeFavoriteId(listingId) : addFavoriteId(listingId));
     } finally {
       store.dispatch(finishFavoriting(listingId));
     }
   },
 
-  toggleFavorite(listingId: string) {
+  toggleFavorite: (listingId: string) => {
     const { favoriteIds, favoritingIds } = store.getState().page;
 
     if (favoritingIds.includes(listingId)) {
@@ -171,7 +157,7 @@ export const pageActions = {
 
     const willFavorite = !favoriteIds.includes(listingId);
 
-    pageActions.trackClick("listing_favorite_toggle", {
+    pageActions.trackClick('listing_favorite_toggle', {
       listingId,
       willFavorite: String(willFavorite),
     });
@@ -187,13 +173,11 @@ export const pageActions = {
     });
   },
 
-  // ── 询价 ──
-
-  async submitInquiry(values: InquiryForm) {
+  submitInquiry: async (values: InquiryForm) => {
     const { selectedListingId } = store.getState().page;
 
     if (!selectedListingId) {
-      throw new Error("请先选择要询价的房源");
+      throw new Error('请先选择要询价的房源');
     }
 
     store.dispatch(setIsSubmittingInquiry(true));
@@ -209,7 +193,7 @@ export const pageActions = {
     }
   },
 
-  async cancelInquiry() {
+  cancelInquiry: async () => {
     const { submittedInquiry } = store.getState().page;
 
     if (!submittedInquiry) {

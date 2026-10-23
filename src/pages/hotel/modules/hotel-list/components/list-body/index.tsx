@@ -1,14 +1,14 @@
-import { Button, Empty, Spin } from "antd";
-import type { RefObject } from "react";
+import { Button, Empty, Spin } from 'antd';
+import type { RefObject } from 'react';
 
-import { FetchStatus } from "@/lib/fetch-status";
+import { FetchStatus } from '@/constants/fetch-status';
 
-import { hotelListActions } from "../../actions";
-import { useHotelListModel } from "../../model";
-import HotelCard from "../hotel-card";
-import LoadMoreFooter from "../load-more-footer";
+import { hotelListActions } from '../../actions';
+import { useHotelListModel } from '../../model';
+import HotelCard from '../hotel-card';
+import LoadMoreFooter from '../load-more-footer';
 
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 const { retry } = hotelListActions;
 
@@ -18,13 +18,8 @@ interface ListBodyProps {
 
 export default function ListBody(props: ListBodyProps) {
   const { sentinelRef } = props;
-  const {
-    hotels,
-    hotelsStatus,
-    selectedHotelId,
-    favoriteIds,
-    selectedHotelIds,
-  } = useHotelListModel();
+  const { hotels, hotelsStatus, selectedHotelId, favoriteIds, selectedHotelIds } =
+    useHotelListModel();
 
   if (hotelsStatus === FetchStatus.Loading) {
     return (

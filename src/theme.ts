@@ -1,25 +1,25 @@
-import type { ThemeConfig } from "antd";
+import type { ThemeConfig } from 'antd';
 
 const palette = {
-  ink: "#3b3129",
-  inkRgb: "59 49 41",
-  paper: "#f7f2ea",
-  card: "#fffdf9",
-  cardRgb: "255 253 249",
-  primary: "#c17a4f",
-  primaryStrong: "#a9603a",
-  primarySoft: "#f3e6d9",
-  primaryWarm: "#d99a6b",
-  amber: "#d99a4a",
-  amberSoft: "#faeedb",
-  ok: "#6f8f5e",
-  okSoft: "#eaf0e4",
-  danger: "#b04a3a",
-  dangerSoft: "#f7e4de",
-  line: "#ece2d4",
-  lineSoft: "#f1e9dd",
-  lineHover: "#e2d5c4",
-  muted: "#8a7c6d",
+  ink: '#3b3129',
+  inkRgb: '59 49 41',
+  paper: '#f7f2ea',
+  card: '#fffdf9',
+  cardRgb: '255 253 249',
+  primary: '#c17a4f',
+  primaryStrong: '#a9603a',
+  primarySoft: '#f3e6d9',
+  primaryWarm: '#d99a6b',
+  amber: '#d99a4a',
+  amberSoft: '#faeedb',
+  ok: '#6f8f5e',
+  okSoft: '#eaf0e4',
+  danger: '#b04a3a',
+  dangerSoft: '#f7e4de',
+  line: '#ece2d4',
+  lineSoft: '#f1e9dd',
+  lineHover: '#e2d5c4',
+  muted: '#8a7c6d',
 };
 
 const fontStack = {
@@ -31,6 +31,8 @@ const fontStack = {
 const shadow = {
   shadowCard: `0 8px 24px -18px rgb(${palette.inkRgb} / 28%)`,
   shadowLift: `0 16px 30px -20px rgb(${palette.inkRgb} / 30%)`,
+  shadowMark: `0 4px 10px -5px rgb(${palette.inkRgb} / 35%)`,
+  shadowStub: `0 2px 8px -3px rgb(${palette.inkRgb} / 22%)`,
 };
 
 const CARD_RADIUS_PX = 16;
@@ -50,10 +52,42 @@ const cssTokens = {
   radiusXs: `${TAG_RADIUS_PX}px`,
   fontSizeBase: `${BASE_FONT_SIZE_PX}px`,
   fontSizeSm: `${SMALL_FONT_SIZE_PX}px`,
+  railScrim: `rgb(${palette.cardRgb} / 88%)`,
 };
 
+const spacingTokens = {
+  'space-1': '1px',
+  'space-3': '3px',
+  'space-4': '4px',
+  'space-5': '5px',
+  'space-6': '6px',
+  'space-7': '7px',
+  'space-8': '8px',
+  'space-9': '9px',
+  'space-10': '10px',
+  'space-12': '12px',
+  'space-13': '13px',
+  'space-14': '14px',
+  'space-16': '16px',
+  'space-18': '18px',
+  'space-20': '20px',
+  'space-22': '22px',
+  'space-24': '24px',
+  'space-26': '26px',
+  'space-28': '28px',
+  'space-34': '34px',
+  'space-40': '40px',
+  'space-44': '44px',
+  'space-56': '56px',
+  'space-80': '80px',
+  'radius-3': '3px',
+  'radius-8': '8px',
+  'radius-12': '12px',
+  'radius-pill': '999px',
+} as const;
+
 const toCssVariableName = (token: string) =>
-  `--${token.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`;
+  `--${token.replaceAll(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`;
 
 /** 把设计令牌写进 :root，样式表以 var(--xxx) 消费同一份值 */
 export function applyTokensToRoot() {
@@ -63,6 +97,11 @@ export function applyTokensToRoot() {
     const [token, value] = entry;
 
     style.setProperty(toCssVariableName(token), value);
+  });
+  Object.entries(spacingTokens).forEach((entry) => {
+    const [token, value] = entry;
+
+    style.setProperty(`--${token}`, value);
   });
 }
 

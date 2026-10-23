@@ -1,6 +1,6 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { resetResultSet, setConfirmRequest } from "../../slice";
+import { resetResultSet, setConfirmRequest } from '../../slice';
 
 interface ConfirmDialogLocalState {
   isConfirming: boolean;
@@ -13,7 +13,7 @@ const initialState: ConfirmDialogLocalState = {
 };
 
 const confirmDialogSlice = createSlice({
-  name: "confirmDialog",
+  name: 'confirmDialog',
   initialState,
   reducers: {
     setIsConfirming(state, action: PayloadAction<boolean>) {

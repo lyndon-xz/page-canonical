@@ -1,11 +1,11 @@
 .sortBar {
   display: flex;
-  gap: 8px;
+  gap: var(--space-8);
   align-items: center;
 }
 
 .option {
-  padding: 6px 14px;
+  padding: var(--space-6) var(--space-14);
   font-size: 13px;
   color: var(--muted);
   cursor: pointer;
@@ -19,7 +19,7 @@
     border-color: var(--primary);
   }
 
-  &[data-active="true"] {
+  &[data-active='true'] {
     color: var(--primary-strong);
     background: var(--primary-soft);
     border-color: var(--primary);

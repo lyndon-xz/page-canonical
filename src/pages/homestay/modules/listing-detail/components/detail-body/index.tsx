@@ -1,12 +1,12 @@
-import { Button, Empty, Spin, Tag } from "antd";
+import { Button, Empty, Spin, Tag } from 'antd';
 
-import { FetchStatus } from "@/lib/fetch-status";
+import { FetchStatus } from '@/constants/fetch-status';
 
-import { FAVORITE_LABEL, UNFAVORITE_LABEL } from "../../../../shared/favorite";
-import { listingDetailActions } from "../../actions";
-import { useListingDetailModel } from "../../model";
+import { FAVORITE_LABEL, UNFAVORITE_LABEL } from '../../../../shared/favorite';
+import { listingDetailActions } from '../../actions';
+import { useListingDetailModel } from '../../model';
 
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 const { openDetailDrawer, retryDetail, toggleFavorite } = listingDetailActions;
 
@@ -16,8 +16,7 @@ interface DetailBodyProps {
 
 export default function DetailBody(props: DetailBodyProps) {
   const { isInDrawer = false } = props;
-  const { listing, detail, detailStatus, isFavorite, isFavoriting } =
-    useListingDetailModel();
+  const { listing, detail, detailStatus, isFavorite, isFavoriting } = useListingDetailModel();
 
   if (detailStatus === FetchStatus.Loading) {
     return (
@@ -75,11 +74,7 @@ export default function DetailBody(props: DetailBodyProps) {
           </Button>
         </div>
       ) : (
-        <Button
-          type="link"
-          className={styles.expandLink}
-          onClick={openDetailDrawer}
-        >
+        <Button type="link" className={styles.expandLink} onClick={openDetailDrawer}>
           展开完整详情
         </Button>
       )}

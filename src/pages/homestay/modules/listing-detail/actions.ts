@@ -1,23 +1,23 @@
-import { pageActions } from "../../actions";
-import { store } from "../../store";
+import { pageActions } from '../../actions';
+import { store } from '../../store';
 
 export const listingDetailActions = {
-  openDetailDrawer() {
-    pageActions.trackClick("detail_drawer_open");
+  openDetailDrawer: () => {
+    pageActions.trackClick('detail_drawer_open');
     pageActions.openDetailDrawer();
   },
 
-  closeDetailDrawer() {
-    pageActions.trackClick("detail_drawer_close");
+  closeDetailDrawer: () => {
+    pageActions.trackClick('detail_drawer_close');
     pageActions.closeDetailDrawer();
   },
 
-  retryDetail() {
-    pageActions.trackClick("detail_retry");
+  retryDetail: () => {
+    pageActions.trackClick('detail_retry');
     pageActions.retryDetail();
   },
 
-  toggleFavorite() {
+  toggleFavorite: () => {
     const { selectedListingId } = store.getState().page;
 
     if (!selectedListingId) {

@@ -1,6 +1,6 @@
 .card {
   position: relative;
-  padding: 18px 18px 16px;
+  padding: var(--space-18) var(--space-18) var(--space-16);
   cursor: pointer;
   background: var(--card);
   border: 1px solid var(--line);
@@ -16,38 +16,38 @@
     transform: translateY(-3px);
   }
 
-  &[data-selected="true"] {
+  &[data-selected='true'] {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px var(--primary-soft);
   }
 
-  &[data-checked="true"] {
+  &[data-checked='true'] {
     background: var(--primary-soft);
   }
 
-  &[data-selected="true"]::before {
+  &[data-selected='true']::before {
     position: absolute;
     top: 16px;
     bottom: 16px;
     left: -1px;
     width: 3px;
-    content: "";
+    content: '';
     background: var(--primary);
-    border-radius: 3px;
+    border-radius: var(--radius-3);
   }
 }
 
 .head {
   display: flex;
-  gap: 12px;
+  gap: var(--space-12);
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: var(--space-14);
 }
 
 .checkbox {
   flex-shrink: 0;
-  margin-top: 3px;
+  margin-top: var(--space-3);
 }
 
 .name {
@@ -74,7 +74,7 @@
 
 .star {
   flex: none;
-  padding: 3px 9px;
+  padding: var(--space-3) var(--space-9);
   font-family: var(--mono);
   font-size: 11px;
   color: var(--muted);
@@ -85,16 +85,16 @@
 
 .meta {
   display: flex;
-  gap: 16px;
+  gap: var(--space-16);
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: var(--space-18);
   font-size: 13.5px;
   color: var(--muted);
 }
 
 .city {
   display: inline-flex;
-  gap: 5px;
+  gap: var(--space-5);
   align-items: center;
 
   :global(.anticon) {
@@ -106,7 +106,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 13px;
+  padding-top: var(--space-13);
   border-top: 1px dashed var(--line);
 }
 
@@ -156,7 +156,7 @@
     background: var(--primary-soft);
   }
 
-  &[data-active="true"] {
+  &[data-active='true'] {
     color: var(--primary-strong);
   }
 }

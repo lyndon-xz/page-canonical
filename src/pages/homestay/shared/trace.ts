@@ -5,11 +5,7 @@ export interface TraceCommonTag {
   selectedListingId: string;
 }
 
-export function reportTrace(
-  event: string,
-  tag: TraceCommonTag & Record<string, string>,
-) {
-  // 埋点槽：示范页用 info 打出事件，不是告警
-  // eslint-disable-next-line no-console
-  console.info("[trace]", event, tag);
+export function reportTrace(event: string, tag: TraceCommonTag & Record<string, string>) {
+  // eslint-disable-next-line no-console -- 示范页把埋点打到 info，不是告警
+  console.info('[trace]', event, tag);
 }

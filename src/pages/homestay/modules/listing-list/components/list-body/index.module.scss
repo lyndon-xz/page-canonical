@@ -1,16 +1,16 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
-  gap: 16px;
+  gap: var(--space-16);
 }
 
 .stateBox {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-10);
   align-items: center;
   justify-content: center;
-  padding: 56px 0;
+  padding: var(--space-56) 0;
 }
 
 .errorText {

@@ -1,4 +1,4 @@
-export const ROOM_TYPE_VALUES = ["整套", "单间", "合住"] as const;
+export const ROOM_TYPE_VALUES = ['整套', '单间', '合住'] as const;
 
 export type RoomType = (typeof ROOM_TYPE_VALUES)[number];
 

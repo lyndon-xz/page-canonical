@@ -1,7 +1,7 @@
-import type { ComponentType } from "react";
+import type { ComponentType } from 'react';
 
-import HomestayPage from "@/pages/homestay";
-import HotelPage from "@/pages/hotel";
+import HomestayPage from '@/pages/homestay';
+import HotelPage from '@/pages/hotel';
 
 interface Route {
   path: string;
@@ -12,20 +12,20 @@ interface Route {
 
 export const routes = [
   {
-    path: "hotel",
-    name: "酒店",
-    lib: "zustand",
+    path: 'hotel',
+    name: '酒店',
+    lib: 'zustand',
     Component: HotelPage,
   },
   {
-    path: "homestay",
-    name: "民宿",
-    lib: "redux toolkit",
+    path: 'homestay',
+    name: '民宿',
+    lib: 'redux toolkit',
     Component: HomestayPage,
   },
 ] as const satisfies readonly Route[];
 
-export type PageKey = (typeof routes)[number]["path"];
+export type PageKey = (typeof routes)[number]['path'];
 
 export const DEFAULT_PAGE: PageKey = routes[0].path;
 

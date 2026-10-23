@@ -1,18 +1,18 @@
-import { message } from "antd";
+import { message } from 'antd';
 
-import { toErrorMessage } from "@/lib/error";
+import { toErrorMessage } from '@/utils/error';
 
-import { pageActions } from "../../actions";
-import { InquirySubmitError } from "../../data/services";
-import { getLive } from "../../live";
-import { ConfirmScene } from "../../shared/confirm";
-import type { InquiryForm } from "../../shared/inquiry";
+import { pageActions } from '../../actions';
+import { InquirySubmitError } from '../../data/services';
+import { getLive } from '../../live';
+import { ConfirmScene } from '../../shared/confirm';
+import type { InquiryForm } from '../../shared/inquiry';
 
 export const inquirySubmitActions = {
-  async submit(values: InquiryForm) {
-    pageActions.trackClick("inquiry_submit");
+  submit: async (values: InquiryForm) => {
+    pageActions.trackClick('inquiry_submit');
 
-    const form = getLive("inquiryForm");
+    const form = getLive('inquiryForm');
 
     try {
       await pageActions.submitInquiry(values);
@@ -31,8 +31,8 @@ export const inquirySubmitActions = {
     }
   },
 
-  requestCancel() {
-    pageActions.trackClick("inquiry_cancel_request");
+  requestCancel: () => {
+    pageActions.trackClick('inquiry_cancel_request');
     pageActions.openConfirm({ scene: ConfirmScene.CancelInquiry });
   },
 };

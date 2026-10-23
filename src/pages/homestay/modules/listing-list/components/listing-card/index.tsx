@@ -3,13 +3,13 @@ import {
   HeartFilled,
   HeartOutlined,
   LoadingOutlined,
-} from "@ant-design/icons";
+} from '@ant-design/icons';
 
-import { FAVORITE_LABEL, UNFAVORITE_LABEL } from "../../../../shared/favorite";
-import type { Listing } from "../../../../shared/listing";
-import { listingListActions } from "../../actions";
+import { FAVORITE_LABEL, UNFAVORITE_LABEL } from '../../../../shared/favorite';
+import type { Listing } from '../../../../shared/listing';
+import { listingListActions } from '../../actions';
 
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 const { selectListing, toggleFavorite } = listingListActions;
 
@@ -33,27 +33,28 @@ export default function ListingCard(props: ListingCardProps) {
   const { id, title, city, pricePerNight, rating, roomType } = listing;
 
   return (
+    // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions -- 卡片内还有收藏按钮，整卡不能再套 button；键盘用标题按钮
     <article
       className={styles.card}
       data-selected={isSelected}
-      role="button"
-      tabIndex={0}
-      aria-pressed={isSelected}
-      onClick={() => selectListing(id)}
-      onKeyDown={(event) => {
-        const { key } = event;
-
-        const isActivationKey = key === "Enter" || key === " ";
-
-        if (!isActivationKey) {
-          return;
-        }
-        event.preventDefault();
+      onClick={() => {
         selectListing(id);
       }}
     >
       <div className={styles.head}>
-        <h3 className={styles.title}>{title}</h3>
+        <h3 className={styles.title}>
+          <button
+            type="button"
+            className={styles.titleButton}
+            aria-pressed={isSelected}
+            onClick={(event) => {
+              event.stopPropagation();
+              selectListing(id);
+            }}
+          >
+            {title}
+          </button>
+        </h3>
         <span className={styles.roomType}>{roomType}</span>
       </div>
 

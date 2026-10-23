@@ -1,14 +1,10 @@
-import {
-  EnvironmentOutlined,
-  HeartFilled,
-  HeartOutlined,
-} from "@ant-design/icons";
-import { Checkbox } from "antd";
+import { EnvironmentOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
+import { Checkbox } from 'antd';
 
-import type { Hotel } from "../../../../shared/hotel";
-import { hotelListActions } from "../../actions";
+import type { Hotel } from '../../../../shared/hotel';
+import { hotelListActions } from '../../actions';
 
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 const { selectHotel, toggleSelect, toggleFavorite } = hotelListActions;
 
@@ -24,26 +20,35 @@ export default function HotelCard(props: HotelCardProps) {
   const { id, name, city, pricePerNight, rating, star, distanceKm } = hotel;
 
   return (
+    // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions -- 卡片内还有勾选和收藏按钮，整卡不能再套 button；键盘用标题按钮
     <article
       className={styles.card}
       data-selected={isSelected}
       data-checked={isChecked}
-      onClick={() => selectHotel(id)}
+      onClick={() => {
+        selectHotel(id);
+      }}
     >
       <div className={styles.head}>
         <Checkbox
           checked={isChecked}
           className={styles.checkbox}
           aria-label={`勾选 ${name}`}
-          onClick={(event) => event.stopPropagation()}
-          onChange={() => toggleSelect(id)}
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+          onChange={() => {
+            toggleSelect(id);
+          }}
         />
         <h3 className={styles.name}>
           <button
             type="button"
             className={styles.nameButton}
             aria-pressed={isSelected}
-            onClick={() => selectHotel(id)}
+            onClick={() => {
+              selectHotel(id);
+            }}
           >
             {name}
           </button>
@@ -68,7 +73,7 @@ export default function HotelCard(props: HotelCardProps) {
           type="button"
           className={styles.favorite}
           data-active={isFavorite}
-          aria-label={isFavorite ? "取消收藏" : "收藏酒店"}
+          aria-label={isFavorite ? '取消收藏' : '收藏酒店'}
           onClick={(event) => {
             event.stopPropagation();
             toggleFavorite(id);

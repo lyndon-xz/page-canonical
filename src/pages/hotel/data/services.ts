@@ -1,18 +1,15 @@
-import { mockDelay } from "@/lib/mock-delay";
+import type { BookingFieldError, BookingForm } from '../shared/booking';
+import type { BatchFavoriteFailure, BatchFavoriteResult } from '../shared/favorite';
+import type { Hotel, HotelPageResult } from '../shared/hotel';
+import { UNLIMITED_STAR, type SearchParams, type SortBy } from '../shared/params';
 
-import type { BookingFieldError, BookingForm } from "../shared/booking";
-import type {
-  BatchFavoriteFailure,
-  BatchFavoriteResult,
-} from "../shared/favorite";
-import type { Hotel, HotelPageResult } from "../shared/hotel";
-import {
-  UNLIMITED_STAR,
-  type SearchParams,
-  type SortBy,
-} from "../shared/params";
+import { MOCK_HOTELS } from './hotels';
 
-import { MOCK_HOTELS } from "./hotels";
+const MOCK_DELAY_MS = 300;
+
+function mockDelay(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+}
 
 const SORT_COMPARATORS: Record<SortBy, (a: Hotel, b: Hotel) => number> = {
   price: (a, b) => a.pricePerNight - b.pricePerNight,
@@ -28,7 +25,7 @@ const resolveMatchedHotels = (searchParams: SearchParams): Hotel[] => {
     const { name, city, star: hotelStar } = hotel;
 
     const isKeywordMatched =
-      normalizedKeyword === "" ||
+      normalizedKeyword === '' ||
       name.toLowerCase().includes(normalizedKeyword) ||
       city.toLowerCase().includes(normalizedKeyword);
     const isStarMatched = star === UNLIMITED_STAR || hotelStar === star;
@@ -38,8 +35,8 @@ const resolveMatchedHotels = (searchParams: SearchParams): Hotel[] => {
 
 const HOTEL_PAGE_SIZE = 12;
 
-const SEARCH_REJECTED_KEYWORD = "error";
-const LOAD_MORE_REJECTED_KEYWORD = "more-error";
+const SEARCH_REJECTED_KEYWORD = 'error';
+const LOAD_MORE_REJECTED_KEYWORD = 'more-error';
 
 export async function fetchHotelPage(
   searchParams: SearchParams,
@@ -50,16 +47,16 @@ export async function fetchHotelPage(
   const normalizedKeyword = searchParams.keyword.trim().toLowerCase();
 
   if (normalizedKeyword === SEARCH_REJECTED_KEYWORD) {
-    throw new Error("酒店列表服务暂不可用");
+    throw new Error('酒店列表服务暂不可用');
   }
 
   if (pageNumber >= 2 && normalizedKeyword === LOAD_MORE_REJECTED_KEYWORD) {
-    throw new Error("酒店列表下一页暂不可用");
+    throw new Error('酒店列表下一页暂不可用');
   }
 
   const matched = resolveMatchedHotels(
     normalizedKeyword === LOAD_MORE_REJECTED_KEYWORD
-      ? { ...searchParams, keyword: "" }
+      ? { ...searchParams, keyword: '' }
       : searchParams,
   );
   const start = (pageNumber - 1) * HOTEL_PAGE_SIZE;
@@ -73,19 +70,17 @@ export async function fetchHotelPage(
   };
 }
 
-const FAVORITE_REJECTED_HOTEL_IDS = ["h2"];
+const FAVORITE_REJECTED_HOTEL_IDS = ['h2'];
 
 export async function toggleHotelFavorite(hotelId: string): Promise<void> {
   await mockDelay();
 
   if (FAVORITE_REJECTED_HOTEL_IDS.includes(hotelId)) {
-    throw new Error("收藏服务暂不可用，请稍后再试");
+    throw new Error('收藏服务暂不可用，请稍后再试');
   }
 }
 
-export async function batchFavoriteHotels(
-  hotelIds: string[],
-): Promise<BatchFavoriteResult> {
+export async function batchFavoriteHotels(hotelIds: string[]): Promise<BatchFavoriteResult> {
   await mockDelay();
 
   const succeededIds: string[] = [];
@@ -93,7 +88,7 @@ export async function batchFavoriteHotels(
 
   hotelIds.forEach((hotelId) => {
     if (FAVORITE_REJECTED_HOTEL_IDS.includes(hotelId)) {
-      failures.push({ hotelId, reason: "收藏服务暂不可用" });
+      failures.push({ hotelId, reason: '收藏服务暂不可用' });
       return;
     }
     succeededIds.push(hotelId);
@@ -102,33 +97,28 @@ export async function batchFavoriteHotels(
   return { succeededIds, failures };
 }
 
-const BOOKING_REJECTED_HOTEL_IDS = ["h5"];
+const BOOKING_REJECTED_HOTEL_IDS = ['h5'];
 
-const BOOKING_BLOCKED_PHONES = ["13800000000"];
+const BOOKING_BLOCKED_PHONES = ['13800000000'];
 
 export class BookingSubmitError extends Error {
   readonly fieldErrors: BookingFieldError[];
 
   constructor(fieldErrors: BookingFieldError[]) {
-    super("预订提交失败");
-    this.name = "BookingSubmitError";
+    super('预订提交失败');
+    this.name = 'BookingSubmitError';
     this.fieldErrors = fieldErrors;
   }
 }
 
-export async function submitBooking(
-  hotelId: string,
-  values: BookingForm,
-): Promise<void> {
+export async function submitBooking(hotelId: string, values: BookingForm): Promise<void> {
   await mockDelay();
 
   if (BOOKING_REJECTED_HOTEL_IDS.includes(hotelId)) {
-    throw new Error("该酒店已订满，换一家试试");
+    throw new Error('该酒店已订满，换一家试试');
   }
 
   if (BOOKING_BLOCKED_PHONES.includes(values.phone.trim())) {
-    throw new BookingSubmitError([
-      { field: "phone", message: "该手机号暂不可用，请更换后重试" },
-    ]);
+    throw new BookingSubmitError([{ field: 'phone', message: '该手机号暂不可用，请更换后重试' }]);
   }
 }

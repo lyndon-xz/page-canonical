@@ -1,5 +1,5 @@
 .title {
-  margin: 0 0 6px;
+  margin: 0 0 var(--space-6);
   font-family: var(--display);
   font-size: 18px;
   font-weight: 600;
@@ -7,13 +7,13 @@
 }
 
 .meta {
-  margin: 0 0 12px;
+  margin: 0 0 var(--space-12);
   font-size: var(--font-size-sm);
   color: var(--muted);
 }
 
 .description {
-  margin: 0 0 14px;
+  margin: 0 0 var(--space-14);
   font-size: 14px;
   line-height: 1.7;
   color: var(--ink);
@@ -22,8 +22,8 @@
 .amenities {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 16px 0 18px;
+  gap: var(--space-8);
+  margin: var(--space-16) 0 var(--space-18);
 }
 
 .amenity {
@@ -34,7 +34,7 @@
 }
 
 .policyLabel {
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-4);
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--ink);
@@ -49,23 +49,23 @@
 
 .actions {
   display: flex;
-  gap: 10px;
-  margin-top: 20px;
+  gap: var(--space-10);
+  margin-top: var(--space-20);
 }
 
 .expandLink {
   height: auto;
   padding: 0;
-  margin-top: 12px;
+  margin-top: var(--space-12);
 }
 
 .stateBox {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-10);
   align-items: center;
   justify-content: center;
-  padding: 40px 0;
+  padding: var(--space-40) 0;
 }
 
 .errorText {

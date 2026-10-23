@@ -1,6 +1,6 @@
 .searchFilter {
-  padding: 16px;
-  margin-bottom: 26px;
+  padding: var(--space-16);
+  margin-bottom: var(--space-26);
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -9,7 +9,7 @@
 
 .row {
   display: flex;
-  gap: 10px;
+  gap: var(--space-10);
   align-items: center;
 }
 
@@ -20,18 +20,18 @@
 .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
+  gap: var(--space-8);
+  margin-top: var(--space-14);
 }
 
 .chip {
-  padding: 6px 16px;
+  padding: var(--space-6) var(--space-16);
   font-size: 13.5px;
   color: var(--muted);
   cursor: pointer;
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   transition: all 0.15s ease;
 
   &:hover {
@@ -39,7 +39,7 @@
     border-color: var(--primary);
   }
 
-  &[data-active="true"] {
+  &[data-active='true'] {
     font-weight: 500;
     color: var(--primary-strong);
     background: var(--primary-soft);
@@ -48,7 +48,7 @@
 }
 
 .resultCount {
-  margin: 16px 0 0;
+  margin: var(--space-16) 0 0;
   font-family: var(--mono);
   font-size: 13px;
   color: var(--muted);

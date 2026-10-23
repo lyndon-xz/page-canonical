@@ -1,19 +1,19 @@
-import { FormProvider, useForm } from "react-hook-form";
-import { Provider } from "react-redux";
+import { FormProvider, useForm } from 'react-hook-form';
+import { Provider } from 'react-redux';
 
-import PageHero from "@/components/page-hero";
+import PageHero from '@/components/page-hero';
 
-import { usePageEffects } from "./effects";
-import { useRegisterLive } from "./live";
-import ConfirmDialog from "./modules/confirm-dialog";
-import InquiryFields from "./modules/inquiry-fields";
-import InquirySubmit from "./modules/inquiry-submit";
-import ListingDetail from "./modules/listing-detail";
-import ListingList from "./modules/listing-list";
-import type { InquiryForm } from "./shared/inquiry";
-import { store } from "./store";
+import { usePageEffects } from './effects';
+import { useRegisterLive } from './live';
+import ConfirmDialog from './modules/confirm-dialog';
+import InquiryFields from './modules/inquiry-fields';
+import InquirySubmit from './modules/inquiry-submit';
+import ListingDetail from './modules/listing-detail';
+import ListingList from './modules/listing-list';
+import type { InquiryForm } from './shared/inquiry';
+import { store } from './store';
 
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 // 挂在 Provider 内部，effects 将来要读 store 时不必改页面结构
 function EffectsRunner() {
@@ -24,16 +24,16 @@ function EffectsRunner() {
 export default function HomestayPage() {
   const methods = useForm<InquiryForm>({
     defaultValues: {
-      guestName: "",
-      phone: "",
-      checkInDate: "",
+      guestName: '',
+      phone: '',
+      checkInDate: '',
       nights: 1,
-      message: "",
+      message: '',
     } satisfies InquiryForm,
-    mode: "onTouched",
+    mode: 'onTouched',
   });
 
-  useRegisterLive("inquiryForm", methods);
+  useRegisterLive('inquiryForm', methods);
 
   return (
     <Provider store={store}>

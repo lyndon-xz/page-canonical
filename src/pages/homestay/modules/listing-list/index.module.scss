@@ -1,12 +1,12 @@
 .listingList {
-  margin-top: 26px;
+  margin-top: var(--space-26);
 }
 
 .header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-16);
 }
 
 .title {

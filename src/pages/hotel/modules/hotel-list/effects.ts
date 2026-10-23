@@ -1,14 +1,12 @@
-import { useEffect, type RefObject } from "react";
+import { useEffect, type RefObject } from 'react';
 
-import { usePageStore } from "../../store";
+import { usePageStore } from '../../store';
 
-import { hotelListActions } from "./actions";
+import { hotelListActions } from './actions';
 
 const { loadMore } = hotelListActions;
 
-export function useScrollBackOnResultSet(
-  listRef: RefObject<HTMLElement | null>,
-) {
+export function useScrollBackOnResultSet(listRef: RefObject<HTMLElement | null>) {
   const appliedParams = usePageStore((s) => s.appliedParams);
 
   useEffect(() => {
@@ -24,7 +22,7 @@ export function useScrollBackOnResultSet(
       return;
     }
 
-    list.scrollIntoView({ behavior: "auto", block: "start" });
+    list.scrollIntoView({ behavior: 'auto', block: 'start' });
   }, [appliedParams, listRef]);
 }
 
@@ -45,6 +43,8 @@ export function useLoadMoreOnSentinel(
     });
     observer.observe(sentinel);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, [sentinelRef, shouldShowSentinel]);
 }

@@ -1,4 +1,4 @@
-export const SORT_BY_VALUES = ["price", "rating", "distance"] as const;
+export const SORT_BY_VALUES = ['price', 'rating', 'distance'] as const;
 
 export type SortBy = (typeof SORT_BY_VALUES)[number];
 
@@ -16,22 +16,18 @@ export interface SearchParams {
 }
 
 export const DEFAULT_SEARCH_PARAMS: SearchParams = {
-  keyword: "",
+  keyword: '',
   star: UNLIMITED_STAR,
-  sortBy: "price",
+  sortBy: 'price',
 };
 
-const {
-  keyword: defaultKeyword,
-  star: defaultStar,
-  sortBy: defaultSortBy,
-} = DEFAULT_SEARCH_PARAMS;
+const { keyword: defaultKeyword, star: defaultStar, sortBy: defaultSortBy } = DEFAULT_SEARCH_PARAMS;
 
 // 与地址栏查询串共享的查询键
 const SEARCH_QUERY_KEYS = {
-  keyword: "keyword",
-  star: "star",
-  sortBy: "sortBy",
+  keyword: 'keyword',
+  star: 'star',
+  sortBy: 'sortBy',
 } as const;
 
 const isStar = (value: number): value is Star =>
@@ -45,8 +41,7 @@ export function parseSearchParams(search: string): SearchParams | null {
   const rawKeyword = query.get(SEARCH_QUERY_KEYS.keyword);
   const rawStar = query.get(SEARCH_QUERY_KEYS.star);
   const rawSortBy = query.get(SEARCH_QUERY_KEYS.sortBy);
-  const hasNoSearchQuery =
-    rawKeyword === null && rawStar === null && rawSortBy === null;
+  const hasNoSearchQuery = rawKeyword === null && rawStar === null && rawSortBy === null;
 
   if (hasNoSearchQuery) {
     return null;
@@ -57,29 +52,24 @@ export function parseSearchParams(search: string): SearchParams | null {
   return {
     keyword: rawKeyword ?? defaultKeyword,
     star: isStar(star) ? star : defaultStar,
-    sortBy:
-      rawSortBy !== null && isSortBy(rawSortBy) ? rawSortBy : defaultSortBy,
+    sortBy: rawSortBy !== null && isSortBy(rawSortBy) ? rawSortBy : defaultSortBy,
   };
 }
 
 /** storage 里的值不可信：逐字段收窄，任一不合法就回落到默认值 */
 export function readPersistedSearchParams(value: unknown): SearchParams {
-  if (typeof value !== "object" || value === null) {
+  if (typeof value !== 'object' || value === null) {
     return DEFAULT_SEARCH_PARAMS;
   }
 
   const keyword =
-    "keyword" in value && typeof value.keyword === "string"
-      ? value.keyword
-      : defaultKeyword;
+    'keyword' in value && typeof value.keyword === 'string' ? value.keyword : defaultKeyword;
   const star =
-    "star" in value && typeof value.star === "number" && isStar(value.star)
+    'star' in value && typeof value.star === 'number' && isStar(value.star)
       ? value.star
       : defaultStar;
   const sortBy =
-    "sortBy" in value &&
-    typeof value.sortBy === "string" &&
-    isSortBy(value.sortBy)
+    'sortBy' in value && typeof value.sortBy === 'string' && isSortBy(value.sortBy)
       ? value.sortBy
       : defaultSortBy;
 
@@ -111,9 +101,5 @@ function serializeParams(searchParams: SearchParams): Record<string, string> {
 export function writeParamsToUrl(searchParams: SearchParams) {
   const query = new URLSearchParams(serializeParams(searchParams)).toString();
 
-  history.replaceState(
-    null,
-    "",
-    query === "" ? window.location.pathname : `?${query}`,
-  );
+  history.replaceState(null, '', query === '' ? window.location.pathname : `?${query}`);
 }

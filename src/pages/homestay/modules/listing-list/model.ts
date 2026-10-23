@@ -1,16 +1,10 @@
-import { shallowEqual } from "react-redux";
+import { shallowEqual } from 'react-redux';
 
-import { useAppSelector } from "../../store";
+import { useAppSelector } from '../../store';
 
 export function useListingListModel() {
   return useAppSelector((s) => {
-    const {
-      listings,
-      listingsStatus,
-      selectedListingId,
-      favoriteIds,
-      favoritingIds,
-    } = s.page;
+    const { listings, listingsStatus, selectedListingId, favoriteIds, favoritingIds } = s.page;
 
     return {
       listings,

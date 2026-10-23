@@ -1,9 +1,9 @@
-import { useMemo } from "react";
-import { useShallow } from "zustand/react/shallow";
+import { useMemo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
-import { FetchStatus } from "@/lib/fetch-status";
+import { FetchStatus } from '@/constants/fetch-status';
 
-import { usePageStore } from "../../store";
+import { usePageStore } from '../../store';
 
 export function useHotelListModel() {
   const state = usePageStore(
@@ -37,8 +37,7 @@ export function useHotelListModel() {
   const { hotelsStatus, loadMoreStatus, selectedHotelIds, hasMore } = rest;
   const hotelsLength = hotels.length;
   const selectedCount = selectedHotelIds.length;
-  const isAllLoadedSelected =
-    hotelsLength > 0 && selectedCount === hotelsLength;
+  const isAllLoadedSelected = hotelsLength > 0 && selectedCount === hotelsLength;
 
   return {
     hotels,

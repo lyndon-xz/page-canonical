@@ -1,26 +1,19 @@
-import { DatePicker, Input } from "antd";
-import dayjs from "dayjs";
-import { Controller } from "react-hook-form";
+import { DatePicker, Input } from 'antd';
+import dayjs from 'dayjs';
+import { Controller } from 'react-hook-form';
 
-import FormField from "@/components/form-field";
-import {
-  PHONE_INVALID_MESSAGE,
-  PHONE_PATTERN,
-  PHONE_REQUIRED_MESSAGE,
-} from "@/lib/phone";
+import FormField from '@/components/form-field';
+import { PHONE_INVALID_MESSAGE, PHONE_PATTERN, PHONE_REQUIRED_MESSAGE } from '@/constants/phone';
 
-import type { Listing } from "../../shared/listing";
+import type { Listing } from '../../shared/listing';
 
-import { useInquiryFieldsModel } from "./model";
+import { useInquiryFieldsModel } from './model';
 
-import styles from "./index.module.scss";
+import styles from './index.module.scss';
 
 const { TextArea } = Input;
 
-function buildTargetText(
-  listing: Listing | null,
-  hasSubmittedInquiry: boolean,
-) {
+function buildTargetText(listing: Listing | null, hasSubmittedInquiry: boolean) {
   if (listing) {
     const { title, pricePerNight } = listing;
 
@@ -28,10 +21,10 @@ function buildTargetText(
   }
 
   if (hasSubmittedInquiry) {
-    return "本次询价已提交，撤回后可重新选择房源";
+    return '本次询价已提交，撤回后可重新选择房源';
   }
 
-  return "请先在上方选择要询价的房源";
+  return '请先在上方选择要询价的房源';
 }
 
 const GUEST_NAME_MAX_LENGTH = 20;
@@ -39,8 +32,7 @@ const INQUIRY_MAX_NIGHTS = 30;
 const MESSAGE_MAX_LENGTH = 200;
 
 export default function InquiryFields() {
-  const { control, errors, listing, hasSubmittedInquiry } =
-    useInquiryFieldsModel();
+  const { control, errors, listing, hasSubmittedInquiry } = useInquiryFieldsModel();
 
   return (
     <>
@@ -49,16 +41,12 @@ export default function InquiryFields() {
       </p>
 
       <div className={styles.fields}>
-        <FormField
-          label="入住人"
-          htmlFor="guestName"
-          error={errors.guestName?.message}
-        >
+        <FormField label="入住人" htmlFor="guestName" error={errors.guestName?.message}>
           <Controller
             name="guestName"
             control={control}
             rules={{
-              required: "请填写入住人",
+              required: '请填写入住人',
               maxLength: {
                 value: GUEST_NAME_MAX_LENGTH,
                 message: `入住人姓名不超过 ${GUEST_NAME_MAX_LENGTH} 字`,
@@ -69,7 +57,7 @@ export default function InquiryFields() {
                 id="guestName"
                 placeholder="请输入入住人姓名"
                 maxLength={GUEST_NAME_MAX_LENGTH}
-                status={errors.guestName ? "error" : undefined}
+                status={errors.guestName ? 'error' : undefined}
                 {...renderProps.field}
               />
             )}
@@ -88,22 +76,18 @@ export default function InquiryFields() {
               <Input
                 id="phone"
                 placeholder="请输入手机号"
-                status={errors.phone ? "error" : undefined}
+                status={errors.phone ? 'error' : undefined}
                 {...renderProps.field}
               />
             )}
           />
         </FormField>
 
-        <FormField
-          label="入住日期"
-          htmlFor="checkInDate"
-          error={errors.checkInDate?.message}
-        >
+        <FormField label="入住日期" htmlFor="checkInDate" error={errors.checkInDate?.message}>
           <Controller
             name="checkInDate"
             control={control}
-            rules={{ required: "请选择入住日期" }}
+            rules={{ required: '请选择入住日期' }}
             render={(renderProps) => {
               const { value, onBlur, onChange } = renderProps.field;
 
@@ -112,36 +96,31 @@ export default function InquiryFields() {
                   id="checkInDate"
                   placeholder="请选择入住日期"
                   inputReadOnly
-                  disabledDate={(current) => current.isBefore(dayjs(), "day")}
-                  value={value === "" ? null : dayjs(value)}
-                  onChange={(_, dateString) =>
-                    onChange(typeof dateString === "string" ? dateString : "")
-                  }
+                  disabledDate={(current) => current.isBefore(dayjs(), 'day')}
+                  value={value === '' ? null : dayjs(value)}
+                  onChange={(_, dateString) => {
+                    onChange(typeof dateString === 'string' ? dateString : '');
+                  }}
                   onBlur={onBlur}
-                  status={errors.checkInDate ? "error" : undefined}
+                  status={errors.checkInDate ? 'error' : undefined}
                 />
               );
             }}
           />
         </FormField>
 
-        <FormField
-          label="入住晚数"
-          htmlFor="nights"
-          error={errors.nights?.message}
-        >
+        <FormField label="入住晚数" htmlFor="nights" error={errors.nights?.message}>
           <Controller
             name="nights"
             control={control}
             rules={{
-              required: "请填写入住晚数",
-              min: { value: 1, message: "至少 1 晚" },
+              required: '请填写入住晚数',
+              min: { value: 1, message: '至少 1 晚' },
               max: {
                 value: INQUIRY_MAX_NIGHTS,
                 message: `单次询价最多 ${INQUIRY_MAX_NIGHTS} 晚`,
               },
-              validate: (value) =>
-                Number.isInteger(value) || "入住晚数须为整数",
+              validate: (value) => Number.isInteger(value) || '入住晚数须为整数',
             }}
             render={(renderProps) => {
               const { name, ref, value, onBlur, onChange } = renderProps.field;
@@ -153,7 +132,7 @@ export default function InquiryFields() {
                   min={1}
                   max={INQUIRY_MAX_NIGHTS}
                   step={1}
-                  status={errors.nights ? "error" : undefined}
+                  status={errors.nights ? 'error' : undefined}
                   name={name}
                   ref={ref}
                   value={value}
@@ -161,7 +140,7 @@ export default function InquiryFields() {
                   onChange={(e) => {
                     const { value: rawValue } = e.target;
 
-                    onChange(rawValue === "" ? undefined : Number(rawValue));
+                    onChange(rawValue === '' ? undefined : Number(rawValue));
                   }}
                 />
               );
@@ -191,7 +170,7 @@ export default function InquiryFields() {
                 placeholder="补充你的入住需求（选填）"
                 maxLength={MESSAGE_MAX_LENGTH}
                 showCount
-                status={errors.message ? "error" : undefined}
+                status={errors.message ? 'error' : undefined}
                 {...renderProps.field}
               />
             )}

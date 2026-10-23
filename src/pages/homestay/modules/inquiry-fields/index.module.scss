@@ -1,10 +1,10 @@
 .target {
-  margin: 0 0 18px;
+  margin: 0 0 var(--space-18);
   font-size: var(--font-size-sm);
   color: var(--muted);
 }
 
-.target[data-selected="true"] {
+.target[data-selected='true'] {
   font-weight: 500;
   color: var(--primary-strong);
 }
@@ -12,7 +12,7 @@
 .fields {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px 18px;
+  gap: var(--space-16) var(--space-18);
 }
 
 .fieldWide {

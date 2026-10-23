@@ -1,8 +1,8 @@
-import type { UseFormReturn } from "react-hook-form";
+import type { UseFormReturn } from 'react-hook-form';
 
-import { createPageLive } from "@/lib/live";
+import { createPageLive } from '@/utils/live';
 
-import type { InquiryForm } from "./shared/inquiry";
+import type { InquiryForm } from './shared/inquiry';
 
 interface PageLiveMap {
   inquiryForm: UseFormReturn<InquiryForm>;

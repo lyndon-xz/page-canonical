@@ -1,21 +1,17 @@
-import { message } from "antd";
+import { message } from 'antd';
 
-import { toErrorMessage } from "@/lib/error";
-import { FetchStatus } from "@/lib/fetch-status";
+import { FetchStatus } from '@/constants/fetch-status';
+import { toErrorMessage } from '@/utils/error';
 
 import {
   batchFavoriteHotels,
   fetchHotelPage,
   submitBooking as submitBookingService,
   toggleHotelFavorite,
-} from "./data/services";
-import type { BookingForm } from "./shared/booking";
-import {
-  parseSearchParams,
-  writeParamsToUrl,
-  type SearchParams,
-} from "./shared/params";
-import { usePageStore } from "./store";
+} from './data/services';
+import type { BookingForm } from './shared/booking';
+import { parseSearchParams, writeParamsToUrl, type SearchParams } from './shared/params';
+import { usePageStore } from './store';
 
 async function waitForHydration() {
   if (usePageStore.persist.hasHydrated()) {
@@ -32,8 +28,7 @@ async function waitForHydration() {
 
 let resultSetGeneration = 0;
 
-const isStaleGeneration = (generation: number) =>
-  generation !== resultSetGeneration;
+const isStaleGeneration = (generation: number) => generation !== resultSetGeneration;
 
 async function loadHotels(searchParams: SearchParams) {
   const { setAppliedParams, resetResultSet, setHotelsStatus, setFirstPage } =
@@ -63,75 +58,65 @@ async function loadHotels(searchParams: SearchParams) {
 
 const favoritingIds = new Set<string>();
 
-export const pageActions = {
-  // ── 列表 ──
+function canLoadMoreHotels() {
+  const { hasMore, loadMoreStatus, hotelsStatus } = usePageStore.getState();
 
-  async initPage() {
+  return hasMore && loadMoreStatus !== FetchStatus.Loading && hotelsStatus !== FetchStatus.Loading;
+}
+
+async function loadNextHotelPage() {
+  const { loadedPage, appliedParams, setLoadMoreStatus, appendPage } = usePageStore.getState();
+  const generation = resultSetGeneration;
+
+  setLoadMoreStatus(FetchStatus.Loading);
+  try {
+    const hotelPage = await fetchHotelPage(appliedParams, loadedPage + 1);
+    if (isStaleGeneration(generation)) {
+      return;
+    }
+    appendPage(hotelPage);
+    setLoadMoreStatus(FetchStatus.Ready);
+  } catch {
+    if (isStaleGeneration(generation)) {
+      return;
+    }
+    setLoadMoreStatus(FetchStatus.Error);
+  }
+}
+
+export const pageActions = {
+  initPage: async () => {
     await waitForHydration();
 
     const initialParams =
-      parseSearchParams(window.location.search) ??
-      usePageStore.getState().appliedParams;
+      parseSearchParams(window.location.search) ?? usePageStore.getState().appliedParams;
 
     await loadHotels(initialParams);
   },
 
-  applySearchParams(patch: Partial<SearchParams>) {
+  applySearchParams: (patch: Partial<SearchParams>) => {
     const { appliedParams } = usePageStore.getState();
 
     void loadHotels({ ...appliedParams, ...patch });
   },
 
-  async loadMoreHotels() {
-    const {
-      hasMore,
-      loadMoreStatus,
-      hotelsStatus,
-      loadedPage,
-      appliedParams,
-      setLoadMoreStatus,
-      appendPage,
-    } = usePageStore.getState();
-    const shouldSkipLoadMore =
-      !hasMore ||
-      loadMoreStatus === FetchStatus.Loading ||
-      hotelsStatus === FetchStatus.Loading;
-
-    if (shouldSkipLoadMore) {
+  loadMoreHotels: async () => {
+    if (!canLoadMoreHotels()) {
       return;
     }
 
-    const generation = resultSetGeneration;
-
-    setLoadMoreStatus(FetchStatus.Loading);
-    try {
-      const hotelPage = await fetchHotelPage(appliedParams, loadedPage + 1);
-      if (isStaleGeneration(generation)) {
-        return;
-      }
-      appendPage(hotelPage);
-      setLoadMoreStatus(FetchStatus.Ready);
-    } catch {
-      if (isStaleGeneration(generation)) {
-        return;
-      }
-      setLoadMoreStatus(FetchStatus.Error);
-    }
+    await loadNextHotelPage();
   },
 
-  retryHotels() {
+  retryHotels: () => {
     void loadHotels(usePageStore.getState().appliedParams);
   },
 
-  // ── 选中 ──
-
-  selectHotel(hotelId: string) {
+  selectHotel: (hotelId: string) => {
     usePageStore.getState().setSelectedHotelId(hotelId);
   },
 
-  // ── 多选 ──
-
-  toggleSelect(hotelId: string) {
+  toggleSelect: (hotelId: string) => {
     const { selectedHotelIds, setSelectedHotelIds } = usePageStore.getState();
 
     setSelectedHotelIds(
@@ -141,19 +126,17 @@ export const pageActions = {
     );
   },
 
-  selectAllLoaded() {
+  selectAllLoaded: () => {
     const { hotels, setSelectedHotelIds } = usePageStore.getState();
 
     setSelectedHotelIds(hotels.map((hotel) => hotel.id));
   },
 
-  clearSelection() {
+  clearSelection: () => {
     usePageStore.getState().setSelectedHotelIds([]);
   },
 
-  // ── 收藏 ──
-
-  async toggleFavorite(hotelId: string) {
+  toggleFavorite: async (hotelId: string) => {
     if (favoritingIds.has(hotelId)) {
       return;
     }
@@ -163,9 +146,7 @@ export const pageActions = {
 
     favoritingIds.add(hotelId);
     setFavoriteIds(
-      isAlreadyFavorited
-        ? favoriteIds.filter((id) => id !== hotelId)
-        : [...favoriteIds, hotelId],
+      isAlreadyFavorited ? favoriteIds.filter((id) => id !== hotelId) : [...favoriteIds, hotelId],
     );
     try {
       await toggleHotelFavorite(hotelId);
@@ -184,7 +165,7 @@ export const pageActions = {
     }
   },
 
-  async batchFavorite() {
+  batchFavorite: async () => {
     const {
       selectedHotelIds,
       isBatchFavoriting,
@@ -203,8 +184,7 @@ export const pageActions = {
     setIsBatchFavoriting(true);
     setBatchFavoriteFailures([]);
     try {
-      const { succeededIds, failures } =
-        await batchFavoriteHotels(selectedHotelIds);
+      const { succeededIds, failures } = await batchFavoriteHotels(selectedHotelIds);
       const { favoriteIds } = usePageStore.getState();
 
       setFavoriteIds([...new Set([...favoriteIds, ...succeededIds])]);
@@ -221,30 +201,22 @@ export const pageActions = {
 
       const reason = toErrorMessage(err);
 
-      setBatchFavoriteFailures(
-        selectedHotelIds.map((hotelId) => ({ hotelId, reason })),
-      );
+      setBatchFavoriteFailures(selectedHotelIds.map((hotelId) => ({ hotelId, reason })));
     } finally {
       setIsBatchFavoriting(false);
     }
   },
 
-  dismissBatchFavoriteFailures() {
+  dismissBatchFavoriteFailures: () => {
     usePageStore.getState().setBatchFavoriteFailures([]);
   },
 
-  // ── 预订 ──
-
-  async submitBooking(values: BookingForm) {
-    const {
-      selectedHotelId,
-      setIsSubmittingBooking,
-      setBookedHotelId,
-      setContact,
-    } = usePageStore.getState();
+  submitBooking: async (values: BookingForm) => {
+    const { selectedHotelId, setIsSubmittingBooking, setBookedHotelId, setContact } =
+      usePageStore.getState();
 
     if (!selectedHotelId) {
-      throw new Error("请先在列表里选择一家酒店");
+      throw new Error('请先在列表里选择一家酒店');
     }
 
     setIsSubmittingBooking(true);

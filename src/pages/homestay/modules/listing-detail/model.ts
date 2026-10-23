@@ -1,6 +1,6 @@
-import { shallowEqual } from "react-redux";
+import { shallowEqual } from 'react-redux';
 
-import { selectSelectedListing, useAppSelector } from "../../store";
+import { selectSelectedListing, useAppSelector } from '../../store';
 
 export function useListingDetailModel() {
   return useAppSelector((s) => {
@@ -19,10 +19,8 @@ export function useListingDetailModel() {
       detail,
       detailStatus,
       isDrawerOpen: isDetailDrawerOpen,
-      isFavorite:
-        !!selectedListingId && favoriteIds.includes(selectedListingId),
-      isFavoriting:
-        !!selectedListingId && favoritingIds.includes(selectedListingId),
+      isFavorite: !!selectedListingId && favoriteIds.includes(selectedListingId),
+      isFavoriting: !!selectedListingId && favoritingIds.includes(selectedListingId),
     };
   }, shallowEqual);
 }

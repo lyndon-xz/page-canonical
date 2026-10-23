@@ -1,10 +1,10 @@
-import { toErrorMessage } from "@/lib/error";
+import { toErrorMessage } from '@/utils/error';
 
-import { pageActions } from "../../actions";
-import { ConfirmScene, type ConfirmRequest } from "../../shared/confirm";
-import { store } from "../../store";
+import { pageActions } from '../../actions';
+import { ConfirmScene, type ConfirmRequest } from '../../shared/confirm';
+import { store } from '../../store';
 
-import { setConfirmError, setIsConfirming } from "./slice";
+import { setConfirmError, setIsConfirming } from './slice';
 
 async function runByScene(request: ConfirmRequest) {
   if (request.scene === ConfirmScene.RemoveFavorite) {
@@ -16,14 +16,14 @@ async function runByScene(request: ConfirmRequest) {
 }
 
 export const confirmDialogActions = {
-  async confirm() {
+  confirm: async () => {
     const { confirmRequest } = store.getState().page;
 
     if (!confirmRequest) {
       return;
     }
 
-    pageActions.trackClick("confirm_ok", { scene: confirmRequest.scene });
+    pageActions.trackClick('confirm_ok', { scene: confirmRequest.scene });
 
     store.dispatch(setIsConfirming(true));
     store.dispatch(setConfirmError(null));
@@ -39,11 +39,11 @@ export const confirmDialogActions = {
     }
   },
 
-  cancel() {
+  cancel: () => {
     const { confirmRequest } = store.getState().page;
 
     if (confirmRequest) {
-      pageActions.trackClick("confirm_cancel", {
+      pageActions.trackClick('confirm_cancel', {
         scene: confirmRequest.scene,
       });
     }

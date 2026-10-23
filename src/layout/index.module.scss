@@ -1,5 +1,5 @@
 .app {
-  --page-padding-x: 24px;
+  --page-padding-x: var(--space-24);
 
   min-height: 100vh;
   background: var(--paper);
@@ -9,7 +9,7 @@
   position: sticky;
   top: 0;
   z-index: var(--z-rail);
-  background: rgb(var(--card-rgb) / 88%);
+  background: var(--rail-scrim);
   border-bottom: 1px solid var(--line);
   backdrop-filter: saturate(1.4) blur(8px);
 }
@@ -17,17 +17,17 @@
 .railInner {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
+  gap: var(--space-24);
   align-items: center;
   justify-content: space-between;
   max-width: 1120px;
-  padding: 14px var(--page-padding-x);
+  padding: var(--space-14) var(--page-padding-x);
   margin: 0 auto;
 }
 
 .brand {
   display: flex;
-  gap: 10px;
+  gap: var(--space-10);
   align-items: center;
 }
 
@@ -38,7 +38,7 @@
   height: 32px;
   background: linear-gradient(135deg, var(--primary), var(--primary-warm));
   border-radius: var(--radius-sm);
-  box-shadow: 0 4px 10px -5px rgb(var(--ink-rgb) / 35%);
+  box-shadow: var(--shadow-mark);
 
   svg {
     width: 18px;
@@ -55,7 +55,7 @@
 
 .sub {
   align-self: flex-end;
-  padding-bottom: 3px;
+  padding-bottom: var(--space-3);
   font-family: var(--mono);
   font-size: 11px;
   color: var(--muted);
@@ -65,18 +65,18 @@
 
 .switch {
   display: flex;
-  gap: 6px;
-  padding: 4px;
+  gap: var(--space-6);
+  padding: var(--space-4);
   background: var(--line-soft);
-  border-radius: 12px;
+  border-radius: var(--radius-12);
 }
 
 .stub {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: var(--space-1);
   align-items: center;
-  padding: 6px 16px 5px;
+  padding: var(--space-6) var(--space-16) var(--space-5);
   font-family: var(--body);
   font-size: var(--font-size-base);
   font-weight: 500;
@@ -108,7 +108,7 @@
 .stubActive {
   color: var(--primary-strong);
   background: var(--card);
-  box-shadow: 0 2px 8px -3px rgb(var(--ink-rgb) / 22%);
+  box-shadow: var(--shadow-stub);
 
   &:hover {
     color: var(--primary-strong);
@@ -117,6 +117,6 @@
 
 .main {
   max-width: 1120px;
-  padding: 44px var(--page-padding-x) 80px;
+  padding: var(--space-44) var(--page-padding-x) var(--space-80);
   margin: 0 auto;
 }

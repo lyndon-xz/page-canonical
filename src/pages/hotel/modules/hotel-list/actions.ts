@@ -1,34 +1,28 @@
-import { pageActions } from "../../actions";
-import type { SortBy } from "../../shared/params";
+import { pageActions } from '../../actions';
+import type { SortBy } from '../../shared/params';
 
 export const hotelListActions = {
-  // ── 列表 ──
-
-  changeSortBy(sortBy: SortBy) {
+  changeSortBy: (sortBy: SortBy) => {
     pageActions.applySearchParams({ sortBy });
   },
 
-  loadMore() {
+  loadMore: () => {
     void pageActions.loadMoreHotels();
   },
 
-  retry() {
+  retry: () => {
     pageActions.retryHotels();
   },
 
-  // ── 选中 ──
-
-  selectHotel(id: string) {
+  selectHotel: (id: string) => {
     pageActions.selectHotel(id);
   },
 
-  // ── 多选 ──
-
-  toggleSelect(id: string) {
+  toggleSelect: (id: string) => {
     pageActions.toggleSelect(id);
   },
 
-  toggleSelectAll(isAllSelected: boolean) {
+  toggleSelectAll: (isAllSelected: boolean) => {
     if (isAllSelected) {
       pageActions.clearSelection();
       return;
@@ -36,21 +30,19 @@ export const hotelListActions = {
     pageActions.selectAllLoaded();
   },
 
-  clearSelection() {
+  clearSelection: () => {
     pageActions.clearSelection();
   },
 
-  // ── 收藏 ──
-
-  toggleFavorite(id: string) {
+  toggleFavorite: (id: string) => {
     void pageActions.toggleFavorite(id);
   },
 
-  batchFavorite() {
+  batchFavorite: () => {
     void pageActions.batchFavorite();
   },
 
-  dismissBatchFavoriteFailures() {
+  dismissBatchFavoriteFailures: () => {
     pageActions.dismissBatchFavoriteFailures();
   },
 };

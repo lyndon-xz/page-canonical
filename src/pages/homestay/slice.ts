@@ -1,11 +1,11 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { FetchStatus } from "@/lib/fetch-status";
+import { FetchStatus } from '@/constants/fetch-status';
 
-import type { ConfirmRequest } from "./shared/confirm";
-import type { ListingFilters } from "./shared/filters";
-import type { SubmittedInquiry } from "./shared/inquiry";
-import type { Listing, ListingDetail } from "./shared/listing";
+import type { ConfirmRequest } from './shared/confirm';
+import type { ListingFilters } from './shared/filters';
+import type { SubmittedInquiry } from './shared/inquiry';
+import type { Listing, ListingDetail } from './shared/listing';
 
 interface HomestayPageState {
   listings: Listing[];
@@ -30,7 +30,7 @@ const initialState: HomestayPageState = {
   listings: [],
   listingsStatus: FetchStatus.Loading,
   selectedListingId: null,
-  appliedFilters: { keyword: "", roomType: "" },
+  appliedFilters: { keyword: '', roomType: '' },
 
   detail: null,
   detailStatus: FetchStatus.Ready,
@@ -53,7 +53,7 @@ function exitListingState(state: HomestayPageState) {
 }
 
 const homestayPageSlice = createSlice({
-  name: "homestayPage",
+  name: 'homestayPage',
   initialState,
   reducers: {
     setListings(state, action: PayloadAction<Listing[]>) {
@@ -88,9 +88,7 @@ const homestayPageSlice = createSlice({
       }
     },
     removeFavoriteId(state, action: PayloadAction<string>) {
-      state.favoriteIds = state.favoriteIds.filter(
-        (id) => id !== action.payload,
-      );
+      state.favoriteIds = state.favoriteIds.filter((id) => id !== action.payload);
     },
     startFavoriting(state, action: PayloadAction<string>) {
       if (!state.favoritingIds.includes(action.payload)) {
@@ -98,9 +96,7 @@ const homestayPageSlice = createSlice({
       }
     },
     finishFavoriting(state, action: PayloadAction<string>) {
-      state.favoritingIds = state.favoritingIds.filter(
-        (id) => id !== action.payload,
-      );
+      state.favoritingIds = state.favoritingIds.filter((id) => id !== action.payload);
     },
 
     setConfirmRequest(state, action: PayloadAction<ConfirmRequest | null>) {
