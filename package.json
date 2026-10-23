@@ -1,15 +1,8 @@
 {
   "name": "@lyndon/page-canonical",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "页面分层架构（store / model / actions / effects / UI）的范式级 SPA 示范：zustand / Redux Toolkit 双栈落地，覆盖结构化状态与非结构化活对象",
-  "keywords": [
-    "spa",
-    "react",
-    "architecture",
-    "layered-page",
-    "state-management"
-  ],
   "license": "MIT",
   "author": {
     "name": "Lyndon",
@@ -38,6 +31,7 @@
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "prettier": "^3.9.6",
     "sass": "^1.87.0",
     "typescript": "^5.9.2",
     "vite": "^8.0.3"

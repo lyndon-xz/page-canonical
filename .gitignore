@@ -1,40 +1,67 @@
 # 依赖
 node_modules/
+.pnpm-store/
 
-# 只用 pnpm，避免多包管理器混用
+# 其它包管理器的 lockfile。pnpm-lock.yaml 入库
 package-lock.json
+npm-shrinkwrap.json
 yarn.lock
+bun.lock
 bun.lockb
 
 # 构建产物
 dist/
+dist-ssr/
 build/
+out/
+.output/
+.next/
+.nuxt/
+.svelte-kit/
+storybook-static/
+*.tsbuildinfo
+vite.config.*.timestamp-*
+vitest.config.*.timestamp-*
 
 # 缓存
 .cache/
 .eslintcache
-*.tsbuildinfo
+.stylelintcache
+.turbo/
+.parcel-cache/
+.swc/
 
 # 测试
 coverage/
+.nyc_output/
+playwright-report/
+blob-report/
+test-results/
 
 # 日志
+logs/
 *.log
+*.log.*
 
-# 环境变量与密钥
+# 环境变量，示例文件入库
 .env*
 !.env*.example
 
-# 编辑器
+# 编辑器，共享的设置入库
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
-.vscode/
+*.swp
 
 # 操作系统
 .DS_Store
 Thumbs.db
+Desktop.ini
 
-# AI 工具
-.agent/
-.claude/
-.cursor/
-.kiro/
+# 个人 AI 工具状态
+.kiro/*
+.cursor/*
+.claude/*
+.agent/*
+CLAUDE.local.md

@@ -36,22 +36,17 @@ const shadow = {
 };
 
 const CARD_RADIUS_PX = 16;
-const CHIP_RADIUS_PX = 9;
-const TAG_RADIUS_PX = 7;
-const CONTROL_RADIUS_PX = 11;
-const CONTROL_HEIGHT_PX = 46;
 const BASE_FONT_SIZE_PX = 15;
-const SMALL_FONT_SIZE_PX = 13;
 
 const cssTokens = {
   ...palette,
   ...fontStack,
   ...shadow,
   radius: `${CARD_RADIUS_PX}px`,
-  radiusSm: `${CHIP_RADIUS_PX}px`,
-  radiusXs: `${TAG_RADIUS_PX}px`,
+  radiusSm: '9px',
+  radiusXs: '7px',
   fontSizeBase: `${BASE_FONT_SIZE_PX}px`,
-  fontSizeSm: `${SMALL_FONT_SIZE_PX}px`,
+  fontSizeSm: '13px',
   railScrim: `rgb(${palette.cardRgb} / 88%)`,
 };
 
@@ -123,10 +118,10 @@ export const theme: ThemeConfig = {
 
     colorBgElevated: palette.card,
 
-    borderRadius: CONTROL_RADIUS_PX,
+    borderRadius: 11,
     borderRadiusLG: CARD_RADIUS_PX,
     boxShadow: shadow.shadowLift,
-    controlHeight: CONTROL_HEIGHT_PX,
+    controlHeight: 46,
     fontSize: BASE_FONT_SIZE_PX,
     fontFamily: fontStack.body,
   },
